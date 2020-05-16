@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "main": "./build/main.js",
     "author": "Bledhard",
+    "start": "node ./src/main.ts",
     "license": "MIT",
     "devDependencies": {
         "@types/debug": "4.1.5",
