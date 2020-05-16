@@ -1,0 +1,5 @@
+settings:
+  token: 'BOT_TOKEN'
+  prefix: '!'
+  nameBot: 'IlluminatiBot'
+  categoryName: 'illuminati-channels'
