@@ -4,6 +4,7 @@
 		"module": "commonjs",
 		"outDir": "./build",
 		"rootDir": "./src",
+		"moduleResolution": "node",
 		"declaration": false,
 		"strict": true,
 		"sourceMap": true,
@@ -14,11 +15,9 @@
         ]
 	},
 	"exclude": [
-		"./build/*",
 		"./node_modules/*",
 	],
 	"include": [
-		"./src/**/*.ts",
-		"./src/config.yml"
+		"./src/**/*.ts"
 	]
 }
