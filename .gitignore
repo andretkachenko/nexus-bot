@@ -1,4 +1,6 @@
 build/*
 node_modules/*
 config.yml
-!build/config.yml.sample
+!build/config.yml
+.env
+!.env.sample
