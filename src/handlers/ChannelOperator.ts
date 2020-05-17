@@ -17,7 +17,6 @@ export class ChannelOperator {
 		if (this.channelMap.ContainsKey(channelID)) {
 			let textChannel = this.resolve(newVoiceState, channelID) as TextChannel
 			this.showHideTextChannel(textChannel, user, true)
-			textChannel.send(`!${newVoiceState.channel?.name}`)
 
 			if (process.env.NODE_ENV === EnvType.Debug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
 		}
@@ -52,13 +51,24 @@ export class ChannelOperator {
 		let channelID = newVoiceState.channelID as string
 
 		if (voiceChannel !== null) newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', {
+			permissionOverwrites: [ { id: newVoiceState.channel.guild.id, deny: ['VIEW_CHANNEL'] }],
 			type: ChannelType.text,
 			parent: voiceChannel.parentID as string,
 			position: voiceChannel.position + 1
 		})
 			.then(ch => {
-				this.showHideTextChannel(ch, user, true)
+				ch.overwritePermissions([
+					{
+						id: ch.guild.id,
+						deny: ['VIEW_CHANNEL'],
+					},
+					{
+						id: user.id,
+						allow: ['VIEW_CHANNEL'],
+					},
+				]);
 				this.channelMap.Add(channelID, ch.id)
+				if(voiceChannel !== null) ch.send(`!${voiceChannel.name}`)
 
 				if (process.env.NODE_ENV === EnvType.Debug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
 			});
