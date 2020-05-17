@@ -19,7 +19,7 @@ export class EventRegistry {
 
         this.testHandlers = new TestHandlers(client, config)
         this.logger = new Logger()
-        this.channelOperator = new ChannelOperator(client, config)
+        this.channelOperator = new ChannelOperator()
     }
 
     public registerEvents() {
