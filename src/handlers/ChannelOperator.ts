@@ -63,7 +63,7 @@ export class ChannelOperator {
 						deny: ['VIEW_CHANNEL'],
 					},
 					{
-						id: user.id,
+						id: user !== null ? user.id : "undefined",
 						allow: ['VIEW_CHANNEL'],
 					},
 				]);
