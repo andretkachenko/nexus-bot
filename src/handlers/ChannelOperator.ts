@@ -2,6 +2,7 @@ import { Client, VoiceState, TextChannel, GuildMember, Guild, CategoryChannel } 
 import { Dictionary } from "../collections/Dictionary";
 import { Logger } from "./Logger";
 import { ChannelType } from "../enums/ChannelType"
+import { EnvType } from "../enums/EnvType";
 
 export class ChannelOperator {
 	private client: Client
@@ -38,10 +39,11 @@ export class ChannelOperator {
 		let channelID = newVoiceState.channelID as string
 
 		if (this.channelMap.ContainsKey(channelID)) {
-			let textChannel = this.resolve(newVoiceState, channelID) as TextChannel			
+			let textChannel = this.resolve(newVoiceState, channelID) as TextChannel
 			this.showHideTextChannel(textChannel, user, true)
-			// test purposes only
-			textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`)
+			textChannel.send(`!${newVoiceState.channel?.name}`)
+
+			if (process.env.NODE_ENV === EnvType.Debug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
 		}
 		else {
 			this.initTextChannel(newVoiceState)
@@ -53,10 +55,18 @@ export class ChannelOperator {
 		let channelID = oldVoiceState.channelID as string
 
 		if (this.channelMap.ContainsKey(channelID)) {
-			let textChannel = this.resolve(oldVoiceState, channelID)			
+			let textChannel = this.resolve(oldVoiceState, channelID)
 			this.showHideTextChannel(textChannel, user, false)
-			// test purposes only
-			textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`)
+			
+			if (process.env.NODE_ENV === EnvType.Debug) textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`) // test purposes only
+
+			let voiceChannel = oldVoiceState.channel
+			if(voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
+				textChannel.delete()
+				.then(ch => {
+					this.channelMap.Remove(channelID)
+				})
+			}
 		}
 	}
 
@@ -83,8 +93,8 @@ export class ChannelOperator {
 			.then(ch => {
 				this.showHideTextChannel(ch, user, true)
 				this.channelMap.Add(channelID, ch.id)
-				// test purposes only
-				ch.send(`channel created for ${this.resolveUsername(user)}`);
+				
+				if (process.env.NODE_ENV === EnvType.Debug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
 			});
 	}
 
@@ -93,7 +103,7 @@ export class ChannelOperator {
 	}
 
 	private resolveUsername(user: GuildMember | null): string {
-		return (user?.nickname !== null ? user?.nickname : user?.displayName) as string
+		return (user?.nickname !== undefined ? user?.nickname : user?.displayName) as string
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
