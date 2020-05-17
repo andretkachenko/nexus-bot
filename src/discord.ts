@@ -1,6 +1,7 @@
 import { Client, Message, VoiceState, TextChannel, GuildMember, GuildChannelManager } from 'discord.js'
 import * as path from 'path'
 import * as YAML from 'yamljs'
+import * as dotenv from "dotenv";
 
 import { Logger } from './handlers/Logger'
 import { EventRegistry } from "./EventRegistry"
@@ -24,7 +25,7 @@ export class Bot {
 		// register all event handlers
 		this.eventRegistry.registerEvents()
 
-		
+		dotenv.config()
 		this.client.login(process.env.TOKEN)
 	}
 }
