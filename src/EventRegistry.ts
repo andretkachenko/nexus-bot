@@ -1,6 +1,6 @@
 import { Client, Message } from "discord.js"
 import { Logger } from "./handlers/Logger"
-import { TestHandlers } from "./handlers/testHandlers"
+import { TestHandlers } from "./handlers/TestHandlers"
 import { ChannelOperator } from "./handlers/ChannelOperator"
 import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
