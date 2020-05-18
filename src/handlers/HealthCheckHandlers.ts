@@ -1,6 +1,6 @@
 import { Message, Client } from "discord.js";
 
-export class TestHandlers {
+export class HealthCheckHandlers {
     private client: Client
     private config: any
 
@@ -9,11 +9,11 @@ export class TestHandlers {
         this.config = config
     }
 
-    public handlePing(message: Message) {
+    public handleHealthCheck(message: Message) {
         // => Prevent message from the bot
         if (this.client.user != undefined && message.author.id !== this.client.user.id) {
             // => Test command
-            if (message.content === this.config.settings.prefix + 'ping') {
+            if (message.content === this.config.settings.prefix + 'health') {
                 message.reply(`${this.config.settings.nameBot} is ready and listening.`)
             }
         }

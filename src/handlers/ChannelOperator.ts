@@ -1,4 +1,4 @@
-import { VoiceState, TextChannel, GuildMember } from "discord.js";
+import { VoiceState, TextChannel, GuildMember, Collection, Message, VoiceChannel } from "discord.js";
 import { Dictionary } from "../collections/Dictionary";
 import { ChannelType } from "../enums/ChannelType"
 import { EnvType } from "../enums/EnvType";
@@ -37,10 +37,7 @@ export class ChannelOperator {
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
-				textChannel.delete()
-					.then(ch => {
-						this.channelMap.Remove(channelID)
-					})
+				this.clearTextChannel(textChannel)
 			}
 		}
 	}
@@ -68,7 +65,8 @@ export class ChannelOperator {
 					},
 				]);
 				this.channelMap.Add(channelID, ch.id)
-				if(voiceChannel !== null) ch.send(`!${voiceChannel.name}`)
+				this.greet(ch, voiceChannel)
+				
 
 				if (process.env.NODE_ENV === EnvType.Debug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
 			});
@@ -84,5 +82,18 @@ export class ChannelOperator {
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
 		if (user != null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+	}
+
+	private async clearTextChannel(textChannel: TextChannel) {
+		let fetched: Collection<string, Message>;
+		do {
+		  fetched = await textChannel.messages.fetch({limit: 100});
+		  textChannel.bulkDelete(fetched);
+		}
+		while(fetched.size >= 2);
+	}
+
+	private greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
+		if(voiceChannel !== null) textChannel.send(`!${voiceChannel.name}`)
 	}
 }
