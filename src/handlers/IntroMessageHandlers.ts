@@ -7,18 +7,17 @@ export class IntroMessageHandlers {
     private readonly wrongChannelType = "wrong-channel-type";
     private readonly faultyGuild = "faulty-guild";
 
-    public introMessageMap: Dictionary<string>
+    public introMessageMap: Dictionary<IntroPictureMap>
     private config: any
 
     constructor(config: any) {
-        this.introMessageMap = new Dictionary<string>()
+        this.introMessageMap = new Dictionary<IntroPictureMap>()
         this.config = config
     }
 
     public registerIntroMessage(message: Message) {
         let expectedCmd = this.config.settings.prefix + 'addintro'
         if (message.content.indexOf(expectedCmd) !== -1) {
-
             let map = message.content.substring(expectedCmd.length)
             let introPictureMap: IntroPictureMap = JSON.parse(map)
 
@@ -27,12 +26,12 @@ export class IntroMessageHandlers {
                 message.channel.send("Error processing command - unable to identify guild.")
                 return
             }
-            if (channelId === this.faultyGuild) {
+            if (channelId === this.wrongChannelType) {
                 message.channel.send("Error processing command - specified channel name does not belong to a voice channel.")
                 return
             }
 
-            this.introMessageMap.Add(channelId, introPictureMap.ImageUrl)
+            this.introMessageMap.Add(channelId, introPictureMap)
         }
     }
 

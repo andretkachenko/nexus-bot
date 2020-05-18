@@ -2,12 +2,13 @@ import { VoiceState, TextChannel, GuildMember, Collection, Message, VoiceChannel
 import { Dictionary } from "../collections/Dictionary";
 import { ChannelType } from "../enums/ChannelType"
 import { EnvType } from "../enums/EnvType";
+import { IntroPictureMap } from "../entities/IntroPictureMap";
 
 export class ChannelOperator {
 	private channelMap: Dictionary<string>
-	private introMessageMap: Dictionary<string>
+	private introMessageMap: Dictionary<IntroPictureMap>
 
-	constructor(introMessageMap: Dictionary<string>) {
+	constructor(introMessageMap: Dictionary<IntroPictureMap>) {
 		this.channelMap = new Dictionary<string>()
 		this.introMessageMap = introMessageMap
 	}
@@ -97,6 +98,12 @@ export class ChannelOperator {
 	}
 
 	private greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
-		if(voiceChannel !== null && this.introMessageMap.ContainsKey(voiceChannel.id)) textChannel.send(this.introMessageMap.Item(voiceChannel.id))
+		if(voiceChannel !== null && this.introMessageMap.ContainsKey(voiceChannel.id)) {
+			let introPictureMap = this.introMessageMap.Item(voiceChannel.id)
+
+			if(introPictureMap.Description !== null) textChannel.send(introPictureMap.Description)
+			if(introPictureMap.ImageUrl !== null) textChannel.send(introPictureMap.ImageUrl)
+			if(introPictureMap.AdditionalUrl !== null) textChannel.send(introPictureMap.AdditionalUrl)
+		}
 	}
 }
