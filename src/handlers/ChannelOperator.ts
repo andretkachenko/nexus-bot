@@ -5,9 +5,11 @@ import { EnvType } from "../enums/EnvType";
 
 export class ChannelOperator {
 	private channelMap: Dictionary<string>
+	private introMessageMap: Dictionary<string>
 
-	constructor() {
+	constructor(introMessageMap: Dictionary<string>) {
 		this.channelMap = new Dictionary<string>()
+		this.introMessageMap = introMessageMap
 	}
 
 	public handleChannelJoin(newVoiceState: VoiceState) {
@@ -37,7 +39,7 @@ export class ChannelOperator {
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
-				this.clearTextChannel(textChannel)
+				this.clearTextChannel(textChannel, voiceChannel)
 			}
 		}
 	}
@@ -84,16 +86,17 @@ export class ChannelOperator {
 		if (user != null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 	}
 
-	private async clearTextChannel(textChannel: TextChannel) {
+	private async clearTextChannel(textChannel: TextChannel, voiceChannel: VoiceChannel) {
 		let fetched: Collection<string, Message>;
 		do {
 		  fetched = await textChannel.messages.fetch({limit: 100});
 		  textChannel.bulkDelete(fetched);
 		}
-		while(fetched.size >= 2);
+		while(fetched.size >= 2)
+		this.greet(textChannel, voiceChannel)
 	}
 
 	private greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
-		if(voiceChannel !== null) textChannel.send(`!${voiceChannel.name}`)
+		if(voiceChannel !== null && this.introMessageMap.ContainsKey(voiceChannel.id)) textChannel.send(this.introMessageMap.Item(voiceChannel.id))
 	}
 }
