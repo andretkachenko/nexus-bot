@@ -37,10 +37,7 @@ export class ChannelOperator {
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
-				textChannel.delete()
-					.then(ch => {
-						this.channelMap.Remove(channelID)
-					})
+				textChannel.messages.delete()
 			}
 		}
 	}
@@ -84,5 +81,14 @@ export class ChannelOperator {
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
 		if (user != null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+	}
+
+	private clearTextChannel(textChannel: TextChannel) {
+		let fetched;
+		do {
+		  fetched = await textChannel.fetch({limit: 100});
+		  textChannel.bulkDelete(fetched);
+		}
+		while(fetched.size >= 2);
 	}
 }

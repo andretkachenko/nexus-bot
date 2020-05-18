@@ -1,6 +1,6 @@
 import { Client, Message } from "discord.js"
 import { Logger } from "./handlers/Logger"
-import { TestHandlers } from "./handlers/TestHandlers"
+import { HealthCheckHandlers } from "./handlers/HealthCheckHandlers"
 import { ChannelOperator } from "./handlers/ChannelOperator"
 import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
@@ -10,14 +10,14 @@ export class EventRegistry {
     private config: any
 
     private logger: Logger
-    private testHandlers: TestHandlers
+    private healthCheckHandlers: HealthCheckHandlers
     private channelOperator: ChannelOperator
 
     constructor(client: Client, config: any) {
         this.client = client
         this.config = config
 
-        this.testHandlers = new TestHandlers(client, config)
+        this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
         this.channelOperator = new ChannelOperator()
     }
@@ -27,7 +27,7 @@ export class EventRegistry {
         this.registerReadyHandler()
 
         // => Check bot is alive
-        this.registerPing()
+        this.registerHealthCheck()
         this.registerVoiceUpdateHandler()
 
         // => Bot error and warn handler
@@ -44,9 +44,9 @@ export class EventRegistry {
         });
     }
 
-    private registerPing() {
+    private registerHealthCheck() {
         this.client.on(ClientEvent.Message, (message: Message) => {
-            this.testHandlers.handlePing(message)
+            this.healthCheckHandlers.handleHealthCheck(message)
         })
     }
 
@@ -61,17 +61,22 @@ export class EventRegistry {
 
     private registerProcessHandlers() {
         process.on(ProcessEvent.Exit, () => {
-            this.logger.logEvent(`[${this.config.settings.nameBot}] Process exit.`)
-            this.client.destroy()
+            const msg = `[${this.config.settings.nameBot}] Process exit.`
+            this.logger.logEvent(msg)
+            console.log(msg)
+            //this.client.destroy()
         })
 
         process.on(ProcessEvent.UncaughtException, (err: Error) => {
             const errorMsg = (err ? err.stack || err : '').toString().replace(new RegExp(`${__dirname}\/`, 'g'), './')
             this.logger.logError(errorMsg)
+            console.log(errorMsg)
         })
 
         process.on(ProcessEvent.UnhandledRejection, (reason: {} | null | undefined) => {
-            this.logger.logError(`Uncaught Promise rejection: ${reason}`)
+            const msg = `Uncaught Promise rejection: ${reason}`
+            this.logger.logError(msg)
+            console.log(msg)
         })
     }
 }
