@@ -4,6 +4,7 @@ import { HealthCheckHandlers } from "./handlers/HealthCheckHandlers"
 import { ChannelOperator } from "./handlers/ChannelOperator"
 import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
+import { IntroMessageHandlers } from "./handlers/IntroMessageHandlers"
 
 export class EventRegistry {
     private client: Client
@@ -12,6 +13,7 @@ export class EventRegistry {
     private logger: Logger
     private healthCheckHandlers: HealthCheckHandlers
     private channelOperator: ChannelOperator
+    private introMessageHandlers: IntroMessageHandlers
 
     constructor(client: Client, config: any) {
         this.client = client
@@ -19,7 +21,8 @@ export class EventRegistry {
 
         this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
-        this.channelOperator = new ChannelOperator()
+        this.introMessageHandlers = new IntroMessageHandlers(config)
+        this.channelOperator = new ChannelOperator(this.introMessageHandlers.introMessageMap)
     }
 
     public registerEvents() {
@@ -28,6 +31,7 @@ export class EventRegistry {
 
         // => Check bot is alive
         this.registerHealthCheck()
+        this.registerIntroMessageHandler()
         this.registerVoiceUpdateHandler()
 
         // => Bot error and warn handler
@@ -38,6 +42,10 @@ export class EventRegistry {
         this.registerProcessHandlers()
     }
 
+    // ---------------- //
+    //  Event Handlers  //
+    // ---------------- //
+    
     private registerReadyHandler() {
         this.client.on(ClientEvent.Ready, () => {
             this.logger.introduce(this.client, this.config.settings.activity);
@@ -50,11 +58,17 @@ export class EventRegistry {
         })
     }
 
+    private registerIntroMessageHandler() {
+        this.client.on(ClientEvent.Message, (message: Message) => {
+            this.introMessageHandlers.registerIntroMessage(message)
+        })
+    }
+
     private registerVoiceUpdateHandler() {
         this.client.on(ClientEvent.VoiceStateUpdate, (oldVoiceState, newVoiceState) => {
             if (newVoiceState.channelID !== oldVoiceState.channelID) {
-                if(newVoiceState.channelID !== undefined) this.channelOperator.handleChannelJoin(newVoiceState)
-                if(oldVoiceState.channelID !== undefined) this.channelOperator.handleChannelLeave(oldVoiceState)
+                if (newVoiceState.channelID !== undefined) this.channelOperator.handleChannelJoin(newVoiceState)
+                if (oldVoiceState.channelID !== undefined) this.channelOperator.handleChannelLeave(oldVoiceState)
             }
         });
     }
@@ -64,7 +78,6 @@ export class EventRegistry {
             const msg = `[${this.config.settings.nameBot}] Process exit.`
             this.logger.logEvent(msg)
             console.log(msg)
-            //this.client.destroy()
         })
 
         process.on(ProcessEvent.UncaughtException, (err: Error) => {
