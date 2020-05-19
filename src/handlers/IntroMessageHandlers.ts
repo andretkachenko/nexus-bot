@@ -1,19 +1,18 @@
 import { Dictionary } from "../collections/Dictionary";
 import { IntroPictureMap } from "../entities/IntroPictureMap";
 import { ChannelType } from "../enums/ChannelType"
-import { Message, Guild, TextChannel, NewsChannel, DMChannel } from "discord.js";
-import { Config } from "../config";
+import { Message, TextChannel, NewsChannel, DMChannel, Client } from "discord.js";
 
 export class IntroMessageHandlers {
     private readonly wrongChannelType = "wrong-channel-type";
     private readonly faultyGuild = "faulty-guild";
 
     public introMessageMap: Dictionary<IntroPictureMap>
-    private config: Config
+    private client: Client
 
-    constructor(config: Config) {
+    constructor(client: Client) {
         this.introMessageMap = new Dictionary<IntroPictureMap>()
-        this.config = config
+        this.client = client
     }
 
     public updateIntroMessage(message: Message) {
@@ -25,15 +24,18 @@ export class IntroMessageHandlers {
     }
 
     public insertIntroMessage(message: Message, expectedCmd: string, update: boolean) {
-        if (message.content.indexOf(expectedCmd) !== -1) {
-            let map = message.content.substring(expectedCmd.length)
-            let introPictureMap: IntroPictureMap = JSON.parse(map)
+        // => Prevent message from the bot
+        if (this.client.user != undefined && message.author.id !== this.client.user.id) {
+            if (message.content.indexOf(expectedCmd) !== -1) {
+                let map = message.content.substring(expectedCmd.length)
+                let introPictureMap: IntroPictureMap = JSON.parse(map)
 
-            let channelId = this.getChannelId(message, introPictureMap.ChannelName)
-            this.validateChannelId(message.channel, channelId)
+                let channelId = this.getChannelId(message, introPictureMap.ChannelName)
+                this.validateChannelId(message.channel, channelId)
 
-            if(update && this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Remove(channelId)
-            this.introMessageMap.Add(channelId, introPictureMap)
+                if (update && this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Remove(channelId)
+                this.introMessageMap.Add(channelId, introPictureMap)
+            }
         }
     }
 

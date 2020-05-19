@@ -6,6 +6,7 @@ import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
 import { IntroMessageHandlers } from "./handlers/IntroMessageHandlers"
 import { Config } from "./config"
+import { HelpHandlers } from "./handlers/HelpHandlers"
 
 export class EventRegistry {
     private client: Client
@@ -15,6 +16,7 @@ export class EventRegistry {
     private healthCheckHandlers: HealthCheckHandlers
     private channelOperator: ChannelOperator
     private introMessageHandlers: IntroMessageHandlers
+    private helpHandlers: HelpHandlers
 
     constructor(client: Client, config: Config) {
         this.client = client
@@ -22,8 +24,9 @@ export class EventRegistry {
 
         this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
-        this.introMessageHandlers = new IntroMessageHandlers(config)
+        this.introMessageHandlers = new IntroMessageHandlers(client)
         this.channelOperator = new ChannelOperator(this.introMessageHandlers.introMessageMap)
+        this.helpHandlers = new HelpHandlers(client, config)
     }
 
     public registerEvents() {
@@ -32,8 +35,10 @@ export class EventRegistry {
 
         // => Check bot is alive
         this.registerHealthCheck()
+
         this.registerIntroMessageHandler()
         this.registerVoiceUpdateHandler()
+        this.registerHelpMessageHandler()
 
         // => Bot error and warn handler
         this.client.on(ClientEvent.Error, this.logger.logError)
@@ -49,19 +54,26 @@ export class EventRegistry {
     
     private registerReadyHandler() {
         this.client.once(ClientEvent.Ready, () => {
-            this.logger.introduce(this.client, this.config.activity);
+            this.logger.introduce(this.client, this.config);
         });
     }
 
     private registerHealthCheck() {
         this.client.on(ClientEvent.Message, (message: Message) => {
             this.healthCheckHandlers.handleHealthCheck(message)
+            this.introMessageHandlers.registerIntroMessage(message)
         })
     }
 
     private registerIntroMessageHandler() {
         this.client.on(ClientEvent.Message, (message: Message) => {
             this.introMessageHandlers.registerIntroMessage(message)
+        })
+    }
+
+    private registerHelpMessageHandler() {
+        this.client.on(ClientEvent.Message, (message: Message) => {
+            this.helpHandlers.handleHelpCall(message)
         })
     }
 
