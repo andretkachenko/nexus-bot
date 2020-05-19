@@ -1,21 +1,18 @@
-import { Client, Message, VoiceState, TextChannel, GuildMember, GuildChannelManager } from 'discord.js'
-import * as path from 'path'
-import * as YAML from 'yamljs'
-import * as dotenv from "dotenv";
-
+import { Client } from 'discord.js'
 import { Logger } from './handlers/Logger'
 import { EventRegistry } from "./EventRegistry"
+import { Config } from './config'
 
 export class Bot {
 	private client: Client
-	private config: any
+	private config: Config
 	private logger: Logger
 	private eventRegistry: EventRegistry
 
 	constructor() {
 		this.client = new Client()
-		this.config = YAML.load(path.resolve(__dirname, 'config.yml'))
 		this.logger = new Logger()
+		this.config = new Config()
 		this.eventRegistry = new EventRegistry(this.client, this.config)
 	}
 
@@ -24,8 +21,6 @@ export class Bot {
 		
 		// register all event handlers
 		this.eventRegistry.registerEvents()
-
-		dotenv.config()
-		this.client.login(process.env.TOKEN)
+		this.client.login(this.config.token)
 	}
 }

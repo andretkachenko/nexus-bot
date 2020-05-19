@@ -5,17 +5,18 @@ import { ChannelOperator } from "./handlers/ChannelOperator"
 import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
 import { IntroMessageHandlers } from "./handlers/IntroMessageHandlers"
+import { Config } from "./config"
 
 export class EventRegistry {
     private client: Client
-    private config: any
+    private config: Config
 
     private logger: Logger
     private healthCheckHandlers: HealthCheckHandlers
     private channelOperator: ChannelOperator
     private introMessageHandlers: IntroMessageHandlers
 
-    constructor(client: Client, config: any) {
+    constructor(client: Client, config: Config) {
         this.client = client
         this.config = config
 
@@ -47,8 +48,8 @@ export class EventRegistry {
     // ---------------- //
     
     private registerReadyHandler() {
-        this.client.on(ClientEvent.Ready, () => {
-            this.logger.introduce(this.client, this.config.settings.activity);
+        this.client.once(ClientEvent.Ready, () => {
+            this.logger.introduce(this.client, this.config.activity);
         });
     }
 
@@ -75,9 +76,10 @@ export class EventRegistry {
 
     private registerProcessHandlers() {
         process.on(ProcessEvent.Exit, () => {
-            const msg = `[${this.config.settings.nameBot}] Process exit.`
+            const msg = `[Illuminati-bot] Process exit.`
             this.logger.logEvent(msg)
-            console.log(msg)
+            console.log(msg)            
+            this.client.destroy()
         })
 
         process.on(ProcessEvent.UncaughtException, (err: Error) => {

@@ -2,21 +2,22 @@ import { Dictionary } from "../collections/Dictionary";
 import { IntroPictureMap } from "../entities/IntroPictureMap";
 import { ChannelType } from "../enums/ChannelType"
 import { Message, Guild } from "discord.js";
+import { Config } from "../config";
 
 export class IntroMessageHandlers {
     private readonly wrongChannelType = "wrong-channel-type";
     private readonly faultyGuild = "faulty-guild";
 
     public introMessageMap: Dictionary<IntroPictureMap>
-    private config: any
+    private config: Config
 
-    constructor(config: any) {
+    constructor(config: Config) {
         this.introMessageMap = new Dictionary<IntroPictureMap>()
         this.config = config
     }
 
     public registerIntroMessage(message: Message) {
-        let expectedCmd = this.config.settings.prefix + 'addintro'
+        let expectedCmd = this.config.prefix + 'addintro'
         if (message.content.indexOf(expectedCmd) !== -1) {
             let map = message.content.substring(expectedCmd.length)
             let introPictureMap: IntroPictureMap = JSON.parse(map)

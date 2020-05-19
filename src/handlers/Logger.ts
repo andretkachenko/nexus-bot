@@ -10,6 +10,6 @@ export class Logger {
 	public introduce(client: Client, config: any) {
 		this.logEvent(`${config.settings.nameBot} Connected.`)
 		this.logEvent(`Logged in as ${client.user != undefined ? client.user.tag : "undefined"}`)
-		if(client.user != undefined) client.user.setActivity(config.settings.activity)
+		if(client.user != undefined) client.user.setActivity({ "name": config.settings.activity })
 	}
 }

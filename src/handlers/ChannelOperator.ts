@@ -8,6 +8,8 @@ export class ChannelOperator {
 	private channelMap: Dictionary<string>
 	private introMessageMap: Dictionary<IntroPictureMap>
 
+	private readonly onDebug = process.env.NODE_ENV === EnvType.Debug;
+
 	constructor(introMessageMap: Dictionary<IntroPictureMap>) {
 		this.channelMap = new Dictionary<string>()
 		this.introMessageMap = introMessageMap
@@ -21,7 +23,7 @@ export class ChannelOperator {
 			let textChannel = this.resolve(newVoiceState, channelID) as TextChannel
 			this.showHideTextChannel(textChannel, user, true)
 
-			if (process.env.NODE_ENV === EnvType.Debug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
+			if (this.onDebug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
 		}
 		else {
 			this.createTextChannel(newVoiceState)
@@ -36,7 +38,7 @@ export class ChannelOperator {
 			let textChannel = this.resolve(oldVoiceState, channelID)
 			this.showHideTextChannel(textChannel, user, false)
 
-			if (process.env.NODE_ENV === EnvType.Debug) textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`) // test purposes only
+			if (this.onDebug)  textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`) // test purposes only
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
@@ -71,7 +73,7 @@ export class ChannelOperator {
 				this.greet(ch, voiceChannel)
 				
 
-				if (process.env.NODE_ENV === EnvType.Debug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
+				if (this.onDebug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
 			});
 	}
 
@@ -94,16 +96,17 @@ export class ChannelOperator {
 		  textChannel.bulkDelete(fetched);
 		}
 		while(fetched.size >= 2)
-		this.greet(textChannel, voiceChannel)
+		textChannel.send("all messages deleted")
+		if (this.onDebug) this.greet(textChannel, voiceChannel)
 	}
 
 	private greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
 		if(voiceChannel !== null && this.introMessageMap.ContainsKey(voiceChannel.id)) {
 			let introPictureMap = this.introMessageMap.Item(voiceChannel.id)
 
-			if(introPictureMap.Description !== null) textChannel.send(introPictureMap.Description)
-			if(introPictureMap.ImageUrl !== null) textChannel.send(introPictureMap.ImageUrl)
-			if(introPictureMap.AdditionalUrl !== null) textChannel.send(introPictureMap.AdditionalUrl)
+			if(introPictureMap.Description !== undefined) textChannel.send(introPictureMap.Description)
+			if(introPictureMap.ImageUrl !== undefined) textChannel.send(introPictureMap.ImageUrl)
+			if(introPictureMap.AdditionalUrl !== undefined) textChannel.send(introPictureMap.AdditionalUrl)
 		}
 	}
 }
