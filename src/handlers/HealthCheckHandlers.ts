@@ -1,10 +1,11 @@
 import { Message, Client } from "discord.js";
+import { Config } from "../config";
 
 export class HealthCheckHandlers {
     private client: Client
-    private config: any
+    private config: Config
 
-    constructor(client: Client, config: any) {
+    constructor(client: Client, config: Config) {
         this.client = client
         this.config = config
     }
@@ -13,8 +14,8 @@ export class HealthCheckHandlers {
         // => Prevent message from the bot
         if (this.client.user != undefined && message.author.id !== this.client.user.id) {
             // => Test command
-            if (message.content === this.config.settings.prefix + 'health') {
-                message.reply(`${this.config.settings.nameBot} is ready and listening.`)
+            if (message.content === this.config.prefix + 'health') {
+                message.reply(`I am ready to serve, sir.`)
             }
         }
     }
