@@ -96,8 +96,8 @@ export class ChannelOperator {
 		  textChannel.bulkDelete(fetched);
 		}
 		while(fetched.size >= 2)
-		textChannel.send("all messages deleted")
-		if (this.onDebug) this.greet(textChannel, voiceChannel)
+		if(this.onDebug) textChannel.send("all messages deleted")
+		this.greet(textChannel, voiceChannel)
 	}
 
 	private greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
