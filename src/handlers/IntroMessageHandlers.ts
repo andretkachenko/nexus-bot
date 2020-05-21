@@ -16,11 +16,11 @@ export class IntroMessageHandlers {
     }
 
     public updateIntroMessage(message: Message) {
-        this.insertIntroMessage(message, "changeIntro", true)
+        this.insertIntroMessage(message, "changeintro", true)
     }
 
     public registerIntroMessage(message: Message) {
-        this.insertIntroMessage(message, "addIntro", false)
+        this.insertIntroMessage(message, "addintro", false)
     }
 
     public insertIntroMessage(message: Message, expectedCmd: string, update: boolean) {
