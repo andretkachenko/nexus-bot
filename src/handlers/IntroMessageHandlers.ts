@@ -20,11 +20,10 @@ export class IntroMessageHandlers {
     }
 
     public registerIntroMessage(message: Message) {
-        this.insertIntroMessage(message, "changeIntro", false)
+        this.insertIntroMessage(message, "addIntro", false)
     }
 
     public insertIntroMessage(message: Message, expectedCmd: string, update: boolean) {
-        // => Prevent message from the bot
         if (this.client.user != undefined && message.author.id !== this.client.user.id) {
             if (message.content.indexOf(expectedCmd) !== -1) {
                 let map = message.content.substring(expectedCmd.length)
@@ -34,7 +33,7 @@ export class IntroMessageHandlers {
                 this.validateChannelId(message.channel, channelId)
 
                 if (update && this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Remove(channelId)
-                this.introMessageMap.Add(channelId, introPictureMap)
+                if(!this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Add(channelId, introPictureMap)
             }
         }
     }
