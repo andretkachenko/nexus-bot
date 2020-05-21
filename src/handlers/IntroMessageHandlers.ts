@@ -26,14 +26,20 @@ export class IntroMessageHandlers {
     public insertIntroMessage(message: Message, expectedCmd: string, update: boolean) {
         if (this.client.user != undefined && message.author.id !== this.client.user.id) {
             if (message.content.indexOf(expectedCmd) !== -1) {
-                let map = message.content.substring(expectedCmd.length)
-                let introPictureMap: IntroPictureMap = JSON.parse(map)
+                let map = message.content.substring(expectedCmd.length+1)
+                try {
+                    let introPictureMap: IntroPictureMap = JSON.parse(map)
 
-                let channelId = this.getChannelId(message, introPictureMap.ChannelName)
-                this.validateChannelId(message.channel, channelId)
+                    let channelId = this.getChannelId(message, introPictureMap.ChannelName)
+                    this.validateChannelId(message.channel, channelId)
 
-                if (update && this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Remove(channelId)
-                if(!this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Add(channelId, introPictureMap)
+                    if (update && this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Remove(channelId)
+                    if (!this.introMessageMap.ContainsKey(channelId)) this.introMessageMap.Add(channelId, introPictureMap)
+                }
+                catch (e) {
+                    console.log(e)
+                    message.channel.send("Error parsing provided intro")
+                }
             }
         }
     }

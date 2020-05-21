@@ -33,18 +33,15 @@ export class EventRegistry {
         // => Log bot started and listening
         this.registerReadyHandler()
 
-        // => Check bot is alive
-        this.registerHealthCheck()
-
-        this.registerIntroMessageHandler()
+        // => Main worker handlers
+        this.registerMessageHandler()
         this.registerVoiceUpdateHandler()
-        this.registerHelpMessageHandler()
 
-        // => Bot error and warn handler
+        // => Bot error and warn handlers
         this.client.on(ClientEvent.Error, this.logger.logError)
         this.client.on(ClientEvent.Warn, this.logger.logWarn)
 
-        // => Process handler
+        // => Process handlers
         this.registerProcessHandlers()
     }
 
@@ -52,27 +49,17 @@ export class EventRegistry {
     //  Event Handlers  //
     // ---------------- //
     
-    private registerReadyHandler() {
+    private registerReadyHandler() {!
         this.client.once(ClientEvent.Ready, () => {
             this.logger.introduce(this.client, this.config);
         });
     }
 
-    private registerHealthCheck() {
+    private registerMessageHandler() {
         this.client.on(ClientEvent.Message, (message: Message) => {
             this.healthCheckHandlers.handleHealthCheck(message)
             this.introMessageHandlers.registerIntroMessage(message)
-        })
-    }
-
-    private registerIntroMessageHandler() {
-        this.client.on(ClientEvent.Message, (message: Message) => {
-            this.introMessageHandlers.registerIntroMessage(message)
-        })
-    }
-
-    private registerHelpMessageHandler() {
-        this.client.on(ClientEvent.Message, (message: Message) => {
+            this.introMessageHandlers.updateIntroMessage(message)
             this.helpHandlers.handleHelpCall(message)
         })
     }
