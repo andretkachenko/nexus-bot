@@ -83,14 +83,14 @@ export class EventRegistry {
 
         process.on(ProcessEvent.UncaughtException, (err: Error) => {
             const errorMsg = (err ? err.stack || err : '').toString().replace(new RegExp(`${__dirname}\/`, 'g'), './')
-            this.logger.logError(errorMsg)
-            console.log(errorMsg)
+            this.logger.logError(errorMsg.substring(0, 500))
+            console.log(errorMsg.substring(0, 500))
         })
 
         process.on(ProcessEvent.UnhandledRejection, (reason: {} | null | undefined) => {
             const msg = `Uncaught Promise rejection: ${reason}`
-            this.logger.logError(msg)
-            console.log(msg)
+            this.logger.logError(msg.substring(0, 500))
+            console.log(msg.substring(0, 500))
         })
     }
 }
