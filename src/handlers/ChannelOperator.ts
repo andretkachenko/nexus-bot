@@ -19,7 +19,7 @@ export class ChannelOperator {
 		let user = newVoiceState.member
 		let channelID = newVoiceState.channelID as string
 
-		if (this.channelMap.ContainsKey(channelID)) {
+		if (this.channelMap.ContainsKey(channelID) && this.resolve(newVoiceState, channelID) !== null) {
 			let textChannel = this.resolve(newVoiceState, channelID) as TextChannel
 			this.showHideTextChannel(textChannel, user, true)
 
