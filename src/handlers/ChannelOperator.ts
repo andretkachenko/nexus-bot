@@ -2,27 +2,28 @@ import { VoiceState, TextChannel, GuildMember, Collection, Message, VoiceChannel
 import { Dictionary } from "../collections/Dictionary";
 import { ChannelType } from "../enums/ChannelType"
 import { EnvType } from "../enums/EnvType";
-import { IntroPictureMap } from "../entities/IntroPictureMap";
+import { IntroMap } from "../entities/IntroMap";
+import { MongoConnector } from "../db/MongoConnector";
+import { TextChannelMap } from "../entities/TextChannelMap";
 
 export class ChannelOperator {
-	private channelMap: Dictionary<string>
-	private introMessageMap: Dictionary<IntroPictureMap>
+	private mongoConnector: MongoConnector
 
 	private readonly onDebug = process.env.NODE_ENV === EnvType.Debug;
 
-	constructor(introMessageMap: Dictionary<IntroPictureMap>) {
-		this.channelMap = new Dictionary<string>()
-		this.introMessageMap = introMessageMap
+	constructor(mongoConnector: MongoConnector) {
+		this.mongoConnector = mongoConnector
 	}
 
-	public handleChannelJoin(newVoiceState: VoiceState) {
+	public async handleChannelJoin(newVoiceState: VoiceState) {
 		let user = newVoiceState.member
-		let channelID = newVoiceState.channelID as string
+		let guildId = newVoiceState.guild.id
+		let channelId = newVoiceState.channelID as string
+		let textChannelId = await this.mongoConnector.fetchTextChannelId(guildId, channelId)
+		let textChannel = this.resolve(newVoiceState, textChannelId)
 
-		if (this.channelMap.ContainsKey(channelID) && this.resolve(newVoiceState, channelID) !== null) {
-			let textChannel = this.resolve(newVoiceState, channelID) as TextChannel
+		if( textChannel !== null) {
 			this.showHideTextChannel(textChannel, user, true)
-
 			if (this.onDebug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
 		}
 		else {
@@ -30,12 +31,14 @@ export class ChannelOperator {
 		}
 	}
 
-	public handleChannelLeave(oldVoiceState: VoiceState) {
+	public async handleChannelLeave(oldVoiceState: VoiceState) {
 		let user = oldVoiceState.member
+		let guildId = oldVoiceState.guild.id
 		let channelID = oldVoiceState.channelID as string
+		let textChannelId = await this.mongoConnector.fetchTextChannelId(guildId, channelID)
 
-		if (this.channelMap.ContainsKey(channelID)) {
-			let textChannel = this.resolve(oldVoiceState, channelID)
+		if (textChannelId !== undefined) {
+			let textChannel = this.resolve(oldVoiceState, textChannelId)
 			this.showHideTextChannel(textChannel, user, false)
 
 			if (this.onDebug)  textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`) // test purposes only
@@ -50,18 +53,19 @@ export class ChannelOperator {
 	private createTextChannel(newVoiceState: VoiceState) {
 		let user = newVoiceState.member
 		let voiceChannel = newVoiceState.channel
-		let channelID = newVoiceState.channelID as string
+		let guildId = newVoiceState.channel?.guild.id as string
+		let channelId = newVoiceState.channelID as string
 
 		if (voiceChannel !== null) newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', {
-			permissionOverwrites: [ { id: newVoiceState.channel.guild.id, deny: ['VIEW_CHANNEL'] }],
+			permissionOverwrites: [ { id: guildId, deny: ['VIEW_CHANNEL'] }],
 			type: ChannelType.text,
 			parent: voiceChannel.parentID as string,
-			position: voiceChannel.position + 1
+			position: voiceChannel.position
 		})
 			.then(ch => {
 				ch.overwritePermissions([
 					{
-						id: ch.guild.id,
+						id: guildId,
 						deny: ['VIEW_CHANNEL'],
 					},
 					{
@@ -69,7 +73,8 @@ export class ChannelOperator {
 						allow: ['VIEW_CHANNEL'],
 					},
 				]);
-				this.channelMap.Add(channelID, ch.id)
+				let textChannelMap: TextChannelMap = { guildId: guildId, voiceChannelId: channelId , textChannelId: ch.id }
+				this.mongoConnector.addTextChannel(textChannelMap)
 				this.greet(ch, voiceChannel)
 				
 
@@ -78,7 +83,7 @@ export class ChannelOperator {
 	}
 
 	private resolve(voiceState: VoiceState, id: string): TextChannel {
-		return voiceState.guild.channels.resolve(this.channelMap.Item(id)) as TextChannel
+		return voiceState.guild.channels.resolve(id) as TextChannel
 	}
 
 	private resolveUsername(user: GuildMember | null): string {
@@ -100,13 +105,13 @@ export class ChannelOperator {
 		this.greet(textChannel, voiceChannel)
 	}
 
-	private greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
-		if(voiceChannel !== null && this.introMessageMap.ContainsKey(voiceChannel.id)) {
-			let introPictureMap = this.introMessageMap.Item(voiceChannel.id)
+	private async greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
+		if(voiceChannel !== null) {
+			let intro = await this.mongoConnector.fetchIntro(voiceChannel.guild.id, voiceChannel.id)
 
-			if(introPictureMap.Description !== undefined) textChannel.send(introPictureMap.Description)
-			if(introPictureMap.ImageUrl !== undefined) textChannel.send(introPictureMap.ImageUrl)
-			if(introPictureMap.AdditionalUrl !== undefined) textChannel.send(introPictureMap.AdditionalUrl)
+			if(intro?.Description !== undefined) textChannel.send(intro.Description)
+			if(intro?.ImageUrl !== undefined) textChannel.send(intro.ImageUrl)
+			if(intro?.AdditionalUrl !== undefined) textChannel.send(intro.AdditionalUrl)
 		}
 	}
 }
