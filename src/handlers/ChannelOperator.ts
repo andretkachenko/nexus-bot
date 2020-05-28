@@ -86,7 +86,7 @@ export class ChannelOperator {
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
-		if (user != null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+		if (user !== null && textChannel !== null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 	}
 
 	private async clearTextChannel(textChannel: TextChannel, voiceChannel: VoiceChannel) {
