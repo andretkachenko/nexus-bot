@@ -2,6 +2,7 @@ import { IntroMap } from "../entities/IntroMap";
 import { ChannelType } from "../enums/ChannelType"
 import { Message, TextChannel, NewsChannel, DMChannel, Client } from "discord.js";
 import { MongoConnector } from "../db/MongoConnector";
+import { Config } from "../config";
 
 export class IntroMessageHandlers {
     private readonly wrongChannelType = "wrong-channel-type";
@@ -9,24 +10,26 @@ export class IntroMessageHandlers {
 
     private mongoConnector: MongoConnector
     private client: Client
+    private config: Config
 
-    constructor(client: Client, mongoConnector: MongoConnector) {
+    constructor(client: Client, mongoConnector: MongoConnector, config: Config) {
         this.mongoConnector = mongoConnector
         this.client = client
+        this.config = config
     }
 
     public updateIntroMessage(message: Message) {
-        this.insertIntroMessage(message, "changeintro", true)
+        this.insertIntroMessage(message, this.config.prefix + "changeintro", true)
     }
 
     public registerIntroMessage(message: Message) {
-        this.insertIntroMessage(message, "addintro", false)
+        this.insertIntroMessage(message, this.config.prefix + "addintro", false)
     }
 
-    public insertIntroMessage(message: Message, expectedCmd: string, update: boolean) {
+    public async insertIntroMessage(message: Message, expectedCmd: string, update: boolean) {
         if (this.client.user != undefined && message.author.id !== this.client.user.id) {
             if (message.content.indexOf(expectedCmd) !== -1) {
-                let map = message.content.substring(expectedCmd.length+1)
+                let map = message.content.substring(expectedCmd.length + 1)
                 try {
                     let introPictureMap: IntroMap = JSON.parse(map)
 
@@ -34,12 +37,10 @@ export class IntroMessageHandlers {
                     let channelId = this.getChannelId(message, introPictureMap.ChannelName)
                     this.validateChannelId(message.channel, channelId)
 
-                    if (update && guildId !== null && this.mongoConnector.fetchIntro(guildId, channelId) !== undefined) this.mongoConnector.deleteIntro(guildId, channelId)
-                    if (this.mongoConnector.fetchIntro(guildId, channelId) === undefined) {
-                        introPictureMap.GuildId = guildId
-                        introPictureMap.ChannelId = channelId
-                        this.mongoConnector.addIntro(introPictureMap)
-                    }
+                    introPictureMap.GuildId = guildId
+                    introPictureMap.ChannelId = channelId
+                    if (update) this.mongoConnector.changeIntro(introPictureMap)
+                    else this.mongoConnector.addIntro(introPictureMap)
                 }
                 catch (e) {
                     console.log(e)

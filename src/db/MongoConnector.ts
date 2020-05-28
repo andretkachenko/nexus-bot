@@ -52,7 +52,7 @@ export class MongoConnector {
         let introMap: IntroMap | undefined
         let db = this.client.db(this.dbName)
         let introMaps = db.collection(this.introCollectionName)
-        let aggregation = introMaps.find({ guildId: guildId, channelId: channelId });
+        let aggregation = introMaps.find({ GuildId: guildId, ChannelId: channelId });
         return aggregation.toArray()
         .then(introMaps => {
             introMap = introMaps[0]
@@ -81,7 +81,7 @@ export class MongoConnector {
     public deleteTextChannel(guildId: string, voiceChannelId: string) {
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textChannelCollectionName)
-        textChannels.deleteOne({ guildId: guildId, channelId: voiceChannelId }, (err) => {
+        textChannels.deleteOne({ GuildId: guildId, ChannelId: voiceChannelId }, (err) => {
             if (err) console.log(err)
             console.log("document deleted")
         })
@@ -90,16 +90,16 @@ export class MongoConnector {
     public changeIntro(introMap: IntroMap) {
         let db = this.client.db(this.dbName)
         let introMaps = db.collection(this.introCollectionName)
-        introMaps.updateOne({ guildId: introMap.GuildId, channelId: introMap.ChannelId }, { $set: { Description: introMap.Description, ImageUrl: introMap.ImageUrl, AdditionalUrl: introMap.AdditionalUrl } }, (err) => {
+        introMaps.updateOne({ GuildId: introMap.GuildId, ChannelId: introMap.ChannelId }, { $set: { Description: introMap.Description, ImageUrl: introMap.ImageUrl, AdditionalUrl: introMap.AdditionalUrl } }, (err) => {
             if (err) console.log(err)
             else console.log("document updated")
         })
     }
 
-    public deleteIntro(guildId: string, voiceChannelId: string) {
+    public async deleteIntro(guildId: string, voiceChannelId: string) {
         let db = this.client.db(this.dbName)
         let introMaps = db.collection(this.introCollectionName)
-        introMaps.deleteOne({ guildId: guildId, channelId: voiceChannelId }, (err) => {
+        introMaps.deleteOne({ GuildId: guildId, ChannelId: voiceChannelId }, (err) => {
             if (err) console.log(err)
             console.log("document deleted")
         })

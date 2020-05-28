@@ -27,7 +27,7 @@ export class EventRegistry {
         
         this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
-        this.introMessageHandlers = new IntroMessageHandlers(client, mongoConnector)
+        this.introMessageHandlers = new IntroMessageHandlers(client, mongoConnector, config)
         this.channelOperator = new ChannelOperator(mongoConnector)
         this.helpHandlers = new HelpHandlers(client, config)
     }
