@@ -7,6 +7,7 @@ import { ProcessEvent } from "./enums/ProcessEvent"
 import { IntroMessageHandlers } from "./handlers/IntroMessageHandlers"
 import { Config } from "./config"
 import { HelpHandlers } from "./handlers/HelpHandlers"
+import { MongoConnector } from "./db/MongoConnector"
 
 export class EventRegistry {
     private client: Client
@@ -22,10 +23,12 @@ export class EventRegistry {
         this.client = client
         this.config = config
 
+        let mongoConnector = new MongoConnector(config)
+        
         this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
-        this.introMessageHandlers = new IntroMessageHandlers(client)
-        this.channelOperator = new ChannelOperator(this.introMessageHandlers.introMessageMap)
+        this.introMessageHandlers = new IntroMessageHandlers(client, mongoConnector, config)
+        this.channelOperator = new ChannelOperator(mongoConnector)
         this.helpHandlers = new HelpHandlers(client, config)
     }
 
