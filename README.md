@@ -1,5 +1,5 @@
 # Illuminati-bot
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 Discord has separation into text and voice channels, with no option to make combined.  
 The purpose of this bot is to create text channel, which is visible only to those who are connected to the linked voice channel.  
 History of the text channel is cleared each time all users leave the voice channel.  
