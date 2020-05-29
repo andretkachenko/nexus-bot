@@ -73,7 +73,7 @@ export class ChannelOperator {
 						allow: ['VIEW_CHANNEL'],
 					},
 				]);
-				let textChannelMap: TextChannelMap = { guildId: guildId, voiceChannelId: channelId , textChannelId: ch.id }
+				let textChannelMap: TextChannelMap = { guildId: guildId.trim(), voiceChannelId: channelId.trim() , textChannelId: ch.id }
 				this.mongoConnector.addTextChannel(textChannelMap)
 				this.greet(ch, voiceChannel)
 				

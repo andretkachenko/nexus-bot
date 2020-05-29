@@ -39,32 +39,34 @@ export class HelpHandlers {
     private giveAddIntroHelp(message: Message) {
         message.channel.send(`
                 \`\`\`
-                !addintro - add info that should be shown in the linked text channel.
+                ${this.config.prefix}addintro - add info that should be shown in the linked text channel.
 
                 Available fields:
-                ChannelName(required) - name of the voice channel for which this intro should be set
+                GuildId(optional) - ID of the server(guild), for which intro should be added. Required if send to bot via DM.
+                ChannelId(required) - ID of the voice channel for which this intro should be set
                 Description(optional) - any message (greetings, description, etc)
                 ImageUrl(optional) - link to the image/gif that should be sent after the mesage
                 AdditionalUrl(optional) - link to the message that should be sent after the mesage
                              
                 Usage example:
-                !addintro { "ChannelName": "Default", "Description": "Welcome to the default channel of our server", "ImageUrl": "https://discord.com/assets/7edaed9d86e1b5dd9d4c98484372222b.svg", "AdditionalUrl": "https://discord.com/assets/d9b6a36b9077400c46cc64404100b59b.svg" }\`\`\`
+                ${this.config.prefix}addintro { "GuildId": "98765432187654321", "ChannelId": "12345678912345678", "Description": "Welcome to the default channel of our server", "ImageUrl": "https://discord.com/assets/7edaed9d86e1b5dd9d4c98484372222b.svg", "AdditionalUrl": "https://discord.com/assets/d9b6a36b9077400c46cc64404100b59b.svg" }\`\`\`
                 `)
     }
 
     private giveChangeIntroHelp(message: Message) {
         message.channel.send(`
                 \`\`\`
-                !changeintro - replace info that should be shown in the linked text channel with the new parameters.
+                ${this.config.prefix}changeintro - replace info that should be shown in the linked text channel with the new parameters.
                 
                 Available fields:
-                ChannelName(required) - name of the voice channel for which this intro should be set
+                GuildId(optional) - ID of the server(guild), for which intro should be added. Required if send to bot via DM.
+                ChannelId(required) - ID of the voice channel for which this intro should be set
                 Description(optional) - any message (greetings, description, etc)
                 ImageUrl(optional) - link to the image/gif that should be sent after the mesage
                 AdditionalUrl(optional) - link to the message that should be sent after the mesage
                                 
                 Usage example:
-                !changeintro { "ChannelName": "Default", "Description": "Welcome to the default channel of our server", "ImageUrl": "https://discord.com/assets/7edaed9d86e1b5dd9d4c98484372222b.svg", "AdditionalUrl": "https://discord.com/assets/d9b6a36b9077400c46cc64404100b59b.svg" }\`\`\`
+                ${this.config.prefix}changeintro { "GuildId": "98765432187654321", "ChannelId": "12345678912345678", "Description": "Welcome to the default channel of our server", "ImageUrl": "https://discord.com/assets/7edaed9d86e1b5dd9d4c98484372222b.svg", "AdditionalUrl": "https://discord.com/assets/d9b6a36b9077400c46cc64404100b59b.svg" }\`\`\`
                 `)        
     }
 }
