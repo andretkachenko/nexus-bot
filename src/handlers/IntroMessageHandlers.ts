@@ -32,15 +32,17 @@ export class IntroMessageHandlers {
                 let map = message.content.substring(expectedCmd.length + 1)
                 try {
                     let introPictureMap: IntroMap = JSON.parse(map)
+                    let isValid = this.validateChannelId(message.channel, introPictureMap.ChannelId, introPictureMap.GuildId)
 
-                    let guildId = message.guild?.id as string
-                    let channelId = this.getChannelId(message, introPictureMap.ChannelName)
-                    this.validateChannelId(message.channel, channelId)
+                    if (isValid) {
+                        if(introPictureMap.GuildId === null || introPictureMap.GuildId === undefined) introPictureMap.GuildId = message.guild?.id as string
 
-                    introPictureMap.GuildId = guildId
-                    introPictureMap.ChannelId = channelId
-                    if (update) this.mongoConnector.changeIntro(introPictureMap)
-                    else this.mongoConnector.addIntro(introPictureMap)
+                        introPictureMap.GuildId = introPictureMap.GuildId.trim()
+                        introPictureMap.ChannelId = introPictureMap.ChannelId.trim()
+
+                        if (update) this.mongoConnector.changeIntro(introPictureMap)
+                        else this.mongoConnector.addIntro(introPictureMap)
+                    }
                 }
                 catch (e) {
                     console.log(e)
@@ -50,24 +52,33 @@ export class IntroMessageHandlers {
         }
     }
 
-    private getChannelId(message: Message, channelName: string): string {
-        if (message.guild != null) {
-            let channel = message.guild.channels.cache.find(ch => ch.name === channelName)
-            return channel?.type === ChannelType.voice ? channel.id : this.wrongChannelType
-        } else {
-            return this.faultyGuild
+    private validateChannelId(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string): boolean {
+        let isValid = true
+        let message = ''
+        if (textChannel.type === ChannelType.dm && (guildId === undefined || guildId === null)) {
+            message = "Error processing command - guildId should be specified while using direct messages."
+            isValid = false
         }
-    }
+        if ((textChannel.type === ChannelType.news || textChannel.type === ChannelType.text) && ((textChannel as TextChannel | NewsChannel).guild === null || (textChannel as TextChannel | NewsChannel).guild === undefined)) {
+            message = "Error processing command - unable to identify guild."
+            isValid = false
+        }
+        if (isValid) {
+            let desiredGuildId = (textChannel as DMChannel).type ? guildId : (textChannel as TextChannel | NewsChannel).guild.id
+            let guild = this.client.guilds.resolve(desiredGuildId.trim())
+            if (guild === null || guild == undefined) {
+                message = "Error processing command - unable to identify guild."
+                isValid = false
+            } else {
+                let channel = guild.channels.resolve(channelId.trim())
+                if (channel?.type !== ChannelType.voice) {
+                    message = "Error processing command - specified channelId does not belong to a voice channel."
+                    isValid = false
+                }
+            }
+        }
 
-    private validateChannelId(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string) {
-
-        if (channelId === this.faultyGuild) {
-            textChannel.send("Error processing command - unable to identify guild.")
-            return
-        }
-        if (channelId === this.wrongChannelType) {
-            textChannel.send("Error processing command - specified channel name does not belong to a voice channel.")
-            return
-        }
+        if (message !== '') textChannel.send(message)
+        return isValid
     }
 }
