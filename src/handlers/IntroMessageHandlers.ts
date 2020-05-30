@@ -70,7 +70,7 @@ export class IntroMessageHandlers {
                 message = "Error processing command - unable to identify guild."
                 isValid = false
             } else {
-                let channel = guild.channels.resolve(channelId.trim())
+                let channel = guild.channels.resolve(channelId)
                 if (channel?.type !== ChannelType.voice) {
                     message = "Error processing command - specified channelId does not belong to a voice channel."
                     isValid = false
