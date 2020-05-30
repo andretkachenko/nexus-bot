@@ -31,8 +31,8 @@ export class MongoConnector {
         let aggregation = textChannels.aggregate<TextChannelMap>([
             {
                 $match: {
-                    guildId: guildId.trim(),
-                    voiceChannelId: channelId.trim()
+                    guildId: guildId,
+                    voiceChannelId: channelId
                 },
             },
         ], {
@@ -52,7 +52,7 @@ export class MongoConnector {
         let introMap: IntroMap | undefined
         let db = this.client.db(this.dbName)
         let introMaps = db.collection(this.introCollectionName)
-        let aggregation = introMaps.find({ GuildId: guildId.trim(), ChannelId: channelId.trim() })
+        let aggregation = introMaps.find({ GuildId: guildId, ChannelId: channelId })
         return aggregation.toArray()
         .then(introMaps => {
             introMap = introMaps[0]
