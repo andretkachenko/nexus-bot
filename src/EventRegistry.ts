@@ -24,7 +24,7 @@ export class EventRegistry {
         this.config = config
 
         let mongoConnector = new MongoConnector(config)
-        
+
         this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
         this.introMessageHandlers = new IntroMessageHandlers(client, mongoConnector, config)
@@ -51,8 +51,9 @@ export class EventRegistry {
     // ---------------- //
     //  Event Handlers  //
     // ---------------- //
-    
-    private registerReadyHandler() {!
+
+    private registerReadyHandler() {
+        !
         this.client.once(ClientEvent.Ready, () => {
             this.logger.introduce(this.client, this.config);
         });
@@ -60,10 +61,12 @@ export class EventRegistry {
 
     private registerMessageHandler() {
         this.client.on(ClientEvent.Message, (message: Message) => {
-            this.healthCheckHandlers.handleHealthCheck(message)
-            this.introMessageHandlers.registerIntroMessage(message)
-            this.introMessageHandlers.updateIntroMessage(message)
-            this.helpHandlers.handleHelpCall(message)
+            if (this.hasAdminPermission(message)) {
+                this.healthCheckHandlers.handleHealthCheck(message)
+                this.introMessageHandlers.registerIntroMessage(message)
+                this.introMessageHandlers.updateIntroMessage(message)
+                this.helpHandlers.handleHelpCall(message)
+            }
         })
     }
 
@@ -80,7 +83,7 @@ export class EventRegistry {
         process.on(ProcessEvent.Exit, () => {
             const msg = `[Illuminati-bot] Process exit.`
             this.logger.logEvent(msg)
-            console.log(msg)            
+            console.log(msg)
             this.client.destroy()
         })
 
@@ -95,5 +98,9 @@ export class EventRegistry {
             this.logger.logError(msg.substring(0, 500))
             console.log(msg.substring(0, 500))
         })
+    }
+
+    private hasAdminPermission(message: Message): boolean {
+        return message.member !== null && message.member.hasPermission("ADMINISTRATOR")
     }
 }
