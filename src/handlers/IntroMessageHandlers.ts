@@ -40,8 +40,8 @@ export class IntroMessageHandlers {
                         introPictureMap.GuildId = introPictureMap.GuildId.trim()
                         introPictureMap.ChannelId = introPictureMap.ChannelId.trim()
 
-                        if (update) this.mongoConnector.changeIntro(introPictureMap)
-                        else this.mongoConnector.addIntro(introPictureMap)
+                        if (update) this.mongoConnector.introRepository.update(introPictureMap)
+                        else this.mongoConnector.introRepository.add(introPictureMap)
                     }
                 }
                 catch (e) {

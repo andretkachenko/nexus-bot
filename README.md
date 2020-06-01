@@ -67,13 +67,6 @@ This bot was deployed by me using Heroku and MongoDB Atlas.
 9. Choose 'Connect your application'
 10. You'll be provided with a connection link. For example: ```mongodb+srv://<username>:<password>@cluster0-dxnlr.mongodb.net/test?retryWrites=true&w=majority```
 11. Save part after '@' sign in .env as MONGO_CLUSTER. In this case, ```MONGO_CLUSTER=cluster0-dxnlr.mongodb.net/test?retryWrites=true&w=majority```
-13. Close Connection window
-14. Click on 'Collections'
-15. Click 'Add my Own Data'
-16. In the opened popup, provide Database Name (save it in .env as MONGO_DB) and Collection Name for Text-Voice Channel mappings collection (save it in .env as MONGO_TXT_COLLECTION)
-17. Click 'Create'
-19. Click 'Create Database'
-20. Create a new collection for channel introductions. Save collection name in .env as MONGO_INTRO_COLLECTION
 
 ### Set up Heroku
 1. Create a Heroku account
