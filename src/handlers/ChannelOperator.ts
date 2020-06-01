@@ -24,6 +24,7 @@ export class ChannelOperator {
 		let user = newVoiceState.member
 		let guildId = newVoiceState.guild.id
 		let channelId = newVoiceState.channelID as string
+		if(channelId === newVoiceState.guild.afkChannelID) return
 		let textChannelId = await this.mongoConnector.textChannelRepository.getId(guildId, channelId)
 		let textChannel = this.resolve(newVoiceState, textChannelId)
 
