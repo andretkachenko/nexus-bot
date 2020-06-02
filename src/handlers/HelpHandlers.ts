@@ -21,7 +21,8 @@ export class HelpHandlers {
                 \`\`\`
                 ${this.config.prefix}health - check if bot is up and running
                 ${this.config.prefix}addintro - add info that should be shown in the linked text channel. write ${this.config.prefix}help addintro to see details
-                ${this.config.prefix}changeintro - replace info that should be shown in the linked text channel with the new parameters. write ${this.config.prefix}help changeintro to see details
+                ${this.config.prefix}changeintro - replace info that should be shown in the linked text channel with the new parameters. write ${this.config.prefix}help changeintro to see details                
+                ${this.config.prefix}about - get info about bot
                 
                 Bot lacks a feature? You can suggest it via https://github.com/andretkachenko/illuminati-bot/issues\`\`\`
                 `)
