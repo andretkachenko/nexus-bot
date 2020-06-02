@@ -6,7 +6,9 @@ History of the text channel is cleared each time all users leave the voice chann
 Additionally, you can add intro descriptions to these linked text channels, which will appear any time it is created or cleared.  
 
 ## Table of Contents
+- [Illuminati-bot](#illuminati-bot)
 - [Existing commands](#existing-commands)
+- [Want to use at your server?](#want-to-use-at-your-server)
 - [Known issues](#known-issues)
   * [If you found a bug](#if-you-found-a-bug)
   * [Need any adjustments?](#need-any-adjustments)
@@ -26,6 +28,10 @@ List of available commands:
 ```
 
 *You can change command prefix ('!' by default) in your .env (PREFIX=! replace with PREFIX=your-sign')*
+
+## Want to use at your server?
+Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage. You can use it via this link - https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=8&scope=bot
+In case bot will be shut down or set to be invite-only in future, you can deploy it yourself using [Deployment manual](#deployment-manual).
 
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels.  

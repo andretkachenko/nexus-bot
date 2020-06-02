@@ -54,18 +54,19 @@ export class EventRegistry {
 
     private registerReadyHandler() {
         !
-        this.client.once(ClientEvent.Ready, () => {
-            this.logger.introduce(this.client, this.config);
-        });
+            this.client.once(ClientEvent.Ready, () => {
+                this.logger.introduce(this.client, this.config);
+            });
     }
 
     private registerMessageHandler() {
         this.client.on(ClientEvent.Message, (message: Message) => {
+            this.healthCheckHandlers.handleHealthCheck(message)
+            this.helpHandlers.handleHelpCall(message)
+
             if (this.hasAdminPermission(message)) {
-                this.healthCheckHandlers.handleHealthCheck(message)
                 this.introMessageHandlers.registerIntroMessage(message)
                 this.introMessageHandlers.updateIntroMessage(message)
-                this.helpHandlers.handleHelpCall(message)
             }
         })
     }
