@@ -30,7 +30,8 @@ List of available commands:
 *You can change command prefix ('!' by default) in your .env (PREFIX=! replace with PREFIX=your-sign')*
 
 ## Want to use at your server?
-Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage. You can use it via this link - https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=8&scope=bot
+Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage.  
+You can use it via this link - https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=8&scope=bot  
 In case bot will be shut down or set to be invite-only in future, you can deploy it yourself using [Deployment manual](#deployment-manual).
 
 ## Known issues
