@@ -2,5 +2,6 @@ export enum BotCommand {
     Help = "help",
     Health = "health",
     AddIntro = "addintro",
-    ChangeIntro = "changeintro"
+    ChangeIntro = "changeintro",
+    About = "about"
 }
