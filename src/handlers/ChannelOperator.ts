@@ -118,9 +118,9 @@ export class ChannelOperator {
 		if (voiceChannel !== null) {
 			let intro = await this.mongoConnector.introRepository.get(voiceChannel.guild.id, voiceChannel.id)
 
-			if (intro?.Description !== undefined) textChannel.send(intro.Description)
-			if (intro?.ImageUrl !== undefined) textChannel.send(intro.ImageUrl)
-			if (intro?.AdditionalUrl !== undefined) textChannel.send(intro.AdditionalUrl)
+			if (this.isNotNullOrEmpty(intro?.Description)) textChannel.send(intro?.Description)
+			if (this.isNotNullOrEmpty(intro?.ImageUrl)) textChannel.send(intro?.ImageUrl)
+			if (this.isNotNullOrEmpty(intro?.AdditionalUrl)) textChannel.send(intro?.AdditionalUrl)
 		}
 	}
 
@@ -147,5 +147,9 @@ export class ChannelOperator {
 			.catch(this.logger.logError)
 
 		return channelCreationPromise
+	}
+
+	private isNotNullOrEmpty(target: string | undefined | null): boolean {
+		return target !== undefined && target !== null && target !== ''
 	}
 }
