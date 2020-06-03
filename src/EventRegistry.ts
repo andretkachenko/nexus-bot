@@ -1,4 +1,4 @@
-import { Client, Message } from "discord.js"
+import { Client, Message, PartialMessage } from "discord.js"
 import { Logger } from "./handlers/Logger"
 import { HealthCheckHandlers } from "./handlers/HealthCheckHandlers"
 import { ChannelOperator } from "./handlers/ChannelOperator"
@@ -38,6 +38,7 @@ export class EventRegistry {
 
         // => Main worker handlers
         this.registerMessageHandler()
+        this.registerMessageUpdateHandler()
         this.registerVoiceUpdateHandler()
 
         // => Bot error and warn handlers
@@ -61,13 +62,13 @@ export class EventRegistry {
 
     private registerMessageHandler() {
         this.client.on(ClientEvent.Message, (message: Message) => {
-            this.healthCheckHandlers.handleHealthCheck(message)
-            this.helpHandlers.handleHelpCall(message)
+            this.configCommandHandlers(message)
+        })
+    }
 
-            if (this.hasAdminPermission(message)) {
-                this.introMessageHandlers.registerIntroMessage(message)
-                this.introMessageHandlers.updateIntroMessage(message)
-            }
+    private registerMessageUpdateHandler() {
+        this.client.on(ClientEvent.MessageUpdate, (oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage) => {
+            if((newMessage as Message).type) this.configCommandHandlers(newMessage as Message)
         })
     }
 
@@ -101,7 +102,21 @@ export class EventRegistry {
         })
     }
 
+    private configCommandHandlers(message: Message) {
+        this.healthCheckHandlers.handleHealthCheck(message)
+        this.helpHandlers.handleHelpCall(message)
+
+        if (this.hasAdminPermission(message) && this.authorNotBot(message)) {
+            this.introMessageHandlers.registerIntroMessage(message)
+            this.introMessageHandlers.updateIntroMessage(message)
+        }
+    }
+
     private hasAdminPermission(message: Message): boolean {
         return message.member !== null && message.member.hasPermission("ADMINISTRATOR")
+    }
+
+    private authorNotBot(message: Message): boolean {
+        return message.author != null && !message.author.bot
     }
 }

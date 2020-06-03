@@ -12,6 +12,7 @@ export class Config {
     introCollectionName: string
     textChannelCollectionName: string
     textCategoryCollectionName: string
+    img: string
 
     constructor() {
         dotenv.config()
@@ -26,5 +27,6 @@ export class Config {
         this.introCollectionName = process.env.MONGO_INTRO_COLLECTION as string
         this.textChannelCollectionName = process.env.MONGO_TXT_COLLECTION as string
         this.textCategoryCollectionName = process.env.MONGO_CATEGORY_COLLECTION as string
+        this.img = process.env.IMG as string
     }
 }

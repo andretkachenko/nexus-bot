@@ -12,7 +12,7 @@ export class HealthCheckHandlers {
 
     public handleHealthCheck(message: Message) {
         // => Prevent message from the bot
-        if (this.client.user != undefined && message.author.id !== this.client.user.id) {
+        if (this.client.user != undefined && message.author !== null && message.author.id !== this.client.user.id) {
             // => Test command
             if (message.content === this.config.prefix + 'health') {
                 message.reply(`I am ready to serve, sir.`)
