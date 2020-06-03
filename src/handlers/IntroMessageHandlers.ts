@@ -5,9 +5,6 @@ import { MongoConnector } from "../db/MongoConnector";
 import { Config } from "../config";
 
 export class IntroMessageHandlers {
-    private readonly wrongChannelType = "wrong-channel-type";
-    private readonly faultyGuild = "faulty-guild";
-
     private mongoConnector: MongoConnector
     private client: Client
     private config: Config
