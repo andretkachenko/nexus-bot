@@ -9,7 +9,6 @@
     "@types/debug": "^4.1.5",
     "@types/node": "^14.0.1",
     "@types/ws": "^7.2.4",
-    "@types/yamljs": "^0.2.31",
     "@types/mongodb": "^3.5.18",
     "debug": "^4.1.1",
     "discord.js": "^12.2.0",
@@ -20,8 +19,7 @@
     "tslint": "^6.1.2",
     "tslint-eslint-rules": "^5.4.0",
     "typescript": "^3.9.2",
-    "ws": "^7.3.0",
-    "yamljs": "^0.3.0"
+    "ws": "^7.3.0"
   },
   "scripts": {
     "debug": "node .",

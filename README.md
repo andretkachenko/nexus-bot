@@ -2,12 +2,10 @@
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 Discord has separation into text and voice channels, with no option to make combined.  
 The purpose of this bot is to create text channel, which is visible only to those who are connected to the linked voice channel.  
-History of the text channel is cleared each time all users leave the voice channel.  
-Additionally, you can add intro descriptions to these linked text channels, which will appear any time it is created or cleared.  
+Each time the last user leaves the voice channel, all non-pinned messages in linked text channel will be deleted. 
 
 ## Table of Contents
 - [Illuminati-bot](#illuminati-bot)
-- [Existing commands](#existing-commands)
 - [Want to use at your server?](#want-to-use-at-your-server)
 - [Known issues](#known-issues)
   * [If you found a bug](#if-you-found-a-bug)
@@ -17,17 +15,6 @@ Additionally, you can add intro descriptions to these linked text channels, whic
   * [Set up Discord bot account](#set-up-discord-bot-account)
   * [Set up MongoDB Atlas](#set-up-mongodb-atlas)
   * [Set up Heroku](#set-up-heroku)
-
-## Existing commands
-List of available commands:
-```
-!help - show list of all commands in text channel
-!health - check if the bot is up and running
-!addintro - add info that should be shown in the linked text channel. write !help addintro to see details
-!changeintro - replace info that should be shown in the linked text channel with the new parameters. write !help changeintro to see details
-```
-
-*You can change command prefix ('!' by default) in your .env (PREFIX=! replace with PREFIX=your-sign')*
 
 ## Want to use at your server?
 Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage.  
@@ -83,5 +70,5 @@ This bot was deployed by me using Heroku and MongoDB Atlas.
 5. Add app to staging/production 
 6. Open app
 7. Go to the Settings tab
-8. In Config Vars section, insert all configurations from .env file (except NODE_ENV, this one is provided by default)
+8. In Config Vars section, insert all configurations from .env file
 9. Go to Deploy tab and ensure Automatic deploy is enabled for master branch

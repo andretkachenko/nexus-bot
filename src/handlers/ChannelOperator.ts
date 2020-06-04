@@ -1,6 +1,5 @@
 import { VoiceState, TextChannel, GuildMember, Collection, Message, VoiceChannel, Guild, CategoryChannel } from "discord.js";
 import { ChannelType } from "../enums/ChannelType"
-import { EnvType } from "../enums/EnvType";
 import { MongoConnector } from "../db/MongoConnector";
 import { TextChannelMap } from "../entities/TextChannelMap";
 import { Config } from "../config";
@@ -11,8 +10,6 @@ export class ChannelOperator {
 	private mongoConnector: MongoConnector
 	private config: Config
 	private logger: Logger
-
-	private readonly onDebug = process.env.NODE_ENV === EnvType.Debug;
 
 	constructor(mongoConnector: MongoConnector, config: Config, logger: Logger) {
 		this.mongoConnector = mongoConnector
@@ -30,9 +27,9 @@ export class ChannelOperator {
 
 		if (textChannel !== null) {
 			this.showHideTextChannel(textChannel, user, true)
-			if (this.onDebug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
 		}
 		else {
+			if (textChannelId !== null && textChannelId !== undefined && textChannelId !== '') await this.mongoConnector.textChannelRepository.delete(guildId, channelId)
 			this.createTextChannel(newVoiceState)
 		}
 	}
@@ -47,11 +44,9 @@ export class ChannelOperator {
 			let textChannel = this.resolve(oldVoiceState, textChannelId)
 			this.showHideTextChannel(textChannel, user, false)
 
-			if (this.onDebug) textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`) // test purposes only
-
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
-				this.clearTextChannel(textChannel, voiceChannel)
+				this.deleteNotPinnedMessages(textChannel, voiceChannel)
 			}
 		}
 	}
@@ -73,20 +68,12 @@ export class ChannelOperator {
 				.then(ch => {
 					ch.overwritePermissions([
 						{
-							id: ch.guild.id,
-							deny: ['VIEW_CHANNEL'],
-						},
-						{
 							id: user !== null ? user.id : "undefined",
 							allow: ['VIEW_CHANNEL'],
 						},
 					]);
 					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
 					this.mongoConnector.textChannelRepository.add(textChannelMap)
-					this.greet(ch, voiceChannel)
-
-
-					if (this.onDebug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
 				});
 		}
 	}
@@ -95,33 +82,19 @@ export class ChannelOperator {
 		return voiceState.guild.channels.resolve(id) as TextChannel
 	}
 
-	private resolveUsername(user: GuildMember | null): string {
-		return (user?.nickname !== undefined ? user?.nickname : user?.displayName) as string
-	}
-
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
 		if (user !== null && textChannel !== null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 	}
 
-	private async clearTextChannel(textChannel: TextChannel, voiceChannel: VoiceChannel) {
+	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannel: VoiceChannel) {
 		let fetched: Collection<string, Message>;
+		let notPinned: Collection<string, Message>;
 		do {
 			fetched = await textChannel.messages.fetch({ limit: 100 });
-			textChannel.bulkDelete(fetched);
+			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned);
+			await textChannel.bulkDelete(notPinned);
 		}
 		while (fetched.size >= 2)
-		if (this.onDebug) textChannel.send("all messages deleted")
-		this.greet(textChannel, voiceChannel)
-	}
-
-	private async greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
-		if (voiceChannel !== null) {
-			let intro = await this.mongoConnector.introRepository.get(voiceChannel.guild.id, voiceChannel.id)
-
-			if (this.isNotNullOrEmpty(intro?.Description)) textChannel.send(intro?.Description)
-			if (this.isNotNullOrEmpty(intro?.ImageUrl)) textChannel.send(intro?.ImageUrl)
-			if (this.isNotNullOrEmpty(intro?.AdditionalUrl)) textChannel.send(intro?.AdditionalUrl)
-		}
 	}
 
 	private async resolveTextCategory(guild: Guild): Promise<string> {
@@ -147,9 +120,5 @@ export class ChannelOperator {
 			.catch(this.logger.logError)
 
 		return channelCreationPromise
-	}
-
-	private isNotNullOrEmpty(target: string | undefined | null): boolean {
-		return target !== undefined && target !== null && target !== ''
 	}
 }

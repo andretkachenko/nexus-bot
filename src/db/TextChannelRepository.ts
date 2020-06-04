@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, DeleteWriteOpResultObject } from "mongodb";
 import { Config } from "../config";
 import { TextChannelMap } from "../entities/TextChannelMap";
 
@@ -30,28 +30,40 @@ export class TextChannelRepository {
             },
         });
         return aggregation.toArray()
-        .then(textChannelMaps => {
-            let textMap = textChannelMaps[0];
-            if(textMap !== undefined) textChannelId = textMap.textChannelId
-            return textChannelId
+            .then(textChannelMaps => {
+                let textMap = textChannelMaps[0];
+                if (textMap !== undefined) textChannelId = textMap.textChannelId
+                return textChannelId
+            })
+    }
+
+    public async add(textChannelMap: TextChannelMap): Promise<boolean> {
+        let result = false
+        let db = this.client.db(this.dbName)
+        let textChannels = db.collection(this.textChannelCollectionName)
+        return textChannels.insertOne(textChannelMap)
+        .then((insertResult) => {
+            if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not inserted")
+            else {
+                console.log("document inserted")
+                result = true
+            }
+            return result
         })
     }
 
-    public add(textChannelMap: TextChannelMap) {
+    public async delete(guildId: string, voiceChannelId: string): Promise<boolean> {
+        let result = false
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textChannelCollectionName)
-        textChannels.insertOne(textChannelMap, (err) => {
-            if (err) console.log(err)
-            console.log("document inserted")
-        })
-    }
-
-    public delete(guildId: string, voiceChannelId: string) {
-        let db = this.client.db(this.dbName)
-        let textChannels = db.collection(this.textChannelCollectionName)
-        textChannels.deleteOne({ GuildId: guildId, ChannelId: voiceChannelId }, (err) => {
-            if (err) console.log(err)
-            console.log("document deleted")
-        })
+        return textChannels.deleteOne({ GuildId: guildId, ChannelId: voiceChannelId })
+            .then((deleteResult) => {
+                if (deleteResult.result.ok !== 1) console.log("command not executed correctly: document not deleted")
+                else {
+                    console.log("document deleted")
+                    result = true
+                }
+                return result
+            })
     }
 }
