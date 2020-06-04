@@ -83,5 +83,5 @@ This bot was deployed by me using Heroku and MongoDB Atlas.
 5. Add app to staging/production 
 6. Open app
 7. Go to the Settings tab
-8. In Config Vars section, insert all configurations from .env file (except NODE_ENV, this one is provided by default)
+8. In Config Vars section, insert all configurations from .env file
 9. Go to Deploy tab and ensure Automatic deploy is enabled for master branch

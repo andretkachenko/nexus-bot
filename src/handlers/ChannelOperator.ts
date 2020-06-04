@@ -1,6 +1,5 @@
 import { VoiceState, TextChannel, GuildMember, Collection, Message, VoiceChannel, Guild, CategoryChannel } from "discord.js";
 import { ChannelType } from "../enums/ChannelType"
-import { EnvType } from "../enums/EnvType";
 import { MongoConnector } from "../db/MongoConnector";
 import { TextChannelMap } from "../entities/TextChannelMap";
 import { Config } from "../config";
@@ -11,8 +10,6 @@ export class ChannelOperator {
 	private mongoConnector: MongoConnector
 	private config: Config
 	private logger: Logger
-
-	private readonly onDebug = process.env.NODE_ENV === EnvType.Debug;
 
 	constructor(mongoConnector: MongoConnector, config: Config, logger: Logger) {
 		this.mongoConnector = mongoConnector
@@ -30,7 +27,6 @@ export class ChannelOperator {
 
 		if (textChannel !== null) {
 			this.showHideTextChannel(textChannel, user, true)
-			if (this.onDebug) textChannel?.send(`${this.resolveUsername(user)} joined channel ${textChannel.name}`) // test purposes only
 		}
 		else {
 			this.createTextChannel(newVoiceState)
@@ -46,8 +42,6 @@ export class ChannelOperator {
 		if (textChannelId !== undefined) {
 			let textChannel = this.resolve(oldVoiceState, textChannelId)
 			this.showHideTextChannel(textChannel, user, false)
-
-			if (this.onDebug) textChannel.send(`${this.resolveUsername(user)} has left channel ${textChannel.name}`) // test purposes only
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
@@ -73,10 +67,6 @@ export class ChannelOperator {
 				.then(ch => {
 					ch.overwritePermissions([
 						{
-							id: ch.guild.id,
-							deny: ['VIEW_CHANNEL'],
-						},
-						{
 							id: user !== null ? user.id : "undefined",
 							allow: ['VIEW_CHANNEL'],
 						},
@@ -84,19 +74,12 @@ export class ChannelOperator {
 					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
 					this.mongoConnector.textChannelRepository.add(textChannelMap)
 					this.greet(ch, voiceChannel)
-
-
-					if (this.onDebug) ch.send(`channel created for ${this.resolveUsername(user)}`); // test purposes only
 				});
 		}
 	}
 
 	private resolve(voiceState: VoiceState, id: string): TextChannel {
 		return voiceState.guild.channels.resolve(id) as TextChannel
-	}
-
-	private resolveUsername(user: GuildMember | null): string {
-		return (user?.nickname !== undefined ? user?.nickname : user?.displayName) as string
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
@@ -110,7 +93,6 @@ export class ChannelOperator {
 			textChannel.bulkDelete(fetched);
 		}
 		while (fetched.size >= 2)
-		if (this.onDebug) textChannel.send("all messages deleted")
 		this.greet(textChannel, voiceChannel)
 	}
 
