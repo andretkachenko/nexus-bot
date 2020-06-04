@@ -1,12 +1,10 @@
 import { Client, Message, PartialMessage } from "discord.js"
 import { Logger } from "./handlers/Logger"
-import { HealthCheckHandlers } from "./handlers/HealthCheckHandlers"
 import { ChannelOperator } from "./handlers/ChannelOperator"
 import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
-import { IntroMessageHandlers } from "./handlers/IntroMessageHandlers"
 import { Config } from "./config"
-import { HelpHandlers } from "./handlers/HelpHandlers"
+import { InfoHandlers } from "./handlers/InfoHandlers"
 import { MongoConnector } from "./db/MongoConnector"
 
 export class EventRegistry {
@@ -14,10 +12,8 @@ export class EventRegistry {
     private config: Config
 
     private logger: Logger
-    private healthCheckHandlers: HealthCheckHandlers
     private channelOperator: ChannelOperator
-    private introMessageHandlers: IntroMessageHandlers
-    private helpHandlers: HelpHandlers
+    private infoHandlers: InfoHandlers
 
     constructor(client: Client, config: Config) {
         this.client = client
@@ -25,11 +21,9 @@ export class EventRegistry {
 
         let mongoConnector = new MongoConnector(config)
 
-        this.healthCheckHandlers = new HealthCheckHandlers(client, config)
         this.logger = new Logger()
-        this.introMessageHandlers = new IntroMessageHandlers(client, mongoConnector, config)
         this.channelOperator = new ChannelOperator(mongoConnector, config, this.logger)
-        this.helpHandlers = new HelpHandlers(client, config)
+        this.infoHandlers = new InfoHandlers(config)
     }
 
     public registerEvents() {
@@ -103,20 +97,6 @@ export class EventRegistry {
     }
 
     private configCommandHandlers(message: Message) {
-        this.healthCheckHandlers.handleHealthCheck(message)
-        this.helpHandlers.handleHelpCall(message)
-
-        if (this.hasAdminPermission(message) && this.authorNotBot(message)) {
-            this.introMessageHandlers.registerIntroMessage(message)
-            this.introMessageHandlers.updateIntroMessage(message)
-        }
-    }
-
-    private hasAdminPermission(message: Message): boolean {
-        return message.member !== null && message.member.hasPermission("ADMINISTRATOR")
-    }
-
-    private authorNotBot(message: Message): boolean {
-        return message.author != null && !message.author.bot
+        this.infoHandlers.handleHelpCall(message)
     }
 }

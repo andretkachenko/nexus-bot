@@ -1,14 +1,11 @@
 import { Config } from '../config'
 import { MongoClient } from 'mongodb'
-import { IntroMap } from '../entities/IntroMap';
 import { TextChannelMap } from '../entities/TextChannelMap';
-import { IntroRepository } from './IntroRepository';
 import { TextChannelRepository } from './TextChannelRepository';
 import { TextCategoryRepository } from './TextCategoryRepository';
 
 export class MongoConnector {
     private client: MongoClient
-    public introRepository: IntroRepository
     public textChannelRepository: TextChannelRepository
     public textCategoryRepository: TextCategoryRepository
 
@@ -23,7 +20,6 @@ export class MongoConnector {
             }
         })
 
-        this.introRepository = new IntroRepository(this.client, config)
         this.textChannelRepository = new TextChannelRepository(this.client, config)
         this.textCategoryRepository = new TextCategoryRepository(this.client, config)
     }

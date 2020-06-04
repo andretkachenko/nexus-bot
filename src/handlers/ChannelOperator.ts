@@ -29,6 +29,7 @@ export class ChannelOperator {
 			this.showHideTextChannel(textChannel, user, true)
 		}
 		else {
+			if (textChannelId !== null && textChannelId !== undefined && textChannelId !== '') await this.mongoConnector.textChannelRepository.delete(guildId, channelId)
 			this.createTextChannel(newVoiceState)
 		}
 	}
@@ -45,7 +46,7 @@ export class ChannelOperator {
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
-				this.clearTextChannel(textChannel, voiceChannel)
+				this.deleteNotPinnedMessages(textChannel, voiceChannel)
 			}
 		}
 	}
@@ -73,7 +74,6 @@ export class ChannelOperator {
 					]);
 					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
 					this.mongoConnector.textChannelRepository.add(textChannelMap)
-					this.greet(ch, voiceChannel)
 				});
 		}
 	}
@@ -86,24 +86,15 @@ export class ChannelOperator {
 		if (user !== null && textChannel !== null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 	}
 
-	private async clearTextChannel(textChannel: TextChannel, voiceChannel: VoiceChannel) {
+	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannel: VoiceChannel) {
 		let fetched: Collection<string, Message>;
+		let notPinned: Collection<string, Message>;
 		do {
 			fetched = await textChannel.messages.fetch({ limit: 100 });
-			textChannel.bulkDelete(fetched);
+			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned);
+			await textChannel.bulkDelete(notPinned);
 		}
 		while (fetched.size >= 2)
-		this.greet(textChannel, voiceChannel)
-	}
-
-	private async greet(textChannel: TextChannel, voiceChannel: VoiceChannel | null) {
-		if (voiceChannel !== null) {
-			let intro = await this.mongoConnector.introRepository.get(voiceChannel.guild.id, voiceChannel.id)
-
-			if (this.isNotNullOrEmpty(intro?.Description)) textChannel.send(intro?.Description)
-			if (this.isNotNullOrEmpty(intro?.ImageUrl)) textChannel.send(intro?.ImageUrl)
-			if (this.isNotNullOrEmpty(intro?.AdditionalUrl)) textChannel.send(intro?.AdditionalUrl)
-		}
 	}
 
 	private async resolveTextCategory(guild: Guild): Promise<string> {
@@ -129,9 +120,5 @@ export class ChannelOperator {
 			.catch(this.logger.logError)
 
 		return channelCreationPromise
-	}
-
-	private isNotNullOrEmpty(target: string | undefined | null): boolean {
-		return target !== undefined && target !== null && target !== ''
 	}
 }
