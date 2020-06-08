@@ -38,7 +38,7 @@ export class TextCategoryRepository {
     public delete(guildId: string) {
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textCategoryCollectionName)
-        textChannels.deleteOne({ GuildId: guildId }, (err) => {
+        textChannels.deleteOne({ guildId: guildId }, (err) => {
             if (err) console.log(err)
             console.log("document deleted")
         })
