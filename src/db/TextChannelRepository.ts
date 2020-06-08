@@ -56,7 +56,7 @@ export class TextChannelRepository {
         let result = false
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textChannelCollectionName)
-        return textChannels.deleteOne({ GuildId: guildId, ChannelId: voiceChannelId })
+        return textChannels.deleteOne({ guildId: guildId, channelId: voiceChannelId })
             .then((deleteResult) => {
                 if (deleteResult.result.ok !== 1) console.log("command not executed correctly: document not deleted")
                 else {
