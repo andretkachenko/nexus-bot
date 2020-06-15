@@ -42,11 +42,12 @@ export class ChannelOperator {
 
 		if (textChannelId !== undefined) {
 			let textChannel = this.resolve(oldVoiceState, textChannelId)
+			if (textChannel === undefined || textChannel === null) return
 			this.showHideTextChannel(textChannel, user, false)
 
 			let voiceChannel = oldVoiceState.channel
 			if (voiceChannel?.members.size !== undefined && voiceChannel?.members.size <= 0) {
-				this.deleteNotPinnedMessages(textChannel, voiceChannel)
+				this.deleteNotPinnedMessages(textChannel)
 			}
 		}
 	}
@@ -86,7 +87,7 @@ export class ChannelOperator {
 		if (user !== null && textChannel !== null) textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 	}
 
-	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannel: VoiceChannel) {
+	private async deleteNotPinnedMessages(textChannel: TextChannel) {
 		let fetched: Collection<string, Message>;
 		let notPinned: Collection<string, Message>;
 		do {
