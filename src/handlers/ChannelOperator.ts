@@ -93,9 +93,9 @@ export class ChannelOperator {
 		do {
 			fetched = await textChannel.messages.fetch({ limit: 100 });
 			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned);
-			await textChannel.bulkDelete(notPinned);
+			if(notPinned.size > 0) await textChannel.bulkDelete(notPinned);
 		}
-		while (fetched.size >= 2)
+		while (notPinned.size > 0)
 	}
 
 	private async resolveTextCategory(guild: Guild): Promise<string> {
