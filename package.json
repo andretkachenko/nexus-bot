@@ -1,6 +1,6 @@
 {
-  "name": "illuminati-bot",
-  "version": "1.0.0",
+  "name": "nexus-bot",
+  "version": "2.2.2",
   "description": "discord bot to map text channel to each voice channel",
   "main": "build/main.js",
   "author": "andretkachenko",
@@ -36,10 +36,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andretkachenko/illuminati-bot.git"
+    "url": "git+https://github.com/andretkachenko/nexus-bot.git"
   },
   "bugs": {
-    "url": "https://github.com/andretkachenko/illuminati-bot/issues"
+    "url": "https://github.com/andretkachenko/nexus-bot/issues"
   },
-  "homepage": "https://github.com/andretkachenko/illuminati-bot#readme"
+  "homepage": "https://github.com/andretkachenko/nexus-bot#readme"
 }

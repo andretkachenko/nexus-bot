@@ -77,7 +77,7 @@ export class EventRegistry {
 
     private registerProcessHandlers() {
         process.on(ProcessEvent.Exit, () => {
-            const msg = `[Illuminati-bot] Process exit.`
+            const msg = `[nexus-bot] Process exit.`
             this.logger.logEvent(msg)
             console.log(msg)
             this.client.destroy()
