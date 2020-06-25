@@ -21,17 +21,23 @@ export class TextCategoryRepository {
         return aggregation.toArray()
             .then(textCategoryMaps => {
                 let textCategoryMap = textCategoryMaps[0];
-                if (textCategoryMap !== undefined) textCategoryId = textCategoryMap.textCategoryId
+                if (textCategoryMap) textCategoryId = textCategoryMap.textCategoryId
                 return textCategoryId
             })
     }
 
-    public add(textCategoryMap: TextCategoryMap) {
+    public async add(textCategoryMap: TextCategoryMap): Promise<string> {
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textCategoryCollectionName)
-        textChannels.insertOne(textCategoryMap, (err) => {
-            if (err) console.log(err)
-            console.log("document inserted")
+        return textChannels.insertOne(textCategoryMap)
+        .then((insertResult) => {
+            let id = ""
+            if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not inserted")
+            else {
+                console.log("document inserted")
+                id = textCategoryMap.textCategoryId
+            }
+            return id
         })
     }
 

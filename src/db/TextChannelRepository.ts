@@ -32,7 +32,7 @@ export class TextChannelRepository {
         return aggregation.toArray()
             .then(textChannelMaps => {
                 let textMap = textChannelMaps[0];
-                if (textMap !== undefined) textChannelId = textMap.textChannelId
+                if (textMap) textChannelId = textMap.textChannelId
                 return textChannelId
             })
     }
@@ -56,7 +56,7 @@ export class TextChannelRepository {
         let result = false
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textChannelCollectionName)
-        return textChannels.deleteOne({ guildId: guildId, channelId: voiceChannelId })
+        return textChannels.deleteOne({ guildId: guildId, voiceChannelId: voiceChannelId })
             .then((deleteResult) => {
                 if (deleteResult.result.ok !== 1) console.log("command not executed correctly: document not deleted")
                 else {

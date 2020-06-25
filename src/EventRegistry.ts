@@ -69,8 +69,8 @@ export class EventRegistry {
     private registerVoiceUpdateHandler() {
         this.client.on(ClientEvent.VoiceStateUpdate, (oldVoiceState, newVoiceState) => {
             if (newVoiceState.channelID !== oldVoiceState.channelID) {
-                if (newVoiceState.channelID !== undefined) this.channelOperator.handleChannelJoin(newVoiceState)
-                if (oldVoiceState.channelID !== undefined) this.channelOperator.handleChannelLeave(oldVoiceState)
+                if (newVoiceState.channelID) this.channelOperator.handleChannelJoin(newVoiceState)
+                if (oldVoiceState.channelID) this.channelOperator.handleChannelLeave(oldVoiceState)
             }
         });
     }
