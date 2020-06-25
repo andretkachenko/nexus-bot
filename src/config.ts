@@ -9,7 +9,6 @@ export class Config {
     mongoPassword: string
     mongoCluster: string
     mongoDb: string
-    introCollectionName: string
     textChannelCollectionName: string
     textCategoryCollectionName: string
     img: string
@@ -24,7 +23,6 @@ export class Config {
         this.mongoPassword = process.env.MONGO_PWD as string
         this.mongoCluster = process.env.MONGO_CLUSTER as string
         this.mongoDb=process.env.MONGO_DB as string
-        this.introCollectionName = process.env.MONGO_INTRO_COLLECTION as string
         this.textChannelCollectionName = process.env.MONGO_TXT_COLLECTION as string
         this.textCategoryCollectionName = process.env.MONGO_CATEGORY_COLLECTION as string
         this.img = process.env.IMG as string
