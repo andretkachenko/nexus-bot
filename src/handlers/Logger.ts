@@ -9,7 +9,7 @@ export class Logger {
     public logWarn = debug('bot:warn')
 
 	public introduce(client: Client, config: Config) {
-		this.logEvent(`Illuminati-bot Connected.`)
+		this.logEvent(`nexus-bot Connected.`)
 		this.logEvent(`Logged in as ${client.user ? client.user.tag : "undefined"}`)
 		if(client.user) client.user.setActivity({ "name": `${config.prefix}help`, "type": "LISTENING" })
 	}

@@ -1,11 +1,11 @@
-# Illuminati-bot
+# nexus-bot
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 Discord has separation into text and voice channels, with no option to make combined.  
 The purpose of this bot is to create text channel, which is visible only to those who are connected to the linked voice channel.  
 Each time the last user leaves the voice channel, all non-pinned messages in linked text channel will be deleted. 
 
 ## Table of Contents
-- [Illuminati-bot](#illuminati-bot)
+- [nexus-bot](#nexus-bot)
 - [Want to use at your server?](#want-to-use-at-your-server)
 - [Known issues](#known-issues)
   * [If you found a bug](#if-you-found-a-bug)

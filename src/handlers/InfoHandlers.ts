@@ -21,10 +21,10 @@ export class InfoHandlers {
             .setTitle("Nexus Bot")
             .setDescription("Discord bot to link text channel to each voice channel.")
             .setColor("#0099ff")
-            .setAuthor('Nexus', this.config.img, 'https://github.com/andretkachenko/illuminati-bot')
+            .setAuthor('Nexus', this.config.img, 'https://github.com/andretkachenko/nexus-bot')
             .setThumbnail(this.config.img)
-            .addField("**Want to use it on your server?**", "Follow this link: https://github.com/andretkachenko/illuminati-bot#want-to-use-at-your-server")
-            .addField("**Any issues or missing feature?**", "You can suggest it via https://github.com/andretkachenko/illuminati-bot/issues")
+            .addField("**Want to use it on your server?**", "Follow this link: https://github.com/andretkachenko/nexus-bot#want-to-use-at-your-server")
+            .addField("**Any issues or missing feature?**", "You can suggest it via https://github.com/andretkachenko/nexus-bot/issues")
             .setFooter(`Nexus bot`);
         message.channel.send(embed)
     }
