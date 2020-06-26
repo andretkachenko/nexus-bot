@@ -46,7 +46,7 @@ export class ChannelOperator {
 			this.showHideTextChannel(textChannel, user, false)
 
 			let voiceChannel = oldVoiceState.channel
-			if (voiceChannel?.members.size && voiceChannel?.members.size <= 0) {
+			if (!voiceChannel?.members.size) {
 				this.deleteNotPinnedMessages(textChannel)
 			}
 		}
