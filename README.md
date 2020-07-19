@@ -7,6 +7,7 @@ Each time the last user leaves the voice channel, all non-pinned messages in lin
 ## Table of Contents
 - [Nexus Bot](#nexus-bot)
 - [Want to use at your server?](#want-to-use-at-your-server)
+- [How to use](#how-to-use)
 - [Known issues](#known-issues)
   * [If you found a bug](#if-you-found-a-bug)
   * [Need any adjustments?](#need-any-adjustments)
@@ -20,6 +21,11 @@ Each time the last user leaves the voice channel, all non-pinned messages in lin
 Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage.  
 You can use it via this link - https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=8&scope=bot  
 In case bot will be shut down or set to be invite-only in future, you can deploy it yourself using [Deployment manual](#deployment-manual).
+
+## How to use
+You don't' need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.  
+Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.  
+Feel free to rename categories and text channels as you wish - it will not affect bot.  
 
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels.  
