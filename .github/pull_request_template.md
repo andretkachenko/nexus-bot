@@ -30,7 +30,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] I am requesting to **pull a topic/feature/bugfix branch** (right side).
 - [ ] I have made a pull request against the **develop branch** (left side). 
 - [ ] The branch was started off *develop branch*.
-- [ ] All commits' message styles matches the requested structure.
+- [ ] All commits' message styles match the requested structure.
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
