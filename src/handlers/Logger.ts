@@ -11,6 +11,6 @@ export class Logger {
 	public introduce(client: Client, config: Config) {
 		this.logEvent(`nexus-bot Connected.`)
 		this.logEvent(`Logged in as ${client.user ? client.user.tag : "undefined"}`)
-		if(client.user) client.user.setActivity({ "name": `${config.prefix}help`, "type": "LISTENING" })
+		if(client.user) client.user.setActivity({ "name": `${config.prefix}help on ${client.guilds.cache.size} servers`, "type": "LISTENING" })
 	}
 }
