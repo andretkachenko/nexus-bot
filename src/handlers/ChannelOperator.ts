@@ -1,20 +1,23 @@
-import { VoiceState, TextChannel, GuildMember, Collection, Message, Guild, CategoryChannel, GuildCreateChannelOptions } from "discord.js";
+import { VoiceState, TextChannel, GuildMember, Collection, Message, Guild, CategoryChannel, GuildCreateChannelOptions, Client } from "discord.js";
 import { ChannelType } from "../enums/ChannelType"
 import { MongoConnector } from "../db/MongoConnector";
 import { TextChannelMap } from "../entities/TextChannelMap";
 import { Config } from "../config";
 import { Logger } from "./Logger";
 import { TextCategoryMap } from "../entities/TextCategoryMap";
+import { Permission } from "../enums/Permission";
 
 export class ChannelOperator {
+    private client: Client
 	private mongoConnector: MongoConnector
 	private config: Config
 	private logger: Logger
 
-	constructor(mongoConnector: MongoConnector, config: Config, logger: Logger) {
+	constructor(mongoConnector: MongoConnector, config: Config, logger: Logger, client: Client) {
 		this.mongoConnector = mongoConnector
 		this.config = config
 		this.logger = logger
+		this.client = client
 	}
 
 	public async handleChannelJoin(newVoiceState: VoiceState) {
@@ -60,7 +63,7 @@ export class ChannelOperator {
 		if (guild) {
 			let parentId = await this.resolveTextCategory(guild)
 			let options: GuildCreateChannelOptions = {
-				permissionOverwrites: [{ id: guild.id, deny: ['VIEW_CHANNEL'] }],
+				permissionOverwrites: [{ id: guild.id, deny: [Permission.VIEW_CHANNEL] }, {id: this.client.user ? this.client.user.id : "", allow: [Permission.VIEW_CHANNEL] }],
 				type: ChannelType.text,
 			}
 			if (parentId) options.parent = parentId as string
@@ -70,7 +73,7 @@ export class ChannelOperator {
 						ch.overwritePermissions([
 							{
 								id: user ? user.id : "undefined",
-								allow: ['VIEW_CHANNEL'],
+								allow: [Permission.VIEW_CHANNEL],
 							},
 						]);
 						let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
@@ -86,7 +89,7 @@ export class ChannelOperator {
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
 		if (user && textChannel) {
-			if (user.hasPermission("ADMINISTRATOR") || user.user.bot) return
+			if (user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot) return
 			textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 		}
 	}
