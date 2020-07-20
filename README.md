@@ -19,7 +19,7 @@ Each time the last user leaves the voice channel, all non-pinned messages in lin
 
 ## Want to use at your server?
 Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage.  
-You can use it via this link - https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=8&scope=bot  
+You can use it via this link - https://discord.com/oauth2/authorize?client_id=709876107213537351&permissions=268510224&scope=bot
 In case bot will be shut down or set to be invite-only in future, you can deploy it yourself using [Deployment manual](#deployment-manual).
 
 ## How to use
