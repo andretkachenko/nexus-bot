@@ -23,12 +23,14 @@ You can use it via this link - https://discord.com/api/oauth2/authorize?client_i
 In case bot will be shut down or set to be invite-only in future, you can deploy it yourself using [Deployment manual](#deployment-manual).
 
 ## How to use
-You don't' need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.  
+You don't need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.  
 Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.  
 Feel free to rename categories and text channels as you wish - it will not affect bot.  
+When the last user leaves the voice channel, messages in the linked text channel will be deleted.  
+If you don't want specific messages to be deleted - you can pin them, and they will remain.
 
 ## Known issues
-- Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels.  
+- Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  
 - Messages in the channel can be cached in the app, so the user can still see it even when it's cleared on the server. These messages will disappear after Discord app reboot. For now, I didn't see any solution to fix it - if you know any workaround, please post it in issues.
 
 ### If you found a bug

@@ -26,7 +26,9 @@ export class InfoHandlers {
             .addField("**How to use**",
             `You don't' need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.
             Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.
-            Feel free to rename categories and text channels as you wish - it will not affect bot.`)
+            Feel free to rename categories and text channels as you wish - it will not affect bot.
+            When the last user leaves the voice channel, messages in the linked text channel will be deleted.  
+            If you don't want specific messages to be deleted - you can pin them, and they will remain.`)
             .addField("**Want to use it on your server?**", "Follow this link: https://github.com/andretkachenko/nexus-bot#want-to-use-at-your-server")
             .addField("**Any issues or missing feature?**", "You can suggest it via https://github.com/andretkachenko/nexus-bot/issues")
             .setFooter(`Nexus bot`);

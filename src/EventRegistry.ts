@@ -22,7 +22,7 @@ export class EventRegistry {
         let mongoConnector = new MongoConnector(config)
 
         this.logger = new Logger()
-        this.channelOperator = new ChannelOperator(mongoConnector, config, this.logger)
+        this.channelOperator = new ChannelOperator(mongoConnector, config, this.logger, client)
         this.infoHandlers = new InfoHandlers(config)
     }
 
