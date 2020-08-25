@@ -1,5 +1,5 @@
 # Nexus Bot
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  [![Discord Bots](https://top.gg/api/widget/status/709876107213537351.svg?noavatar=true)](https://top.gg/bot/709876107213537351)  
 Discord has separation into text and voice channels, with no option to make combined.  
 The purpose of this bot is to create text channel, which is visible only to those who are connected to the linked voice channel.  
 Each time the last user leaves the voice channel, all non-pinned messages in linked text channel will be deleted. 
@@ -25,8 +25,8 @@ If you don't want specific messages to be deleted - you can pin them, and they w
 If you have any issue with the bot functionality, feel free to post an issue in this repo - for now, I am intended to maintain this app as long as I don't feel it is stable enough.
 
 ### Need any adjustments?
-If you feel some really cool feature is missing, or you want to make some minor tweaks just for your own quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.
-Please bear in mind: my intentions are to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
+If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
+Please bear in mind: I intend to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
 
 ## Environment setup
 1. Install NodeJS
