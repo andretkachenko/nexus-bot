@@ -1,31 +1,19 @@
 # Nexus Bot
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  [![Discord Bots](https://top.gg/api/widget/status/709876107213537351.svg?noavatar=true)](https://top.gg/bot/709876107213537351)  
 Discord has separation into text and voice channels, with no option to make combined.  
 The purpose of this bot is to create text channel, which is visible only to those who are connected to the linked voice channel.  
 Each time the last user leaves the voice channel, all non-pinned messages in linked text channel will be deleted. 
 
-## Table of Contents
-- [Nexus Bot](#nexus-bot)
-- [Want to use at your server?](#want-to-use-at-your-server)
-- [How to use](#how-to-use)
-- [Known issues](#known-issues)
-  * [If you found a bug](#if-you-found-a-bug)
-  * [Need any adjustments?](#need-any-adjustments)
-- [Environment setup](#environment-setup)
-- [Deployment manual](#deployment-manual)
-  * [Set up Discord bot account](#set-up-discord-bot-account)
-  * [Set up MongoDB Atlas](#set-up-mongodb-atlas)
-  * [Set up Heroku](#set-up-heroku)
-
 ## Want to use at your server?
-Currently the bot is deployed via Heroku and MongoDB Atlas for personal usage.  
-You can use it via this link - https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=8&scope=bot  
-In case bot will be shut down or set to be invite-only in future, you can deploy it yourself using [Deployment manual](#deployment-manual).
+[![Discord Bots](https://top.gg/api/widget/709876107213537351.svg)](https://top.gg/bot/709876107213537351)  
+You can use the bot via this [link](https://discord.com/oauth2/authorize?client_id=709876107213537351&permissions=268510224&scope=bot).
 
 ## How to use
 You don't need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.  
 Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.  
 Feel free to rename categories and text channels as you wish - it will not affect bot.  
+All linked text channels are initially created under the specific category, however, you can move them wherever you like, bot still will be able to process it.
+Linked channel is not created for the voice channel, marked as AFK.
 When the last user leaves the voice channel, messages in the linked text channel will be deleted.  
 If you don't want specific messages to be deleted - you can pin them, and they will remain.
 
@@ -37,7 +25,8 @@ If you don't want specific messages to be deleted - you can pin them, and they w
 If you have any issue with the bot functionality, feel free to post an issue in this repo - for now, I am intended to maintain this app as long as I don't feel it is stable enough.
 
 ### Need any adjustments?
-If you feel some really cool feature is missing, or you want to make some minor tweaks just for your own quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.
+If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
+Please bear in mind: I intend to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
 
 ## Environment setup
 1. Install NodeJS
@@ -46,37 +35,3 @@ If you feel some really cool feature is missing, or you want to make some minor 
 4. Configure .env (use .env.sample as a reference if needed)
 5. After any changes in code, in cmd call ```tsc```
 6. Start the app by using ```nodemon build/main.js``` or debug it with your IDE
-
-## Deployment manual
-This bot was deployed by me using Heroku and MongoDB Atlas.
-
-### Set up Discord bot account
-1. Go to Discord Developer Portal
-2. Click 'New Application', provide application name and click 'Create'
-3. In the menu on left, go to the 'Bot' tab
-4. Click 'Add Bot'
-5. Copy Token from the created bot and save it in .env as TOKEN
-
-### Set up MongoDB Atlas
-1. Create MongoDB Atlas account
-2. Add new Project
-3. Build a Cluster
-4. Choose a plan, region, cluster tier and cluster name
-5. When your cluster is deployed, click on 'Connections'
-6. Whitelist a connection IP address => Add a different IP Address => Add '0.0.0.0' to ensure Heroku is able to connect (Heroku uses dynamic IPs, so there's no way to whitelist just one IP)
-7. Create a MongoDB User => Provide Username (save it in .env as MONGO_NAME) and Password (type or use autogenerate button; save it in .env as MONGO_PWD)
-8. Click 'Choose connection method'
-9. Choose 'Connect your application'
-10. You'll be provided with a connection link. For example: ```mongodb+srv://<username>:<password>@cluster0-dxnlr.mongodb.net/test?retryWrites=true&w=majority```
-11. Save part after '@' sign in .env as MONGO_CLUSTER. In this case, ```MONGO_CLUSTER=cluster0-dxnlr.mongodb.net/test?retryWrites=true&w=majority```
-
-### Set up Heroku
-1. Create a Heroku account
-2. Create a New Pipeline
-3. Connect Pipeline to the Github repository
-4. Open pipeline
-5. Add app to staging/production 
-6. Open app
-7. Go to the Settings tab
-8. In Config Vars section, insert all configurations from .env file
-9. Go to Deploy tab and ensure Automatic deploy is enabled for master branch
