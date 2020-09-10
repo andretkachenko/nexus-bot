@@ -8,7 +8,7 @@ import { TextCategoryMap } from "../entities/TextCategoryMap";
 import { Permission } from "../enums/Permission";
 
 export class ChannelOperator {
-    private client: Client
+	private client: Client
 	private mongoConnector: MongoConnector
 	private config: Config
 	private logger: Logger
@@ -56,27 +56,25 @@ export class ChannelOperator {
 	}
 
 	private async createTextChannel(newVoiceState: VoiceState) {
-		let guild = newVoiceState.channel?.guild	
+		let guild = newVoiceState.channel?.guild
 
 		if (guild && guild.me?.permissions.has(Permission.MANAGE_CHANNELS) && guild.me?.permissions.has(Permission.MANAGE_ROLES)) {
 			let user = newVoiceState.member
 			let voiceChannel = newVoiceState.channel
-			let channelId = newVoiceState.channelID as string	
+			let channelId = newVoiceState.channelID as string
 			let parentId = await this.resolveTextCategory(guild)
 			let options: GuildCreateChannelOptions = {
-				permissionOverwrites: [{ id: guild.id, deny: [Permission.VIEW_CHANNEL] }, {id: this.client.user ? this.client.user.id : "", allow: [Permission.VIEW_CHANNEL] }],
+				permissionOverwrites: [
+					{ id: guild.id, deny: [Permission.VIEW_CHANNEL] },
+					{ id: this.client.user ? this.client.user.id : "", allow: [Permission.VIEW_CHANNEL] },
+					{ id: user ? user.id : "undefined", allow: [Permission.VIEW_CHANNEL] }
+				],
 				type: ChannelType.text,
 			}
 			if (parentId) options.parent = parentId as string
 			if (voiceChannel) {
 				newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', options)
 					.then(ch => {
-						ch.overwritePermissions([
-							{
-								id: user ? user.id : "undefined",
-								allow: [Permission.VIEW_CHANNEL],
-							},
-						]);
 						let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
 						this.mongoConnector.textChannelRepository.add(textChannelMap)
 					});
@@ -89,7 +87,7 @@ export class ChannelOperator {
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
-		if(!textChannel.guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return
+		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return
 
 		if (user && textChannel) {
 			if (user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot) return
@@ -98,7 +96,7 @@ export class ChannelOperator {
 	}
 
 	private async deleteNotPinnedMessages(textChannel: TextChannel) {
-		if(!textChannel.guild.me?.permissions.has(Permission.MANAGE_MESSAGES)) return
+		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_MESSAGES)) return
 
 		let fetched: Collection<string, Message>;
 		let notPinned: Collection<string, Message>;
@@ -119,7 +117,7 @@ export class ChannelOperator {
 	}
 
 	private async createCategory(guild: Guild): Promise<string> {
-		if(!guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return ''
+		if (!guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return ''
 
 		let channelCreationPromise = guild.channels.create(this.config.categoryName, {
 			type: ChannelType.category
