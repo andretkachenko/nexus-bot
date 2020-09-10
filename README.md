@@ -5,8 +5,7 @@ The purpose of this bot is to create text channel, which is visible only to thos
 Each time the last user leaves the voice channel, all non-pinned messages in linked text channel will be deleted. 
 
 ## Want to use at your server?
-[![Discord Bots](https://top.gg/api/widget/709876107213537351.svg)](https://top.gg/bot/709876107213537351)  
-You can use the bot via this [link](https://discord.com/oauth2/authorize?client_id=709876107213537351&permissions=268510224&scope=bot).
+[![Invite bot to your server](https://i.imgur.com/MgQZMpT.jpg)](https://discord.com/oauth2/authorize?client_id=709876107213537351&permissions=268510224&scope=bot)
 
 ## How to use
 You don't need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.  
@@ -27,6 +26,12 @@ If you have any issue with the bot functionality, feel free to post an issue in 
 ### Need any adjustments?
 If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
 Please bear in mind: I intend to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
+
+## If you like the bot
+Nexus bot was approved by the top.gg administrators (one of the biggest aggregator for the Discord bots and servers)
+If you feel the bot is worthy enough - you can vote for it at [its top.gg page](https://top.gg/bot/709876107213537351).
+You can do it every 12 hours. If you also want your server to be mentioned as one of the communities this bot empowers - make an issue [here](https://github.com/andretkachenko/nexus-bot/issues/new/choose) (only possible if you add the server to the top.gg).
+Voting isn't required, but always appreciated) I will be glad to know that my work helps people achieve what they want.
 
 ## Environment setup
 1. Install NodeJS
