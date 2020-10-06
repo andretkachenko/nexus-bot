@@ -6,6 +6,7 @@ import { ProcessEvent } from "./enums/ProcessEvent"
 import { Config } from "./config"
 import { InfoHandlers } from "./handlers/InfoHandlers"
 import { MongoConnector } from "./db/MongoConnector"
+import { ServerHandlers } from "./handlers/ServerHandlers"
 
 export class EventRegistry {
     private client: Client
@@ -14,6 +15,7 @@ export class EventRegistry {
     private logger: Logger
     private channelOperator: ChannelOperator
     private infoHandlers: InfoHandlers
+    private serverHandlers: ServerHandlers
 
     constructor(client: Client, config: Config) {
         this.client = client
@@ -24,6 +26,7 @@ export class EventRegistry {
         this.logger = new Logger()
         this.channelOperator = new ChannelOperator(mongoConnector, config, this.logger, client)
         this.infoHandlers = new InfoHandlers(config)
+        this.serverHandlers = new ServerHandlers(mongoConnector)
     }
 
     public registerEvents() {
@@ -34,6 +37,7 @@ export class EventRegistry {
         this.registerMessageHandler()
         this.registerMessageUpdateHandler()
         this.registerVoiceUpdateHandler()
+        this.registerKickHandler()
 
         // => Bot error and warn handlers
         this.client.on(ClientEvent.Error, this.logger.logError)
@@ -73,6 +77,12 @@ export class EventRegistry {
                 if (oldVoiceState.channelID) this.channelOperator.handleChannelLeave(oldVoiceState)
             }
         });
+    }
+
+    private registerKickHandler() {
+        this.client.on(ClientEvent.GuildDelete, guild => {
+            this.serverHandlers.handleBotKickedFromServer(guild)
+        })
     }
 
     private registerProcessHandlers() {
