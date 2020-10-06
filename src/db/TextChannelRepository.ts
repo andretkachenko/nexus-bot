@@ -37,6 +37,21 @@ export class TextChannelRepository {
             })
     }
 
+    public async deleteAllGuildChannels(guildId: string): Promise<boolean> {
+        let result = false
+        let db = this.client.db(this.dbName)
+        let textChannels = db.collection(this.textChannelCollectionName)
+        return textChannels.deleteMany({ guildId: guildId })
+            .then((deleteResult) => {
+                if (deleteResult.result.ok !== 1) console.log("command not executed correctly: documents not deleted")
+                else {
+                    console.log("documents deleted")
+                    result = true
+                }
+                return result
+            })
+    }
+
     public async add(textChannelMap: TextChannelMap): Promise<boolean> {
         let result = false
         let db = this.client.db(this.dbName)
