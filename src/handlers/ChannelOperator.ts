@@ -63,6 +63,7 @@ export class ChannelOperator {
 			let voiceChannel = newVoiceState.channel
 			let channelId = newVoiceState.channelID as string
 			let parentId = await this.resolveTextCategory(guild)
+			let categoryExists = newVoiceState.channel?.guild.channels.cache.find(c => c.id == parentId)
 			let options: GuildCreateChannelOptions = {
 				permissionOverwrites: [
 					{ id: guild.id, deny: [Permission.VIEW_CHANNEL] },
@@ -71,7 +72,7 @@ export class ChannelOperator {
 				],
 				type: ChannelType.text,
 			}
-			if (parentId) options.parent = parentId as string
+			if (parentId && categoryExists) options.parent = parentId as string
 			if (voiceChannel) {
 				newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', options)
 					.then(ch => {
@@ -110,6 +111,11 @@ export class ChannelOperator {
 
 	private async resolveTextCategory(guild: Guild): Promise<string> {
 		let textCategoryId = await this.mongoConnector.textCategoryRepository.getId(guild.id)
+		let categoryExists = guild.channels.cache.find(c => c.id == textCategoryId)
+		if(!categoryExists) {
+			this.mongoConnector.textCategoryRepository.delete(guild.id)
+			textCategoryId = ''
+		}
 		if (this.isNullOrEmpty(textCategoryId)) {
 			textCategoryId = await this.createCategory(guild)
 		}
