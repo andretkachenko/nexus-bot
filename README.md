@@ -19,7 +19,7 @@ If you don't want specific messages to be deleted - you can pin them, and they w
 ## Existing commands
 List of available commands:
 - `sudo help` - get info about bot and list of existing commands
-- `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message.
+- `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message. Requires user to have admin rights.
 
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  
@@ -31,12 +31,6 @@ If you have any issue with the bot functionality, feel free to post an issue in 
 ### Need any adjustments?
 If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
 Please bear in mind: I intend to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
-
-## If you like the bot
-Nexus bot was approved by the top.gg administrators (one of the biggest aggregator for the Discord bots and servers)
-If you feel the bot is worthy enough - you can vote for it at [its top.gg page](https://top.gg/bot/709876107213537351).
-You can do it every 12 hours. If you also want your server to be mentioned as one of the communities this bot empowers - make an issue [here](https://github.com/andretkachenko/nexus-bot/issues/new/choose) (only possible if you add the server to the top.gg).
-Voting isn't required, but always appreciated) I will be glad to know that my work helps people achieve what they want.
 
 ## Environment setup
 1. Install NodeJS
