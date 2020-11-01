@@ -16,6 +16,11 @@ Linked channel is not created for the voice channel, marked as AFK.
 When the last user leaves the voice channel, messages in the linked text channel will be deleted.  
 If you don't want specific messages to be deleted - you can pin them, and they will remain.
 
+## Existing commands
+List of available commands:
+- `sudo help` - get info about bot and list of existing commands
+- `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message.
+
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  
 - Messages in the channel can be cached in the app, so the user can still see it even when it's cleared on the server. These messages will disappear after Discord app reboot. For now, I didn't see any solution to fix it - if you know any workaround, please post it in issues.
