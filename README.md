@@ -19,7 +19,7 @@ If you don't want specific messages to be deleted - you can pin them, and they w
 ## Existing commands
 List of available commands:
 - `sudo help` - get info about bot and list of existing commands
-- `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message.
+- `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message. Requires user to have admin rights.
 
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  
