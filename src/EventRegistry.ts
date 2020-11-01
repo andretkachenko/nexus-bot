@@ -7,6 +7,7 @@ import { Config } from "./config"
 import { InfoHandlers } from "./handlers/InfoHandlers"
 import { MongoConnector } from "./db/MongoConnector"
 import { ServerHandlers } from "./handlers/ServerHandlers"
+import { TextHandlers } from "./handlers/TextHandlers"
 
 export class EventRegistry {
     private client: Client
@@ -15,6 +16,7 @@ export class EventRegistry {
     private logger: Logger
     private channelOperator: ChannelOperator
     private infoHandlers: InfoHandlers
+    private textHandlers: TextHandlers
     private serverHandlers: ServerHandlers
 
     constructor(client: Client, config: Config) {
@@ -26,6 +28,7 @@ export class EventRegistry {
         this.logger = new Logger()
         this.channelOperator = new ChannelOperator(mongoConnector, config, this.logger, client)
         this.infoHandlers = new InfoHandlers(config)
+        this.textHandlers = new TextHandlers(config)
         this.serverHandlers = new ServerHandlers(mongoConnector)
     }
 
@@ -107,6 +110,8 @@ export class EventRegistry {
     }
 
     private configCommandHandlers(message: Message) {
+        if(message.author.bot) return
         this.infoHandlers.handleHelpCall(message)
+        this.textHandlers.handleWriteCall(message)
     }
 }
