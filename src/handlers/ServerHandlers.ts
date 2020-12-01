@@ -9,7 +9,8 @@ export class ServerHandlers {
     }
 
     public async handleBotKickedFromServer(guild: Guild) {
-        this.mongoConnector.textCategoryRepository.delete(guild.id);
-        this.mongoConnector.textChannelRepository.deleteAllGuildChannels(guild.id);
+        this.mongoConnector.textCategoryRepository.delete(guild.id)
+        this.mongoConnector.textChannelRepository.deleteAllGuildChannels(guild.id)
+        this.mongoConnector.ignoredChannels.deleteAllGuildChannels(guild.id)
     }
 }
