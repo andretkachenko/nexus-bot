@@ -57,10 +57,13 @@ export class ChannelOperator {
 
 	private async createTextChannel(newVoiceState: VoiceState) {
 		let guild = newVoiceState.channel?.guild
+		let voiceChannel = newVoiceState.channel
+		if (!voiceChannel) return
+		let isIgnored = await this.mongoConnector.ignoredChannels.isIgnored(guild?.id as string, voiceChannel.id)
+		if (isIgnored) return;
 
 		if (guild && guild.me?.permissions.has(Permission.MANAGE_CHANNELS) && guild.me?.permissions.has(Permission.MANAGE_ROLES)) {
 			let user = newVoiceState.member
-			let voiceChannel = newVoiceState.channel
 			let channelId = newVoiceState.channelID as string
 			let parentId = await this.resolveTextCategory(guild)
 			let categoryExists = newVoiceState.channel?.guild.channels.cache.find(c => c.id == parentId)
@@ -73,13 +76,11 @@ export class ChannelOperator {
 				type: ChannelType.text,
 			}
 			if (parentId && categoryExists) options.parent = parentId as string
-			if (voiceChannel) {
-				newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', options)
-					.then(ch => {
-						let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
-						this.mongoConnector.textChannelRepository.add(textChannelMap)
-					});
-			}
+			newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', options)
+				.then(ch => {
+					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
+					this.mongoConnector.textChannelRepository.add(textChannelMap)
+				});
 		}
 	}
 
@@ -112,7 +113,7 @@ export class ChannelOperator {
 	private async resolveTextCategory(guild: Guild): Promise<string> {
 		let textCategoryId = await this.mongoConnector.textCategoryRepository.getId(guild.id)
 		let categoryExists = guild.channels.cache.find(c => c.id == textCategoryId)
-		if(!categoryExists) {
+		if (!categoryExists) {
 			this.mongoConnector.textCategoryRepository.delete(guild.id)
 			textCategoryId = ''
 		}

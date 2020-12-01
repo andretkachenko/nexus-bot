@@ -10,15 +10,10 @@ export class TextHandlers {
     }
 
     public handleWriteCall(message: Message) {
-        if(!this.hasAdminPermission(message)) return
         let writeCmd = this.config.prefix + BotCommand.Write
         if (message.content.includes(writeCmd)) {      
             message.channel.send(message.content.substring(writeCmd.length), message.attachments.array())
             return
         }
-    }
-
-    private hasAdminPermission(message: Message): boolean {
-        return message.member !== null && message.member.hasPermission("ADMINISTRATOR")
     }
 }
