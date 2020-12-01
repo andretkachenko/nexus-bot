@@ -11,6 +11,7 @@ export class Config {
     mongoDb: string
     textChannelCollectionName: string
     textCategoryCollectionName: string
+    ignoredChannelsCollectionName: string
     img: string
 
     constructor() {
@@ -25,6 +26,7 @@ export class Config {
         this.mongoDb=process.env.MONGO_DB as string
         this.textChannelCollectionName = process.env.MONGO_TXT_COLLECTION as string
         this.textCategoryCollectionName = process.env.MONGO_CATEGORY_COLLECTION as string
+        this.ignoredChannelsCollectionName = process.env.MONGO_IGNORE_COLLECTION as string
         this.img = process.env.IMG as string
     }
 }
