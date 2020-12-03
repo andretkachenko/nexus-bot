@@ -35,7 +35,7 @@ export class IgnoreHandler {
     }
 
     private addIgnore(message: Message) {
-        let channelId = message.content.substring(BotCommand.IgnoreAdd.length + 1).trim()
+        let channelId = message.content.substring(this.config.prefix.length + BotCommand.IgnoreAdd.length).trim()
         try {
             let isValid = this.validateChannelId(message.channel, channelId, message.guild?.id)
             if (isValid) {
@@ -49,7 +49,7 @@ export class IgnoreHandler {
     }
 
     private deleteIgnore(message: Message) {
-        let channelId = message.content.substring(BotCommand.IgnoreDelete.length + 1).trim()
+        let channelId = message.content.substring(this.config.prefix.length + BotCommand.IgnoreDelete.length).trim()
         try {
             let isValid = this.validateChannelId(message.channel, channelId, message.guild?.id)
             if (isValid) {
