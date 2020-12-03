@@ -8,13 +8,10 @@ Each time the last user leaves the voice channel, all non-pinned messages in lin
 [![Invite bot to your server](https://i.imgur.com/MgQZMpT.jpg)](https://discord.com/oauth2/authorize?client_id=709876107213537351&permissions=268510224&scope=bot)
 
 ## How to use
-You don't need to set up anything - once you join a voice channel, a new category with the linked text channel will be created.  
+You don't need to set up anything - once you join a voice channel (excluding inactive channel), a new category with the linked text channel will be created.  
 Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.  
-Feel free to rename categories and text channels as you wish - it will not affect bot.  
-All linked text channels are initially created under the specific category, however, you can move them wherever you like, bot still will be able to process it.
-Linked channel is not created for the voice channel, marked as AFK.
-When the last user leaves the voice channel, messages in the linked text channel will be deleted.  
-If you don't want specific messages to be deleted - you can pin them, and they will remain.
+Feel free to rename/move categories and text channels as you wish - it will not affect bot.
+When the last user leaves the voice channel, messages in the linked text channel will be deleted (excluding pinned messages).
 
 ## Existing commands
 List of available commands:
