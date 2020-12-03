@@ -42,7 +42,7 @@ export class IgnoreHandler {
                 let ignoredChannel: IgnoredChannel = { guildId: message.guild?.id as string, channelId: channelId }
                 this.mongoConnector.ignoredChannels.add(ignoredChannel)
             }
-        } catch(e) {
+        } catch (e) {
             console.log(e)
             message.channel.send("Error adding ignore channel")
         }
@@ -55,7 +55,7 @@ export class IgnoreHandler {
             if (isValid) {
                 this.mongoConnector.ignoredChannels.delete(message.guild?.id as string, channelId)
             }
-        } catch(e) {
+        } catch (e) {
             console.log(e)
             message.channel.send("Error deleting ignore channel")
         }
@@ -67,8 +67,8 @@ export class IgnoreHandler {
         if (textChannel.type === ChannelType.dm) {
             message = "Direct messages are not supported."
             isValid = false
-        } 
-        else if (guildId=== undefined) {
+        }
+        else if (guildId === undefined) {
             message = "Error processing command - unable to identify guild."
             isValid = false
         }
@@ -79,7 +79,7 @@ export class IgnoreHandler {
                 isValid = false
             } else {
                 let channel = guild.channels.resolve(channelId)
-                if (channel?.type !== ChannelType.voice) {
+                if (channel?.type != ChannelType.voice) {
                     message = "Error processing command - specified channelId does not belong to a voice channel."
                     isValid = false
                 }
