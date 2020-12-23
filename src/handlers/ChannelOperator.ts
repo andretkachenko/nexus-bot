@@ -80,7 +80,10 @@ export class ChannelOperator {
 				.then(ch => {
 					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
 					this.mongoConnector.textChannelRepository.add(textChannelMap)
-				});
+				})
+				.catch(reason => {
+					console.log("createTextChannel() error: " + reason)
+				})
 		}
 	}
 
@@ -93,7 +96,10 @@ export class ChannelOperator {
 
 		if (user && textChannel) {
 			if (user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot) return
-			textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+			textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })			
+				.catch(reason => {
+				console.log("showHideTextChannel() error: " + reason + "; value: " + value)
+			})
 		}
 	}
 
