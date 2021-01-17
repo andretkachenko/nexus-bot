@@ -1,6 +1,6 @@
 import { Client, Message, PartialMessage } from "discord.js"
 import { Logger } from "./handlers/Logger"
-import { ChannelOperator } from "./handlers/ChannelOperator"
+import { ChannelHandlers } from "./handlers/ChannelHandlers"
 import { ClientEvent } from "./enums/ClientEvent"
 import { ProcessEvent } from "./enums/ProcessEvent"
 import { Config } from "./config"
@@ -8,7 +8,7 @@ import { InfoHandlers } from "./handlers/InfoHandlers"
 import { MongoConnector } from "./db/MongoConnector"
 import { ServerHandlers } from "./handlers/ServerHandlers"
 import { TextHandlers } from "./handlers/TextHandlers"
-import { IgnoreHandler } from "./handlers/IgnoreHandler"
+import { IgnoreHandlers } from "./handlers/IgnoreHandlers"
 import { SettingsHandlers } from "./handlers/SettingsHandlers"
 
 export class EventRegistry {
@@ -16,11 +16,11 @@ export class EventRegistry {
     private config: Config
 
     private logger: Logger
-    private channelOperator: ChannelOperator
+    private channelHandlers: ChannelHandlers
     private infoHandlers: InfoHandlers
     private textHandlers: TextHandlers
     private serverHandlers: ServerHandlers
-    private ignoreHandler: IgnoreHandler
+    private ignoreHandlers: IgnoreHandlers
     private settingsHandlers: SettingsHandlers
 
     constructor(client: Client, config: Config) {
@@ -30,11 +30,11 @@ export class EventRegistry {
         let mongoConnector = new MongoConnector(config)
 
         this.logger = new Logger()
-        this.channelOperator = new ChannelOperator(mongoConnector, config, this.logger, client)
+        this.channelHandlers = new ChannelHandlers(mongoConnector, config, this.logger, client)
         this.infoHandlers = new InfoHandlers(config)
         this.textHandlers = new TextHandlers(config)
         this.serverHandlers = new ServerHandlers(mongoConnector)
-        this.ignoreHandler = new IgnoreHandler(client, mongoConnector, config)
+        this.ignoreHandlers = new IgnoreHandlers(client, mongoConnector, config)
         this.settingsHandlers = new SettingsHandlers(config, mongoConnector)
     }
 
@@ -82,8 +82,8 @@ export class EventRegistry {
     private registerVoiceUpdateHandler() {
         this.client.on(ClientEvent.VoiceStateUpdate, (oldVoiceState, newVoiceState) => {
             if (newVoiceState.channelID !== oldVoiceState.channelID) {
-                if (newVoiceState.channelID) this.channelOperator.handleChannelJoin(newVoiceState)
-                if (oldVoiceState.channelID) this.channelOperator.handleChannelLeave(oldVoiceState)
+                if (newVoiceState.channelID) this.channelHandlers.handleChannelJoin(newVoiceState)
+                if (oldVoiceState.channelID) this.channelHandlers.handleChannelLeave(oldVoiceState)
             }
         });
     }
@@ -96,7 +96,7 @@ export class EventRegistry {
 
     private registerProcessHandlers() {
         process.on(ProcessEvent.Exit, () => {
-            const msg = `[nexus-bot] Process exit.`
+            const msg = `[ERROR] Process exit.`
             this.logger.logEvent(msg)
             console.log(msg)
             this.client.destroy()
@@ -104,12 +104,13 @@ export class EventRegistry {
 
         process.on(ProcessEvent.UncaughtException, (err: Error) => {
             const errorMsg = (err ? err.stack || err : '').toString().replace(new RegExp(`${__dirname}\/`, 'g'), './')
-            this.logger.logError(errorMsg)
-            console.log(errorMsg)
+            const msg = "[ERROR] " + errorMsg
+            this.logger.logError(msg)
+            console.log(msg)
         })
 
         process.on(ProcessEvent.UnhandledRejection, (reason: {} | null | undefined) => {
-            const msg = `Uncaught Promise rejection: ${reason}`
+            const msg = `[ERROR] Uncaught Promise rejection: ${reason}`
             this.logger.logError(msg)
             console.log(msg)
         })
@@ -121,8 +122,8 @@ export class EventRegistry {
         
         if(!this.hasAdminPermission(message)) return
         this.textHandlers.handleWriteCall(message)
-        this.ignoreHandler.handleAddIgnore(message)
-        this.ignoreHandler.handleDeleteIgnore(message)
+        this.ignoreHandlers.handleAddIgnore(message)
+        this.ignoreHandlers.handleDeleteIgnore(message)
         this.settingsHandlers.handlePreserveUpdate(message)
     }
 

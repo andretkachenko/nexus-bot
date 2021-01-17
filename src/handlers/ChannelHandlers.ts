@@ -7,7 +7,7 @@ import { Logger } from "./Logger";
 import { TextCategoryMap } from "../entities/TextCategoryMap";
 import { Permission } from "../enums/Permission";
 
-export class ChannelOperator {
+export class ChannelHandlers {
 	private client: Client
 	private mongoConnector: MongoConnector
 	private config: Config
@@ -84,7 +84,7 @@ export class ChannelOperator {
 					this.mongoConnector.textChannelRepository.add(textChannelMap)
 				})
 				.catch(reason => {
-					console.log("createTextChannel() error: " + reason)
+					console.log("[ERROR] ChannelHandlers.createTextChannel() - " + reason)
 				})
 		}
 	}
@@ -100,7 +100,7 @@ export class ChannelOperator {
 			if (user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot) return
 			textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })			
 				.catch(reason => {
-				console.log("showHideTextChannel() error: " + reason + "; value: " + value)
+				console.log("[ERROR] ChannelHandlers.showHideTextChannel() - " + reason)
 			})
 		}
 	}

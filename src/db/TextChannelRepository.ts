@@ -31,9 +31,8 @@ export class TextChannelRepository {
         let textChannels = db.collection(this.textChannelCollectionName)
         return textChannels.deleteMany({ guildId: guildId })
             .then((deleteResult) => {
-                if (deleteResult.result.ok !== 1) console.log("command not executed correctly: documents not deleted")
+                if (deleteResult.result.ok !== 1) console.log(`[ERROR] TextChannelRepository.deleteAllGuildChannels(${guildId})`)
                 else {
-                    console.log("documents deleted")
                     result = true
                 }
                 return result
@@ -46,9 +45,8 @@ export class TextChannelRepository {
         let textChannels = db.collection(this.textChannelCollectionName)
         return textChannels.insertOne(textChannelMap)
             .then((insertResult) => {
-                if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not inserted")
+                if (insertResult.result.ok !== 1) console.log("[ERROR] TextChannelRepository.add()")
                 else {
-                    console.log("document inserted")
                     result = true
                 }
                 return result
@@ -61,9 +59,8 @@ export class TextChannelRepository {
         let textChannels = db.collection(this.textChannelCollectionName)
         return textChannels.deleteOne({ guildId: guildId, voiceChannelId: voiceChannelId })
             .then((deleteResult) => {
-                if (deleteResult.result.ok !== 1) console.log("command not executed correctly: document not deleted")
+                if (deleteResult.result.ok !== 1) console.log(`[ERROR] TextChannelRepository.delete(guildId: ${guildId}, voiceChannelId: ${voiceChannelId})`)
                 else {
-                    console.log("document deleted")
                     result = true
                 }
                 return result
@@ -83,9 +80,8 @@ export class TextChannelRepository {
             }
         })
             .then((insertResult) => {
-                if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not updated")
+                if (insertResult.result.ok !== 1) console.log(`[ERROR] TextChannelRepository.setPreserveOption({ guildId: ${textChannelMap.guildId}, voiceChannelId: ${textChannelMap.voiceChannelId} })`)
                 else {
-                    console.log("document updated")
                     result = true
                 }
                 return result

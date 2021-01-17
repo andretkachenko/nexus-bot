@@ -24,12 +24,11 @@ export class IgnoredChannelsRepository {
             })
     }
 
-    public add(auditChannel: IgnoredChannel) {
+    public add(ignoreChannel: IgnoredChannel) {
         let db = this.client.db(this.dbName)
         let ignoredChannels = db.collection(this.ignoredChannelsCollectionName)
-        ignoredChannels.insertOne(auditChannel, (err) => {
-            if (err) console.log(err)
-            console.log("document inserted")
+        ignoredChannels.insertOne(ignoreChannel, (err) => {
+            if (err) console.log(`[ERROR] IgnoredChannelsRepository.add() - ${err}`)
         })
     }
 
@@ -39,11 +38,8 @@ export class IgnoredChannelsRepository {
         let ignoredChannels = db.collection(this.ignoredChannelsCollectionName)
         return ignoredChannels.deleteOne({ guildId: guildId, channelId: channelId })
             .then((deleteResult) => {
-                if (deleteResult.result.ok !== 1) console.log("command not executed correctly: document not deleted")
-                else {
-                    console.log("document deleted")
-                    result = true
-                }
+                if (deleteResult.result.ok !== 1) console.log(`[ERROR] IgnoredChannelsRepository.delete(${guildId}, ${channelId})`)
+                else result = true
                 return result
             })
     }
@@ -54,11 +50,8 @@ export class IgnoredChannelsRepository {
         let textChannels = db.collection(this.ignoredChannelsCollectionName)
         return textChannels.deleteMany({ guildId: guildId })
             .then((deleteResult) => {
-                if (deleteResult.result.ok !== 1) console.log("command not executed correctly: documents not deleted")
-                else {
-                    console.log("documents deleted")
-                    result = true
-                }
+                if (deleteResult.result.ok !== 1) console.log(`[ERROR] IgnoredChannelsRepository.deleteAllGuildChannels(${guildId})`)
+                else result = true
                 return result
             })
     }

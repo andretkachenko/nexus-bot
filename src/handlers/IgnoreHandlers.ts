@@ -5,7 +5,7 @@ import { BotCommand } from "../enums/BotCommand"
 import { MongoConnector } from "../db/MongoConnector"
 import { IgnoredChannel } from "../entities/IgnoredChannel"
 
-export class IgnoreHandler {
+export class IgnoreHandlers {
     private config: Config
     private client: Client
     private mongoConnector: MongoConnector
@@ -43,7 +43,7 @@ export class IgnoreHandler {
                 this.mongoConnector.ignoredChannels.add(ignoredChannel)
             }
         } catch (e) {
-            console.log(e)
+            console.log("[ERROR] IgnoreHandlers.addIgnore() - " + e)
             message.channel.send("Error adding ignore channel")
         }
     }
@@ -56,7 +56,7 @@ export class IgnoreHandler {
                 this.mongoConnector.ignoredChannels.delete(message.guild?.id as string, channelId)
             }
         } catch (e) {
-            console.log(e)
+            console.log("[ERROR] IgnoreHandlers.deleteIgnore() - " + e)
             message.channel.send("Error deleting ignore channel")
         }
     }
