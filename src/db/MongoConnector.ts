@@ -16,7 +16,7 @@ export class MongoConnector {
 
         this.client.connect((err) => {
             if (err) {
-                console.log('Error occurred while connecting to MongoDB Atlas...\n', err);
+                console.log('[ERROR] MongoDB Atlas Connect - \n', err);
                 return;
             }
         })
