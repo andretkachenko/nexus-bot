@@ -19,6 +19,7 @@ List of available commands:
 - `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message. Requires user to have admin rights.
 - `sudo ignore add {channelId}` - skip voice channel with the specified id when checking for linked text channel. Example: `sudo ignore add 717824008636334130`. Requires user to have admin rights.
 - `sudo ignore delete {channelId}` - remove voice channel with the specified id from ignore list. Example: `sudo ignore delete 717824008636334130`. Requires user to have admin rights.
+- `sudo preserve {channelId} [0/1]` - set linked text channel to save messages after the last user left the voice channel. `channelId` - id of the voice channel. Example: `sudo preserve 717824008636334130 1`. Requires user to have admin rights.
 
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  

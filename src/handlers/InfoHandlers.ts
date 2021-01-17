@@ -29,6 +29,7 @@ export class InfoHandlers {
             **${this.config.prefix}write** - repeat message that was written by the user. Can be used to add description of the channel, so that it is viewed as a system message. Requires user to have admin rights.
             **${this.config.prefix}ignore add {channelId}** - skip voice channel with the specified id when checking for linked text channel. Example: \`${this.config.prefix}ignore add 717824008636334130\`. Requires user to have admin rights.
             **${this.config.prefix}ignore delete {channelId}** - remove voice channel with the specified id from ignore list. Example: \`${this.config.prefix}ignore delete 717824008636334130\`. Requires user to have admin rights.
+            **${this.config.prefix}preserve {channelId} [0/1]** - set linked text channel to save messages after the last user left the voice channel. \`channelId\` - id of the voice channel. Example: \`${this.config.prefix}preserve 717824008636334130 1\`. Requires user to have admin rights.
             `)
             .addField("**Want to use it on your server?**", "Follow this link: https://github.com/andretkachenko/nexus-bot#want-to-use-at-your-server")
             .addField("**Any issues or missing feature?**", "You can suggest it via https://github.com/andretkachenko/nexus-bot/issues")

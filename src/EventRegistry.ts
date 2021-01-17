@@ -9,6 +9,7 @@ import { MongoConnector } from "./db/MongoConnector"
 import { ServerHandlers } from "./handlers/ServerHandlers"
 import { TextHandlers } from "./handlers/TextHandlers"
 import { IgnoreHandler } from "./handlers/IgnoreHandler"
+import { SettingsHandlers } from "./handlers/SettingsHandlers"
 
 export class EventRegistry {
     private client: Client
@@ -20,6 +21,7 @@ export class EventRegistry {
     private textHandlers: TextHandlers
     private serverHandlers: ServerHandlers
     private ignoreHandler: IgnoreHandler
+    private settingsHandlers: SettingsHandlers
 
     constructor(client: Client, config: Config) {
         this.client = client
@@ -33,6 +35,7 @@ export class EventRegistry {
         this.textHandlers = new TextHandlers(config)
         this.serverHandlers = new ServerHandlers(mongoConnector)
         this.ignoreHandler = new IgnoreHandler(client, mongoConnector, config)
+        this.settingsHandlers = new SettingsHandlers(config, mongoConnector)
     }
 
     public registerEvents() {
@@ -120,6 +123,7 @@ export class EventRegistry {
         this.textHandlers.handleWriteCall(message)
         this.ignoreHandler.handleAddIgnore(message)
         this.ignoreHandler.handleDeleteIgnore(message)
+        this.settingsHandlers.handlePreserveUpdate(message)
     }
 
     private hasAdminPermission(message: Message): boolean {

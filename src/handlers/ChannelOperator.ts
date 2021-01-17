@@ -25,7 +25,8 @@ export class ChannelOperator {
 		let guildId = newVoiceState.guild.id
 		let channelId = newVoiceState.channelID as string
 		if (channelId === newVoiceState.guild.afkChannelID) return
-		let textChannelId = await this.mongoConnector.textChannelRepository.getId(guildId, channelId)
+		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(guildId, channelId)
+		let textChannelId = textChannelMap != null ? textChannelMap.textChannelId : ''
 		let textChannel = this.resolve(newVoiceState, textChannelId)
 
 		if (textChannel) {
@@ -40,8 +41,9 @@ export class ChannelOperator {
 	public async handleChannelLeave(oldVoiceState: VoiceState) {
 		let user = oldVoiceState.member
 		let guildId = oldVoiceState.guild.id
-		let channelID = oldVoiceState.channelID as string
-		let textChannelId = await this.mongoConnector.textChannelRepository.getId(guildId, channelID)
+		let channelId = oldVoiceState.channelID as string
+		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(guildId, channelId)
+		let textChannelId = textChannelMap != null ? textChannelMap.textChannelId : ''
 
 		if (!this.isNullOrEmpty(textChannelId)) {
 			let textChannel = this.resolve(oldVoiceState, textChannelId)
@@ -49,8 +51,8 @@ export class ChannelOperator {
 			this.showHideTextChannel(textChannel, user, false)
 
 			let voiceChannel = oldVoiceState.channel
-			if (!voiceChannel?.members.size) {
-				this.deleteNotPinnedMessages(textChannel)
+			if (!voiceChannel?.members.size && voiceChannel != null) {
+				this.deleteNotPinnedMessages(textChannel, voiceChannel.id)
 			}
 		}
 	}
@@ -103,8 +105,11 @@ export class ChannelOperator {
 		}
 	}
 
-	private async deleteNotPinnedMessages(textChannel: TextChannel) {
+	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannelId: string) {
 		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_MESSAGES)) return
+
+		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
+		if(textChannelMap == null || textChannelMap.preserve == true) return
 
 		let fetched: Collection<string, Message>;
 		let notPinned: Collection<string, Message>;

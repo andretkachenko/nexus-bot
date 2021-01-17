@@ -1,4 +1,4 @@
-import { MongoClient, DeleteWriteOpResultObject } from "mongodb";
+import { MongoClient } from "mongodb";
 import { Config } from "../config";
 import { TextChannelMap } from "../entities/TextChannelMap";
 
@@ -13,27 +13,15 @@ export class TextChannelRepository {
         this.textChannelCollectionName = config.textChannelCollectionName
     }
 
-    public async getId(guildId: string, channelId: string): Promise<string> {
-        let textChannelId: string = ''
+    public async getTextChannelMap(guildId: string, channelId: string): Promise<TextChannelMap> {
+        let textChannelMap: TextChannelMap
         let db = this.client.db(this.dbName);
-        let textChannels = db.collection(this.textChannelCollectionName);
-        let aggregation = textChannels.aggregate<TextChannelMap>([
-            {
-                $match: {
-                    guildId: guildId,
-                    voiceChannelId: channelId
-                },
-            },
-        ], {
-            cursor: {
-                batchSize: 1
-            },
-        });
+        let textChannels = db.collection<TextChannelMap>(this.textChannelCollectionName);
+        let aggregation = textChannels.find({ guildId: guildId, voiceChannelId: channelId })
         return aggregation.toArray()
             .then(textChannelMaps => {
-                let textMap = textChannelMaps[0];
-                if (textMap) textChannelId = textMap.textChannelId
-                return textChannelId
+                textChannelMap = textChannelMaps[0]
+                return textChannelMap
             })
     }
 
@@ -57,14 +45,14 @@ export class TextChannelRepository {
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textChannelCollectionName)
         return textChannels.insertOne(textChannelMap)
-        .then((insertResult) => {
-            if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not inserted")
-            else {
-                console.log("document inserted")
-                result = true
-            }
-            return result
-        })
+            .then((insertResult) => {
+                if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not inserted")
+                else {
+                    console.log("document inserted")
+                    result = true
+                }
+                return result
+            })
     }
 
     public async delete(guildId: string, voiceChannelId: string): Promise<boolean> {
@@ -76,6 +64,28 @@ export class TextChannelRepository {
                 if (deleteResult.result.ok !== 1) console.log("command not executed correctly: document not deleted")
                 else {
                     console.log("document deleted")
+                    result = true
+                }
+                return result
+            })
+    }
+
+    public async setPreserveOption(textChannelMap: TextChannelMap): Promise<boolean> {
+        let result = false
+        let db = this.client.db(this.dbName)
+        let textChannels = db.collection(this.textChannelCollectionName)
+        return textChannels.updateOne({
+            guildId: textChannelMap.guildId,
+            voiceChannelId: textChannelMap.voiceChannelId
+        }, {
+            $set: {
+                preserve: textChannelMap.preserve
+            }
+        })
+            .then((insertResult) => {
+                if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not updated")
+                else {
+                    console.log("document updated")
                     result = true
                 }
                 return result
