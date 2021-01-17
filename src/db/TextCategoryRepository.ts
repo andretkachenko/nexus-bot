@@ -32,9 +32,8 @@ export class TextCategoryRepository {
         return textChannels.insertOne(textCategoryMap)
         .then((insertResult) => {
             let id = ""
-            if (insertResult.result.ok !== 1) console.log("command not executed correctly: document not inserted")
+            if (insertResult.result.ok !== 1) console.log(`[ERROR] TextCategoryRepository.add()`)
             else {
-                console.log("document inserted")
                 id = textCategoryMap.textCategoryId
             }
             return id
@@ -45,8 +44,7 @@ export class TextCategoryRepository {
         let db = this.client.db(this.dbName)
         let textChannels = db.collection(this.textCategoryCollectionName)
         textChannels.deleteMany({ guildId: guildId }, (err) => {
-            if (err) console.log(err)
-            console.log("document deleted")
+            if (err) console.log(`[ERROR] TextCategoryRepository.delete(${guildId})`)
         })
     }
 }
