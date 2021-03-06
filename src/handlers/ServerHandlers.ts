@@ -1,5 +1,5 @@
-import { Guild } from "discord.js";
-import { MongoConnector } from "../db/MongoConnector";
+import { Guild } from "discord.js"
+import { MongoConnector } from "../db/MongoConnector"
 
 export class ServerHandlers {
     private mongoConnector: MongoConnector
