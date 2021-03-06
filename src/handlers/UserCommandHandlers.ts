@@ -1,7 +1,17 @@
-import { Client, Message } from "discord.js"
+import {
+    Client,
+    Message
+} from "discord.js"
 import { MongoConnector } from "../db/MongoConnector"
 import { IHandler } from "./userCommands/Ihandler"
-import { Help, IgnoreChannel, Ping, Preserve, Write } from "./userCommands"
+import {
+    Help,
+    IgnoreChannel,
+    Ping,
+    Preserve,
+    SkipUser,
+    Write
+} from "./userCommands"
 import { Config } from "../config"
 
 export class UserCommandHandlers {
@@ -10,10 +20,11 @@ export class UserCommandHandlers {
     constructor(client: Client, mongoConnector: MongoConnector, config: Config) {
         this.handler = new Help(config)
         this.handler
-        .setNext(new Ping(config.prefix))
-        .setNext(new Write(config.prefix))
-        .setNext(new Preserve(mongoConnector, config.prefix))
-        .setNext(new IgnoreChannel(client, mongoConnector, config.prefix))
+            .setNext(new Ping(config.prefix))
+            .setNext(new Write(config.prefix))
+            .setNext(new Preserve(mongoConnector, config.prefix))
+            .setNext(new IgnoreChannel(client, mongoConnector, config.prefix))
+            .setNext(new SkipUser(mongoConnector, config.prefix))
     }
 
     public handle(message: Message) {
