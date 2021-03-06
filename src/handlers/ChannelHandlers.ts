@@ -103,7 +103,7 @@ export class ChannelHandlers {
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
-		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return
+		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_ROLES)) return
 
 		if (user && textChannel) {
 			this.skip(user)
