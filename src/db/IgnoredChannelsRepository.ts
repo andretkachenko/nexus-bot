@@ -14,12 +14,12 @@ export class IgnoredChannelsRepository {
     }
 
     public async isIgnored(guildId: string, channelId: string): Promise<boolean> {
-        let db = this.client.db(this.dbName);
-        let ignoredChannels = db.collection<IgnoredChannel>(this.ignoredChannelsCollectionName);
+        let db = this.client.db(this.dbName)
+        let ignoredChannels = db.collection<IgnoredChannel>(this.ignoredChannelsCollectionName)
         let aggregation = ignoredChannels.find({ guildId: guildId, channelId: channelId })
         return aggregation.toArray()
             .then(channels => {
-                let ignoredChannel = channels[0];
+                let ignoredChannel = channels[0]
                 return ignoredChannel !== undefined && ignoredChannel !== null
             })
     }

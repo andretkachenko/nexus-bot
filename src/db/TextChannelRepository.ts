@@ -1,6 +1,6 @@
-import { MongoClient } from "mongodb";
-import { Config } from "../config";
-import { TextChannelMap } from "../entities/TextChannelMap";
+import { MongoClient } from "mongodb"
+import { Config } from "../config"
+import { TextChannelMap } from "../entities"
 
 export class TextChannelRepository {
     private client: MongoClient
@@ -8,15 +8,15 @@ export class TextChannelRepository {
     private dbName: string
 
     constructor(client: MongoClient, config: Config) {
-        this.client = client;
+        this.client = client
         this.dbName = config.mongoDb
         this.textChannelCollectionName = config.textChannelCollectionName
     }
 
     public async getTextChannelMap(guildId: string, channelId: string): Promise<TextChannelMap> {
         let textChannelMap: TextChannelMap
-        let db = this.client.db(this.dbName);
-        let textChannels = db.collection<TextChannelMap>(this.textChannelCollectionName);
+        let db = this.client.db(this.dbName)
+        let textChannels = db.collection<TextChannelMap>(this.textChannelCollectionName)
         let aggregation = textChannels.find({ guildId: guildId, voiceChannelId: channelId })
         return aggregation.toArray()
             .then(textChannelMaps => {

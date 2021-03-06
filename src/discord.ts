@@ -1,5 +1,5 @@
 import { Client } from 'discord.js'
-import { Logger } from './handlers/Logger'
+import { Logger } from './Logger'
 import { EventRegistry } from "./EventRegistry"
 import { Config } from './config'
 

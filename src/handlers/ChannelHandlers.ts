@@ -1,11 +1,20 @@
-import { VoiceState, TextChannel, GuildMember, Collection, Message, Guild, CategoryChannel, GuildCreateChannelOptions, Client } from "discord.js";
-import { ChannelType } from "../enums/ChannelType"
-import { MongoConnector } from "../db/MongoConnector";
-import { TextChannelMap } from "../entities/TextChannelMap";
-import { Config } from "../config";
-import { Logger } from "./Logger";
-import { TextCategoryMap } from "../entities/TextCategoryMap";
-import { Permission } from "../enums/Permission";
+import {
+	VoiceState,
+	TextChannel,
+	GuildMember,
+	Collection,
+	Message, Guild,
+	GuildCreateChannelOptions,
+	Client
+} from "discord.js"
+import { MongoConnector } from "../db/MongoConnector"
+import {
+	TextChannelMap,
+	TextCategoryMap
+} from "../entities"
+import { Config } from "../config"
+import { Logger } from "../Logger"
+import { Permission } from "../enums"
 
 export class ChannelHandlers {
 	private client: Client
@@ -62,7 +71,7 @@ export class ChannelHandlers {
 		let voiceChannel = newVoiceState.channel
 		if (!voiceChannel) return
 		let isIgnored = await this.mongoConnector.ignoredChannels.isIgnored(guild?.id as string, voiceChannel.id)
-		if (isIgnored) return;
+		if (isIgnored) return
 
 		if (guild && guild.me?.permissions.has(Permission.MANAGE_CHANNELS) && guild.me?.permissions.has(Permission.MANAGE_ROLES)) {
 			let user = newVoiceState.member
@@ -97,11 +106,14 @@ export class ChannelHandlers {
 		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return
 
 		if (user && textChannel) {
-			if (user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot) return
-			textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })			
-				.catch(reason => {
-				console.log("[ERROR] ChannelHandlers.showHideTextChannel() - " + reason)
-			})
+			this.skip(user)
+				.then(skip => {
+					if (skip) return
+					textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+						.catch(reason => {
+							console.log("[ERROR] ChannelHandlers.showHideTextChannel() - " + reason)
+						})
+				})
 		}
 	}
 
@@ -109,14 +121,14 @@ export class ChannelHandlers {
 		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_MESSAGES)) return
 
 		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
-		if(textChannelMap == null || textChannelMap.preserve == true) return
+		if (textChannelMap == null || textChannelMap.preserve == true) return
 
-		let fetched: Collection<string, Message>;
-		let notPinned: Collection<string, Message>;
+		let fetched: Collection<string, Message>
+		let notPinned: Collection<string, Message>
 		do {
-			fetched = await textChannel.messages.fetch({ limit: 100 });
-			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned);
-			if (notPinned.size > 0) await textChannel.bulkDelete(notPinned);
+			fetched = await textChannel.messages.fetch({ limit: 100 })
+			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
+			if (notPinned.size > 0) await textChannel.bulkDelete(notPinned)
 		}
 		while (notPinned.size > 0)
 	}
@@ -151,5 +163,17 @@ export class ChannelHandlers {
 
 	private isNullOrEmpty(target: string): boolean {
 		return (!target || 0 === target.length)
+	}
+
+	private async skip(user: GuildMember | null): Promise<boolean> {
+		if (!user) return false
+		var result: boolean
+		result = user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot || await this.isSkipped(user)
+
+		return result
+	}
+
+	private async isSkipped(user: GuildMember | null): Promise<boolean> {
+		return user ? this.mongoConnector.bypassUsers.any(user.guild?.id, user.id) : false
 	}
 }

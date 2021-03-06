@@ -1,6 +1,6 @@
 import * as debug from 'debug'
 import { Client } from 'discord.js'
-import { Config } from '../config'
+import { Config } from './config'
 
 export class Logger {
     public logSystem = debug('bot:system')

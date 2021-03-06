@@ -1,6 +1,6 @@
-import { MongoClient } from "mongodb";
-import { Config } from "../config";
-import { TextCategoryMap } from "../entities/TextCategoryMap"; 
+import { MongoClient } from "mongodb"
+import { Config } from "../config"
+import { TextCategoryMap } from "../entities" 
 
 export class TextCategoryRepository {
     private client: MongoClient
@@ -8,19 +8,19 @@ export class TextCategoryRepository {
     private dbName: string
 
     constructor(client: MongoClient, config: Config) {
-        this.client = client;
+        this.client = client
         this.dbName = config.mongoDb
         this.textCategoryCollectionName = config.textCategoryCollectionName
     }
 
     public async getId(guildId: string): Promise<string> {
         let textCategoryId: string = ''
-        let db = this.client.db(this.dbName);
-        let textCategories = db.collection<TextCategoryMap>(this.textCategoryCollectionName);        
+        let db = this.client.db(this.dbName)
+        let textCategories = db.collection<TextCategoryMap>(this.textCategoryCollectionName)        
         let aggregation = textCategories.find({ guildId: guildId })
         return aggregation.toArray()
             .then(textCategoryMaps => {
-                let textCategoryMap = textCategoryMaps[0];
+                let textCategoryMap = textCategoryMaps[0]
                 if (textCategoryMap) textCategoryId = textCategoryMap.textCategoryId
                 return textCategoryId
             })
