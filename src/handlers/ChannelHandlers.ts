@@ -174,6 +174,6 @@ export class ChannelHandlers {
 	}
 
 	private async isSkipped(user: GuildMember | null): Promise<boolean> {
-		return user ? this.mongoConnector.bypassUsers.any(user.guild?.id, user.id) : false
+		return user ? this.mongoConnector.skippedUsers.any(user.guild?.id, user.id) : false
 	}
 }

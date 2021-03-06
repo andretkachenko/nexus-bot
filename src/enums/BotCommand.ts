@@ -3,5 +3,6 @@ export enum BotCommand {
     Ping = "ping",
     Write = "write",
     Ignore = "ignore",
+    Skip = "skip",
     Preserve = "preserve"
 }

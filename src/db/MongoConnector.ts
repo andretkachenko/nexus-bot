@@ -3,12 +3,14 @@ import { MongoClient } from 'mongodb'
 import { TextChannelRepository } from './TextChannelRepository'
 import { TextCategoryRepository } from './TextCategoryRepository'
 import { IgnoredChannelsRepository } from './IgnoredChannelsRepository'
+import { SkippedUsersRepository } from './SkippedUsersRepository'
 
 export class MongoConnector {
     private client: MongoClient
     public textChannelRepository: TextChannelRepository
     public textCategoryRepository: TextCategoryRepository
     public ignoredChannels : IgnoredChannelsRepository
+    public skippedUsers : SkippedUsersRepository
     constructor(config: Config) {
         let uri = `mongodb+srv://${config.mongoName}:${config.mongoPassword}@${config.mongoCluster}`
         this.client = new MongoClient(uri, { useNewUrlParser: true })
@@ -23,5 +25,6 @@ export class MongoConnector {
         this.textChannelRepository = new TextChannelRepository(this.client, config)
         this.textCategoryRepository = new TextCategoryRepository(this.client, config)
         this.ignoredChannels = new IgnoredChannelsRepository(this.client, config)
+        this.skippedUsers = new SkippedUsersRepository(this.client, config.mongoDb)
     }
 }
