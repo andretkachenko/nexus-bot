@@ -153,7 +153,7 @@ export class ChannelHandlers {
 	private async createCategory(guild: Guild): Promise<string> {
 		if (!guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return ''
 
-		let channelCreationPromise = guild.channels.create(this.config.categoryName, {
+		let channelCreationPromise = guild.channels.create("Nexus channels", {
 			type: ChannelType.category
 		})
 

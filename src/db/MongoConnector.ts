@@ -22,7 +22,7 @@ export class MongoConnector {
 
     constructor(config: Config) {
         let uri = `mongodb+srv://${config.mongoName}:${config.mongoPassword}@${config.mongoCluster}`
-        this.client = new MongoClient(uri, { useNewUrlParser: true })
+        this.client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
         this.client.connect((err) => {
             if (err) {
