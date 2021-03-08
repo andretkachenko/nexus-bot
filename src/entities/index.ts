@@ -1,4 +1,5 @@
 export { IgnoredChannel } from './IgnoredChannel'
-export { TextCategoryMap } from './TextCategoryMap'
+export { TextCategory as TextCategoryMap } from './TextCategory'
 export { TextChannelMap } from './TextChannelMap'
 export { SkippedUser } from './SkippedUser'
+export { IGuildRelated } from './IGuildRelated'

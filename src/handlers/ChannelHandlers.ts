@@ -70,7 +70,7 @@ export class ChannelHandlers {
 		let guild = newVoiceState.channel?.guild
 		let voiceChannel = newVoiceState.channel
 		if (!voiceChannel) return
-		let isIgnored = await this.mongoConnector.ignoredChannels.isIgnored(guild?.id as string, voiceChannel.id)
+		let isIgnored = await this.mongoConnector.ignoredChannels.any(guild?.id as string, voiceChannel.id)
 		if (isIgnored) return
 
 		if (guild && guild.me?.permissions.has(Permission.MANAGE_CHANNELS) && guild.me?.permissions.has(Permission.MANAGE_ROLES)) {
@@ -90,10 +90,10 @@ export class ChannelHandlers {
 			newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', options)
 				.then(ch => {
 					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
-					this.mongoConnector.textChannelRepository.add(textChannelMap)
+					this.mongoConnector.textChannelRepository.insert(textChannelMap)
 				})
 				.catch(reason => {
-					console.log("[ERROR] ChannelHandlers.createTextChannel() - " + reason)
+					console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}`)
 				})
 		}
 	}
@@ -111,7 +111,7 @@ export class ChannelHandlers {
 					if (skip) return
 					textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
 						.catch(reason => {
-							console.log("[ERROR] ChannelHandlers.showHideTextChannel() - " + reason)
+							console.log(`[ERROR] ${this.constructor.name}.showHideTextChannel() - ${reason}`)
 						})
 				})
 		}
@@ -137,7 +137,7 @@ export class ChannelHandlers {
 		let textCategoryId = await this.mongoConnector.textCategoryRepository.getId(guild.id)
 		let categoryExists = guild.channels.cache.find(c => c.id == textCategoryId)
 		if (!categoryExists) {
-			this.mongoConnector.textCategoryRepository.delete(guild.id)
+			this.mongoConnector.textCategoryRepository.deleteForGuild(guild.id)
 			textCategoryId = ''
 		}
 		if (this.isNullOrEmpty(textCategoryId)) {
@@ -154,10 +154,13 @@ export class ChannelHandlers {
 		})
 
 		return channelCreationPromise
-			.then((category) => {
+			.then(async (category) => {
 				this.logger.logEvent
 				let textCategoryMap: TextCategoryMap = { guildId: category.guild.id, textCategoryId: category.id }
-				return this.mongoConnector.textCategoryRepository.add(textCategoryMap)
+				return this.mongoConnector.textCategoryRepository.insert(textCategoryMap)
+				.then(success => {
+					return success ? category.id : ''
+				})
 			})
 	}
 
