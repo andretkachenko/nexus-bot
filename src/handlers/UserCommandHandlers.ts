@@ -3,7 +3,7 @@ import {
     Message
 } from "discord.js"
 import { MongoConnector } from "../db/MongoConnector"
-import { IHandler } from "./userCommands/Ihandler"
+import { IHandler } from "./userCommands/IHandler"
 import {
     Help,
     IgnoreChannel,
