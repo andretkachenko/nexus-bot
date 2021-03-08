@@ -20,8 +20,9 @@ export class Preserve extends BaseHandler {
         let guildId = message.guild?.id as string
         let textChannelMap: TextChannelMap = {
             guildId: guildId,
-            voiceChannelId: args[0],
-            textChannelId: '', preserve: args[1] == '1'
+            voiceChannelId: args[1],
+            textChannelId: '', 
+            preserve: args[0] == '1'
         }
         this.mongoConnector.textChannelRepository.setPreserveOption(textChannelMap)
     }

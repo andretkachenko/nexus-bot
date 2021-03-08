@@ -25,13 +25,13 @@ export class IgnoreChannel extends BaseHandler {
 
     protected process(message: Message) {
         let args = this.splitArguments(this.trimCommand(message))
-        let channelId = args[0]
-        let ignore = args[1]
+        let ignore = args[0] === '1'
+        let channelId = args[1]
         let guildId = message.guild?.id as string  
         try {
-            let isValid = this.validateChannelId(message.channel, args[0], message.guild?.id)
+            let isValid = this.validateChannelId(message.channel, channelId, guildId)
             if (isValid) {                              
-                if(ignore === '1') this.addIgnore(guildId, channelId)
+                if(ignore) this.addIgnore(guildId, channelId)
                 else this.deleteIgnore(guildId, channelId)
             }
         } catch (e) {
