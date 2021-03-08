@@ -73,8 +73,9 @@ export class EventRegistry {
     }
 
     private handeMessageUpdate() {
-        this.client.on(ClientEvent.MessageUpdate, (_oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage) => {
-            if ((newMessage as Message).type) this.userCommandHandlers.handle(newMessage as Message)
+        this.client.on(ClientEvent.MessageUpdate, (_oldMsg: Message | PartialMessage, newMsg: Message | PartialMessage) => {
+            let newMessage = newMsg as Message
+            if (newMessage.type) this.userCommandHandlers.handle(newMessage)
         })
     }
 
