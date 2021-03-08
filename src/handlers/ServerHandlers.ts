@@ -1,5 +1,5 @@
-import { Guild } from "discord.js";
-import { MongoConnector } from "../db/MongoConnector";
+import { Guild } from "discord.js"
+import { MongoConnector } from "../db/MongoConnector"
 
 export class ServerHandlers {
     private mongoConnector: MongoConnector
@@ -9,8 +9,6 @@ export class ServerHandlers {
     }
 
     public async handleBotKickedFromServer(guild: Guild) {
-        this.mongoConnector.textCategoryRepository.delete(guild.id)
-        this.mongoConnector.textChannelRepository.deleteAllGuildChannels(guild.id)
-        this.mongoConnector.ignoredChannels.deleteAllGuildChannels(guild.id)
+        this.mongoConnector.repositories.forEach(repo => repo.deleteForGuild(guild.id))
     }
 }

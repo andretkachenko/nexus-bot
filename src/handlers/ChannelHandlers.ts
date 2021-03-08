@@ -1,11 +1,20 @@
-import { VoiceState, TextChannel, GuildMember, Collection, Message, Guild, CategoryChannel, GuildCreateChannelOptions, Client } from "discord.js";
-import { ChannelType } from "../enums/ChannelType"
-import { MongoConnector } from "../db/MongoConnector";
-import { TextChannelMap } from "../entities/TextChannelMap";
-import { Config } from "../config";
-import { Logger } from "./Logger";
-import { TextCategoryMap } from "../entities/TextCategoryMap";
-import { Permission } from "../enums/Permission";
+import {
+	VoiceState,
+	TextChannel,
+	GuildMember,
+	Collection,
+	Message, Guild,
+	GuildCreateChannelOptions,
+	Client
+} from "discord.js"
+import { MongoConnector } from "../db/MongoConnector"
+import {
+	TextChannelMap,
+	TextCategory
+} from "../entities"
+import { Config } from "../config"
+import { Logger } from "../Logger"
+import { Permission } from "../enums"
 
 export class ChannelHandlers {
 	private client: Client
@@ -61,8 +70,8 @@ export class ChannelHandlers {
 		let guild = newVoiceState.channel?.guild
 		let voiceChannel = newVoiceState.channel
 		if (!voiceChannel) return
-		let isIgnored = await this.mongoConnector.ignoredChannels.isIgnored(guild?.id as string, voiceChannel.id)
-		if (isIgnored) return;
+		let isIgnored = await this.mongoConnector.ignoredChannels.any(guild?.id as string, voiceChannel.id)
+		if (isIgnored) return
 
 		if (guild && guild.me?.permissions.has(Permission.MANAGE_CHANNELS) && guild.me?.permissions.has(Permission.MANAGE_ROLES)) {
 			let user = newVoiceState.member
@@ -81,10 +90,10 @@ export class ChannelHandlers {
 			newVoiceState.channel?.guild.channels.create(voiceChannel.name + '-text', options)
 				.then(ch => {
 					let textChannelMap: TextChannelMap = { guildId: ch.guild.id, voiceChannelId: channelId, textChannelId: ch.id }
-					this.mongoConnector.textChannelRepository.add(textChannelMap)
+					this.mongoConnector.textChannelRepository.insert(textChannelMap)
 				})
 				.catch(reason => {
-					console.log("[ERROR] ChannelHandlers.createTextChannel() - " + reason)
+					console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}`)
 				})
 		}
 	}
@@ -94,14 +103,17 @@ export class ChannelHandlers {
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
-		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return
+		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_ROLES)) return
 
 		if (user && textChannel) {
-			if (user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot) return
-			textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })			
-				.catch(reason => {
-				console.log("[ERROR] ChannelHandlers.showHideTextChannel() - " + reason)
-			})
+			this.skip(user)
+				.then(skip => {
+					if (skip) return
+					textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+						.catch(reason => {
+							console.log(`[ERROR] ${this.constructor.name}.showHideTextChannel() - ${reason}`)
+						})
+				})
 		}
 	}
 
@@ -109,14 +121,14 @@ export class ChannelHandlers {
 		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_MESSAGES)) return
 
 		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
-		if(textChannelMap == null || textChannelMap.preserve == true) return
+		if (textChannelMap == null || textChannelMap.preserve == true) return
 
-		let fetched: Collection<string, Message>;
-		let notPinned: Collection<string, Message>;
+		let fetched: Collection<string, Message>
+		let notPinned: Collection<string, Message>
 		do {
-			fetched = await textChannel.messages.fetch({ limit: 100 });
-			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned);
-			if (notPinned.size > 0) await textChannel.bulkDelete(notPinned);
+			fetched = await textChannel.messages.fetch({ limit: 100 })
+			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
+			if (notPinned.size > 0) await textChannel.bulkDelete(notPinned)
 		}
 		while (notPinned.size > 0)
 	}
@@ -125,7 +137,7 @@ export class ChannelHandlers {
 		let textCategoryId = await this.mongoConnector.textCategoryRepository.getId(guild.id)
 		let categoryExists = guild.channels.cache.find(c => c.id == textCategoryId)
 		if (!categoryExists) {
-			this.mongoConnector.textCategoryRepository.delete(guild.id)
+			this.mongoConnector.textCategoryRepository.deleteForGuild(guild.id)
 			textCategoryId = ''
 		}
 		if (this.isNullOrEmpty(textCategoryId)) {
@@ -142,14 +154,34 @@ export class ChannelHandlers {
 		})
 
 		return channelCreationPromise
-			.then((category) => {
+			.then(async (category) => {
 				this.logger.logEvent
-				let textCategoryMap: TextCategoryMap = { guildId: category.guild.id, textCategoryId: category.id }
-				return this.mongoConnector.textCategoryRepository.add(textCategoryMap)
+				let textCategoryMap: TextCategory = { guildId: category.guild.id, textCategoryId: category.id }
+				return this.mongoConnector.textCategoryRepository.insert(textCategoryMap)
+				.then(success => {
+					return success ? category.id : ''
+				})
 			})
 	}
 
 	private isNullOrEmpty(target: string): boolean {
 		return (!target || 0 === target.length)
+	}
+
+	private async skip(user: GuildMember): Promise<boolean> {
+		return user.hasPermission(Permission.ADMINISTRATOR) 
+		|| user.user.bot 
+		|| await this.userSkipped(user) 
+		|| await this.userInSkippedRole(user)
+	}
+
+	private async userSkipped(user: GuildMember): Promise<boolean> {
+		return this.mongoConnector.skippedUsers.any(user.guild?.id, user.id)
+	}
+
+	private async userInSkippedRole(user: GuildMember): Promise<boolean> {
+		let skippedRoleIds = (await this.mongoConnector.skippedRoles.getAll(user.guild.id)).map(role => { return role.roleId})
+		let userRoles = user.roles.cache.map(role => { return role.id })
+		return userRoles.some(role => skippedRoleIds.includes(role))
 	}
 }

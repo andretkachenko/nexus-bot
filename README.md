@@ -14,12 +14,14 @@ Feel free to rename/move categories and text channels as you wish - it will not 
 When the last user leaves the voice channel, messages in the linked text channel will be deleted (excluding pinned messages).
 
 ## Existing commands
+`{}` - 'replace with id', `[]` - choose one option, `@{}` - mention user/role  
+
 List of available commands:
 - `sudo help` - get info about bot and list of existing commands
-- `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message. Requires user to have admin rights.
-- `sudo ignore add {channelId}` - skip voice channel with the specified id when checking for linked text channel. Example: `sudo ignore add 717824008636334130`. Requires user to have admin rights.
-- `sudo ignore delete {channelId}` - remove voice channel with the specified id from ignore list. Example: `sudo ignore delete 717824008636334130`. Requires user to have admin rights.
-- `sudo preserve {channelId} [0/1]` - set linked text channel to save messages after the last user left the voice channel. `channelId` - id of the voice channel. Example: `sudo preserve 717824008636334130 1`. Requires user to have admin rights.
+- `sudo write` - repeat message that was written by the user. Can be used to send a system message to the channel. Requires user to have admin rights.
+- `sudo ignore [0/1] {channelId}` - ignore/handle voice channel with the specified id when checking for linked text channel. Example: `sudo ignore 1 717824008636334130`. Requires user to have admin rights.
+- `sudo skip [0/1] @{user/role}` - skip/change visibility settings for specific user/role. Supports multiple mentions. Example: `sudo skip 1 @User1 @Role1 @User2`. Requires user to have admin rights.
+- `sudo preserve [0/1] {channelId}` - set linked text channel to save messages after the last user left the voice channel. `channelId` - id of the voice channel. Example: `sudo preserve 1 717824008636334130`. Requires user to have admin rights.
 
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  
