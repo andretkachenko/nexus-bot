@@ -8,13 +8,13 @@ export class SkippedUsersRepository extends Repository<SkippedUser> {
     }
 
     public async any(guildId: string, userId: string): Promise<boolean> {
-        return super.get({ guildId: guildId, userId: userId })
+        return super.getFirst({ guildId: guildId, userId: userId })
             .then(entity => {
                 return entity !== undefined && entity !== null
             })
     }
 
-    public async delete(guildId: string, userId: string): Promise<boolean> {
-        return super.deleteOne({ guildId: guildId, userId: userId })
+    public async delete(user: SkippedUser): Promise<boolean> {
+        return super.deleteOne({ guildId: user.guildId, userId: user.userId })
     }
 }

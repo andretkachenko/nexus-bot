@@ -26,7 +26,7 @@ export class Help extends BaseHandler {
             {} - 'replace with id', [] - choose one option
             **${this.prefix}write** - repeat message that was written by the user. Can be used to add description of the channel, so that it is viewed as a system message. Requires user to have admin rights.
             **${this.prefix}ignore {channelId} [0/1]** - ignore/handle voice channel with the specified id when checking for linked text channel. Example: \`${this.prefix}ignore 71782400863633ss4130 1\`. Requires user to have admin rights.
-            **${this.prefix}skip {userId} [0/1]** - skip/change visibility settings for specific user. Example: \`${this.prefix}skip 709876107213537351 1\`. Requires user to have admin rights.
+            **${this.prefix}skip [0/1] @{userId/roleId} ** - skip/change visibility settings for specific user/role. **@{userId/roles}** - mention user/role instead. Supports multiple mentions. Example: \`${this.prefix}skip 1 @User1 @Role1 @User2\`. Requires user to have admin rights.
             **${this.prefix}preserve {channelId} [0/1]** - set linked text channel to save messages after the last user left the voice channel. \`channelId\` - id of the voice channel. Example: \`${this.prefix}preserve 717824008636334130 1\`. Requires user to have admin rights.
             `)
             .addField("**Want to use it on your server?**", "Follow this link: https://github.com/andretkachenko/nexus-bot#want-to-use-at-your-server")

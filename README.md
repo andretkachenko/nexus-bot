@@ -17,8 +17,8 @@ When the last user leaves the voice channel, messages in the linked text channel
 List of available commands:
 - `sudo help` - get info about bot and list of existing commands
 - `sudo write` - repeat message that was written by the user. Can be used to add description of the channel, , so that it is viewed as a system message. Requires user to have admin rights.
-- `sudo ignore add {channelId}` - skip voice channel with the specified id when checking for linked text channel. Example: `sudo ignore add 717824008636334130`. Requires user to have admin rights.
-- `sudo ignore delete {channelId}` - remove voice channel with the specified id from ignore list. Example: `sudo ignore delete 717824008636334130`. Requires user to have admin rights.
+- `sudo ignore {channelId} [0/1]` - ignore/handle voice channel with the specified id when checking for linked text channel. Example: `sudo ignore 717824008636334130 1`. Requires user to have admin rights.
+- `sudo skip [0/1] @{user/role}` - skip/change visibility settings for specific user/role. **@{user/role}** - mention user/role instead. Supports multiple mentions. Example: `sudo skip 1 @User1 @Role1 @User2`. Requires user to have admin rights.
 - `sudo preserve {channelId} [0/1]` - set linked text channel to save messages after the last user left the voice channel. `channelId` - id of the voice channel. Example: `sudo preserve 717824008636334130 1`. Requires user to have admin rights.
 
 ## Known issues

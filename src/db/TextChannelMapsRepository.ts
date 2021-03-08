@@ -8,7 +8,7 @@ export class TextChannelMapsRepository extends Repository<TextChannelMap> {
     }
 
     public async getTextChannelMap(guildId: string, channelId: string): Promise<TextChannelMap> {
-        return super.get({ guildId: guildId, voiceChannelId: channelId })
+        return super.getFirst({ guildId: guildId, voiceChannelId: channelId })
     }
 
     public async delete(guildId: string, voiceChannelId: string): Promise<boolean> {

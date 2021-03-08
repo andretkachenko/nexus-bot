@@ -18,7 +18,7 @@ export class Repository<TEntity extends IGuildRelated> {
         this.collectionName = this.constructor.name.replace('Repository', '')
     }
 
-    protected async get(filter: FilterQuery<TSchema>): Promise<TEntity> {
+    protected async getFirst(filter: FilterQuery<TSchema>): Promise<TEntity> {
         let entity: TEntity
         let db = this.client.db(this.dbName)
         let textChannels = db.collection<TEntity>(this.collectionName)
@@ -28,6 +28,13 @@ export class Repository<TEntity extends IGuildRelated> {
                 entity = aggregation[0]
                 return entity
             })
+    }
+
+    protected async getMany(filter: FilterQuery<TSchema>): Promise<TEntity[]> {
+        let db = this.client.db(this.dbName)
+        let textChannels = db.collection<TEntity>(this.collectionName)
+        let aggregation = textChannels.find(filter)
+        return aggregation.toArray()
     }
 
     public async insert(entity: TEntity): Promise<boolean> {

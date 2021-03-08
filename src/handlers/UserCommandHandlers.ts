@@ -9,7 +9,7 @@ import {
     IgnoreChannel,
     Ping,
     Preserve,
-    SkipUser,
+    SkipUsersRoles,
     Write
 } from "./userCommands"
 import { Config } from "../config"
@@ -24,7 +24,7 @@ export class UserCommandHandlers {
             .setNext(new Write(config.prefix))
             .setNext(new Preserve(mongoConnector, config.prefix))
             .setNext(new IgnoreChannel(client, mongoConnector, config.prefix))
-            .setNext(new SkipUser(mongoConnector, config.prefix))
+            .setNext(new SkipUsersRoles(mongoConnector, config.prefix))
     }
 
     public handle(message: Message) {

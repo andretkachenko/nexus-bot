@@ -10,7 +10,7 @@ import {
 import { MongoConnector } from "../db/MongoConnector"
 import {
 	TextChannelMap,
-	TextCategoryMap
+	TextCategory
 } from "../entities"
 import { Config } from "../config"
 import { Logger } from "../Logger"
@@ -156,7 +156,7 @@ export class ChannelHandlers {
 		return channelCreationPromise
 			.then(async (category) => {
 				this.logger.logEvent
-				let textCategoryMap: TextCategoryMap = { guildId: category.guild.id, textCategoryId: category.id }
+				let textCategoryMap: TextCategory = { guildId: category.guild.id, textCategoryId: category.id }
 				return this.mongoConnector.textCategoryRepository.insert(textCategoryMap)
 				.then(success => {
 					return success ? category.id : ''
@@ -168,15 +168,20 @@ export class ChannelHandlers {
 		return (!target || 0 === target.length)
 	}
 
-	private async skip(user: GuildMember | null): Promise<boolean> {
-		if (!user) return false
-		var result: boolean
-		result = user.hasPermission(Permission.ADMINISTRATOR) || user.user.bot || await this.isSkipped(user)
-
-		return result
+	private async skip(user: GuildMember): Promise<boolean> {
+		return user.hasPermission(Permission.ADMINISTRATOR) 
+		|| user.user.bot 
+		|| await this.userSkipped(user) 
+		|| await this.userInSkippedRole(user)
 	}
 
-	private async isSkipped(user: GuildMember | null): Promise<boolean> {
-		return user ? this.mongoConnector.skippedUsers.any(user.guild?.id, user.id) : false
+	private async userSkipped(user: GuildMember): Promise<boolean> {
+		return this.mongoConnector.skippedUsers.any(user.guild?.id, user.id)
+	}
+
+	private async userInSkippedRole(user: GuildMember): Promise<boolean> {
+		let skippedRoleIds = (await this.mongoConnector.skippedRoles.getAll(user.guild.id)).map(role => { return role.roleId})
+		let userRoles = user.roles.cache.map(role => { return role.id })
+		return userRoles.some(role => skippedRoleIds.includes(role))
 	}
 }
