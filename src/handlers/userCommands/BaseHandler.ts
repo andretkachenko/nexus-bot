@@ -1,6 +1,6 @@
 import { Message } from "discord.js"
 import { Permission } from "../../enums"
-import { IHandler } from "./Ihandler"
+import { IHandler } from "./IHandler"
 
 export abstract class BaseHandler implements IHandler {
     private nextHandler!: IHandler
