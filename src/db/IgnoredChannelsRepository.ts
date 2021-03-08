@@ -8,7 +8,7 @@ export class IgnoredChannelsRepository extends Repository<IgnoredChannel> {
     }
 
     public async any(guildId: string, channelId: string): Promise<boolean> {
-        return super.get({ guildId: guildId, channelId: channelId })
+        return super.getFirst({ guildId: guildId, channelId: channelId })
             .then(channel => {
                 return channel !== undefined && channel !== null
             })
