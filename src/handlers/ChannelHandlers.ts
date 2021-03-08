@@ -3,7 +3,8 @@ import {
 	TextChannel,
 	GuildMember,
 	Collection,
-	Message, Guild,
+	Message,
+	Guild,
 	GuildCreateChannelOptions,
 	Client
 } from "discord.js"
@@ -14,7 +15,10 @@ import {
 } from "../entities"
 import { Config } from "../config"
 import { Logger } from "../Logger"
-import { Permission } from "../enums"
+import {
+	Permission,
+	ChannelType
+} from "../enums"
 
 export class ChannelHandlers {
 	private client: Client
@@ -158,9 +162,9 @@ export class ChannelHandlers {
 				this.logger.logEvent
 				let textCategoryMap: TextCategory = { guildId: category.guild.id, textCategoryId: category.id }
 				return this.mongoConnector.textCategoryRepository.insert(textCategoryMap)
-				.then(success => {
-					return success ? category.id : ''
-				})
+					.then(success => {
+						return success ? category.id : ''
+					})
 			})
 	}
 
@@ -169,10 +173,10 @@ export class ChannelHandlers {
 	}
 
 	private async skip(user: GuildMember): Promise<boolean> {
-		return user.hasPermission(Permission.ADMINISTRATOR) 
-		|| user.user.bot 
-		|| await this.userSkipped(user) 
-		|| await this.userInSkippedRole(user)
+		return user.hasPermission(Permission.ADMINISTRATOR)
+			|| user.user.bot
+			|| await this.userSkipped(user)
+			|| await this.userInSkippedRole(user)
 	}
 
 	private async userSkipped(user: GuildMember): Promise<boolean> {
@@ -180,7 +184,7 @@ export class ChannelHandlers {
 	}
 
 	private async userInSkippedRole(user: GuildMember): Promise<boolean> {
-		let skippedRoleIds = (await this.mongoConnector.skippedRoles.getAll(user.guild.id)).map(role => { return role.roleId})
+		let skippedRoleIds = (await this.mongoConnector.skippedRoles.getAll(user.guild.id)).map(role => { return role.roleId })
 		let userRoles = user.roles.cache.map(role => { return role.id })
 		return userRoles.some(role => skippedRoleIds.includes(role))
 	}
