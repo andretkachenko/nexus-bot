@@ -49,7 +49,7 @@ export class IgnoreChannel extends BaseHandler {
             guildId: guildId,
             channelId: channelId
         }
-        this.mongoConnector.ignoredChannels.add(ignoredChannel)        
+        this.mongoConnector.ignoredChannels.insert(ignoredChannel)        
     }
 
     private validateChannelId(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string | undefined): boolean {
