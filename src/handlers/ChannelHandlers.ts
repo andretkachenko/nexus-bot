@@ -2,14 +2,12 @@ import {
 	VoiceState,
 	TextChannel,
 	GuildMember,
-	Collection,
-	Message,
 	Guild,
 	GuildCreateChannelOptions,
 	Client,
 	Permissions,
 	CategoryChannel,
-	OverwriteResolvable
+	PermissionResolvable,
 } from "discord.js"
 import { MongoConnector } from "../db/MongoConnector"
 import {
@@ -66,9 +64,10 @@ export class ChannelHandlers {
 		if (!newVoiceState.channel || !guild || isIgnored || !guild.me?.permissions) return
 
 		let parentId = await this.resolveTextCategory(guild)
-		let category = newVoiceState.channel?.guild.channels.cache.find(c => c.id == parentId)
+		let category = newVoiceState.channel?.guild.channels.cache.find(c => c.id == parentId) as CategoryChannel
 
-		if (!this.canManageChannelAndRole(guild?.me?.permissions, category?.permissionsFor(guild.me?.id as string))) return
+		if (!this.sufficientPermissions([Permission.MANAGE_CHANNELS, Permission.MANAGE_ROLES],
+			guild?.me?.permissions, category?.permissionsFor(guild.me?.id as string))) return
 
 		let options: GuildCreateChannelOptions = {
 			type: ChannelType.text,
@@ -88,7 +87,7 @@ export class ChannelHandlers {
 			],
 		}
 
-		if (category && (category as CategoryChannel).children.size < 50) options.parent = parentId
+		if (category && category.children.size < 50) options.parent = parentId
 		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(async reason => {
@@ -103,9 +102,7 @@ export class ChannelHandlers {
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
-		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_ROLES)) return
-
-		if (!user || !textChannel) return
+		if (!this.sufficientPermissionsForChannel(Permission.MANAGE_ROLES, textChannel) || !user || !textChannel) return
 
 		this.skip(user)
 			.then(skip => {
@@ -118,7 +115,7 @@ export class ChannelHandlers {
 	}
 
 	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannelId: string) {
-		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_MESSAGES)) return
+		if (!this.sufficientPermissionsForChannel(Permission.MANAGE_MESSAGES, textChannel)) return
 
 		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
 		if (textChannelMap.preserve) return
@@ -144,14 +141,15 @@ export class ChannelHandlers {
 	}
 
 	private async createCategory(guild: Guild): Promise<string> {
-		if (!guild.me?.permissions.has(Permission.MANAGE_CHANNELS)) return ''
+		if (!this.sufficientPermissions(Permission.MANAGE_CHANNELS, guild.me?.permissions)) return ''
 
-		let channelCreationPromise = guild.channels.create("Nexus channels", {
-			type: ChannelType.category
-		})
+		let categoryId = ''
 
-		return channelCreationPromise
-			.then(async (category) => this.registerCategory(category))
+		await guild.channels.create("Nexus channels", { type: ChannelType.category })
+			.then(async (category) => categoryId = await this.registerCategory(category))
+			.catch(reason => { console.log(`[ERROR] ${this.constructor.name}.createCategory() - ${reason}`) })
+
+		return categoryId
 	}
 
 	private async registerCategory(category: CategoryChannel): Promise<string> {
@@ -197,38 +195,36 @@ export class ChannelHandlers {
 		return userRoles.some(role => skippedRoleIds.includes(role))
 	}
 
-	private canManageChannelAndRole(...permissions: (Readonly<Permissions> | undefined | null)[]): boolean {
+	private sufficientPermissionsForChannel(required: PermissionResolvable, textChannel: TextChannel): boolean {
+		let bot = textChannel.guild.me
+		return this.sufficientPermissions(required,
+			bot?.permissions,
+			textChannel.parent?.permissionsFor(bot?.id as string))
+	}
+
+	private sufficientPermissions(required: PermissionResolvable, ...permissions: (Readonly<Permissions> | undefined | null)[]): boolean {
 		for (let permissionSet of permissions) {
-			if (permissionSet && !permissionSet.has([Permission.MANAGE_CHANNELS, Permission.MANAGE_ROLES])) return false
+			if (permissionSet && !permissionSet.has([Permission.VIEW_CHANNEL, required])) return false
 		}
 		return true
 	}
 
-	private botHigherRole(bot: GuildMember | null, user: GuildMember | null): boolean {
-		let result = false
-		if (bot?.roles && user?.roles) result = bot.roles.highest.position > user.roles.highest.position
-		return result;
-	}
-
-	private addOverwrite(permissionOverwrites: OverwriteResolvable[], user: GuildMember | null) {
-		permissionOverwrites.push(
-			{
-				id: user?.id as string,
-				allow: [Permission.VIEW_CHANNEL]
-			})
-	}
-
 	private async fetchAndDelete(textChannel: TextChannel): Promise<boolean> {
-		let fetched: Collection<string, Message>
-		let notPinned: Collection<string, Message>
+		let last = false
 
-		fetched = await textChannel.messages.fetch({ limit: 100 })
-		notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
-		if (notPinned.size > 0) {
-			await textChannel.bulkDelete(notPinned).catch(reason => this.handleBulkDeleteError(reason))
+		try {
+			let fetched = await textChannel.messages.fetch({ limit: 100 })
+			let notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
+			last = notPinned.size > 0
+			if (last) {
+				await textChannel.bulkDelete(notPinned).catch(reason => this.handleBulkDeleteError(reason))
+			}
+		}
+		catch (error) {
+			this.handleBulkDeleteError(error as string)
 		}
 
-		return notPinned.size > 0
+		return last
 	}
 
 	private handleBulkDeleteError(reason: string) {
