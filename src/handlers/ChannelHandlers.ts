@@ -93,6 +93,7 @@ export class ChannelHandlers {
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(async reason => {
 				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.permissions.toJSON().toString()} + ${category?.permissionsFor(guild?.me?.id as string)}`)
+
 			})
 
 	}
