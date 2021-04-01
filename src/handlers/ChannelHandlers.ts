@@ -8,7 +8,8 @@ import {
 	GuildCreateChannelOptions,
 	Client,
 	Permissions,
-	CategoryChannel
+	CategoryChannel,
+	OverwriteResolvable
 } from "discord.js"
 import { MongoConnector } from "../db/MongoConnector"
 import {
@@ -69,29 +70,31 @@ export class ChannelHandlers {
 
 		if (!this.canManageChannelAndRole(guild?.me?.permissions, category?.permissionsFor(guild.me?.id as string))) return
 
+		let bot = newVoiceState.guild.me
+		let user = newVoiceState.member
+		let permissionOverwrites : OverwriteResolvable[] =  [
+			{
+				id: guild.id,
+				deny: [Permission.VIEW_CHANNEL]
+			},
+			{
+				id: bot?.id as string,
+				allow: [Permission.VIEW_CHANNEL]
+			},
+		]
+
+		if(this.botHigherRole(bot, user)) this.addOverwrite(permissionOverwrites, user)
+
 		let options: GuildCreateChannelOptions = {
 			type: ChannelType.text,
-			permissionOverwrites: [
-				{
-					id: guild.id,
-					deny: [Permission.VIEW_CHANNEL]
-				},
-				{
-					id: this.client.user?.id as string,
-					allow: [Permission.VIEW_CHANNEL]
-				},
-				{
-					id: newVoiceState.member?.id as string,
-					allow: [Permission.VIEW_CHANNEL]
-				}
-			],
+			permissionOverwrites: permissionOverwrites
 		}
 
 		if (category && (category as CategoryChannel).children.size < 50) options.parent = parentId
 		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(async reason => {
-				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; name: ${newVoiceState.channel?.name + '-text'}; serverId: ${guild?.id}; serverOwner: ${await (await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}`)
+				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}`)
 			})
 
 	}
@@ -203,5 +206,19 @@ export class ChannelHandlers {
 			if (permissionSet && !permissionSet.has([Permission.MANAGE_CHANNELS, Permission.MANAGE_ROLES])) return false
 		}
 		return true
+	}
+
+	private botHigherRole(bot: GuildMember | null, user: GuildMember | null): boolean {		
+		let result = false
+		if (bot?.roles && user?.roles) result = bot.roles.highest.position > user.roles.highest.position
+		return result;
+	}
+
+	private addOverwrite(permissionOverwrites: OverwriteResolvable[], user: GuildMember | null) {		
+		permissionOverwrites.push(
+			{
+				id: user?.id as string,
+				allow: [Permission.VIEW_CHANNEL]
+			})
 	}
 }
