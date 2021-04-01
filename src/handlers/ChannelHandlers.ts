@@ -92,7 +92,7 @@ export class ChannelHandlers {
 		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(async reason => {
-				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.permissions.toJSON().toString()} + ${category?.permissionsFor(guild?.me?.id as string)}`)
+				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.permissions.toJSON().toString()} + ${category?.permissionsFor(guild?.me?.id as string)?.toJSON().toString()} vs ${newVoiceState.member?.permissions.toJSON().toString()} + ${category?.permissionsFor(newVoiceState.member?.id as string)?.toJSON().toString()}`)
 
 			})
 
