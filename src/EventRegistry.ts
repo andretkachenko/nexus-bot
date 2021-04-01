@@ -32,7 +32,7 @@ export class EventRegistry {
         let mongoConnector = new MongoConnector(config)
 
         this.logger = new Logger()
-        this.channelHandlers = new ChannelHandlers(mongoConnector, config, this.logger, client)
+        this.channelHandlers = new ChannelHandlers(mongoConnector, this.logger, client)
         this.userCommandHandlers = new UserCommandHandlers(client, mongoConnector, config)
         this.serverHandlers = new ServerHandlers(mongoConnector)
     }
