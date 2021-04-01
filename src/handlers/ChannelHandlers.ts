@@ -69,32 +69,30 @@ export class ChannelHandlers {
 		let category = newVoiceState.channel?.guild.channels.cache.find(c => c.id == parentId)
 
 		if (!this.canManageChannelAndRole(guild?.me?.permissions, category?.permissionsFor(guild.me?.id as string))) return
-
-		let bot = newVoiceState.guild.me
-		let user = newVoiceState.member
-		let permissionOverwrites : OverwriteResolvable[] =  [
-			{
-				id: guild.id,
-				deny: [Permission.VIEW_CHANNEL]
-			},
-			{
-				id: bot?.id as string,
-				allow: [Permission.VIEW_CHANNEL]
-			},
-		]
-
-		if(this.botHigherRole(bot, user)) this.addOverwrite(permissionOverwrites, user)
-
+		
 		let options: GuildCreateChannelOptions = {
 			type: ChannelType.text,
-			permissionOverwrites: permissionOverwrites
+			permissionOverwrites: [
+				{
+					id: guild.id,
+					deny: [Permission.VIEW_CHANNEL]
+				},
+				{
+					id: this.client.user?.id as string,
+					allow: [Permission.VIEW_CHANNEL]
+				},
+				{
+					id: newVoiceState.member?.id as string,
+					allow: [Permission.VIEW_CHANNEL]
+				}
+			],
 		}
 
 		if (category && (category as CategoryChannel).children.size < 50) options.parent = parentId
 		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(async reason => {
-				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}`)
+				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.permissions.toJSON().toString()}`)
 			})
 
 	}
