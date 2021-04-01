@@ -8,6 +8,8 @@ export class Write extends BaseHandler {
     }
 
     protected process(message: Message) {
-        message.channel.send(this.trimCommand(message), message.attachments.array())
+        let msg = this.trimCommand(message)
+        if(msg !== '') message.channel.send(msg, message.attachments.array())
+        .catch(reason => { console.log(`[ERROR] ${this.constructor.name}.process() - ${reason}`)})
     }
 }
