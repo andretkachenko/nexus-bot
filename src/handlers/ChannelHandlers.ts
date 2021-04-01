@@ -69,7 +69,7 @@ export class ChannelHandlers {
 		let category = newVoiceState.channel?.guild.channels.cache.find(c => c.id == parentId)
 
 		if (!this.canManageChannelAndRole(guild?.me?.permissions, category?.permissionsFor(guild.me?.id as string))) return
-		
+
 		let options: GuildCreateChannelOptions = {
 			type: ChannelType.text,
 			permissionOverwrites: [
@@ -92,7 +92,7 @@ export class ChannelHandlers {
 		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(async reason => {
-				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.permissions.toJSON().toString()} + ${category?.permissionsFor(guild?.me?.id as string)?.toJSON().toString()} vs ${newVoiceState.member?.permissions.toJSON().toString()} + ${category?.permissionsFor(newVoiceState.member?.id as string)?.toJSON().toString()}`)
+				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.roles.highest.position}:${guild?.me?.permissions.toJSON().toString()}+${category?.permissionsFor(guild?.me?.id as string)?.toJSON().toString()} vs ${newVoiceState.member?.roles.highest.position}:${newVoiceState.member?.permissions.toJSON().toString()}+${category?.permissionsFor(newVoiceState.member?.id as string)?.toJSON().toString()}`)
 
 			})
 
@@ -106,7 +106,7 @@ export class ChannelHandlers {
 		if (!textChannel.guild.me?.permissions.has(Permission.MANAGE_ROLES)) return
 
 		if (!user || !textChannel) return
-		
+
 		this.skip(user)
 			.then(skip => {
 				if (skip) return
@@ -123,14 +123,11 @@ export class ChannelHandlers {
 		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
 		if (textChannelMap.preserve) return
 
-		let fetched: Collection<string, Message>
-		let notPinned: Collection<string, Message>
+		let last: boolean
 		do {
-			fetched = await textChannel.messages.fetch({ limit: 100 })
-			notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
-			if (notPinned.size > 0) await textChannel.bulkDelete(notPinned)
+			last = await this.fetchAndDelete(textChannel)
 		}
-		while (notPinned.size > 0)
+		while (!last)
 	}
 
 	private async resolveTextCategory(guild: Guild): Promise<string> {
@@ -159,13 +156,13 @@ export class ChannelHandlers {
 
 	private async registerCategory(category: CategoryChannel): Promise<string> {
 		this.logger.logEvent
-		let textCategoryMap: TextCategory = { 
-			guildId: category.guild.id, 
-			textCategoryId: category.id 
+		let textCategoryMap: TextCategory = {
+			guildId: category.guild.id,
+			textCategoryId: category.id
 		}
 		return this.mongoConnector.textCategoryRepository.insert(textCategoryMap)
-			.then(success => { 
-				return success ? category.id : '' 
+			.then(success => {
+				return success ? category.id : ''
 			})
 	}
 
@@ -200,24 +197,43 @@ export class ChannelHandlers {
 		return userRoles.some(role => skippedRoleIds.includes(role))
 	}
 
-	private canManageChannelAndRole(... permissions: (Readonly<Permissions> | undefined | null)[]): boolean {
+	private canManageChannelAndRole(...permissions: (Readonly<Permissions> | undefined | null)[]): boolean {
 		for (let permissionSet of permissions) {
 			if (permissionSet && !permissionSet.has([Permission.MANAGE_CHANNELS, Permission.MANAGE_ROLES])) return false
 		}
 		return true
 	}
 
-	private botHigherRole(bot: GuildMember | null, user: GuildMember | null): boolean {		
+	private botHigherRole(bot: GuildMember | null, user: GuildMember | null): boolean {
 		let result = false
 		if (bot?.roles && user?.roles) result = bot.roles.highest.position > user.roles.highest.position
 		return result;
 	}
 
-	private addOverwrite(permissionOverwrites: OverwriteResolvable[], user: GuildMember | null) {		
+	private addOverwrite(permissionOverwrites: OverwriteResolvable[], user: GuildMember | null) {
 		permissionOverwrites.push(
 			{
 				id: user?.id as string,
 				allow: [Permission.VIEW_CHANNEL]
 			})
+	}
+
+	private async fetchAndDelete(textChannel: TextChannel): Promise<boolean> {
+		let fetched: Collection<string, Message>
+		let notPinned: Collection<string, Message>
+
+		fetched = await textChannel.messages.fetch({ limit: 100 })
+		notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
+		if (notPinned.size > 0) {
+			await textChannel.bulkDelete(notPinned).catch(reason => this.handleBulkDeleteError(reason))
+		}
+
+		return notPinned.size > 0
+	}
+
+	private handleBulkDeleteError(reason: string) {
+		if (reason !== "DiscordAPIError: You can only bulk delete messages that are under 14 days old.") {
+			console.log(`[ERROR] ${this.constructor.name}.deleteNotPinnedMessages() - ${reason}`)
+		}
 	}
 }
