@@ -87,11 +87,11 @@ export class ChannelHandlers {
 			],
 		}
 
-		if (parentId && category) options.parent = parentId as string
+		if (category && (category as CategoryChannel).children.size < 50) options.parent = parentId
 		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
 			.catch(reason => {
-				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}`)
+				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; name: ${newVoiceState.channel?.name + '-text'}; serverId: ${guild?.id}; serverOwner: ${guild?.owner?.user.tag}`)
 			})
 
 	}
