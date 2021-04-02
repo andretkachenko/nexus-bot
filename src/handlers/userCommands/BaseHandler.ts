@@ -1,12 +1,15 @@
 import { Message } from "discord.js"
 import { Permission } from "../../enums"
+import { Logger } from "../../Logger"
 import { IHandler } from "./IHandler"
 
 export abstract class BaseHandler implements IHandler {
+    protected logger: Logger
     private nextHandler!: IHandler
     protected readonly cmd: string
 
-    constructor(cmd: string) {
+    constructor(logger: Logger, cmd: string) {
+        this.logger = logger
         this.cmd = cmd
     }
 

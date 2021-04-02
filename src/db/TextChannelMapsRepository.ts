@@ -1,10 +1,11 @@
 import { MongoClient } from "mongodb"
 import { TextChannelMap } from "../entities"
+import { Logger } from "../Logger"
 import { Repository } from "./Repository"
 
 export class TextChannelMapsRepository extends Repository<TextChannelMap> {
-    constructor(client: MongoClient, dbName: string) {
-        super(client, dbName)
+    constructor(logger: Logger, client: MongoClient, dbName: string) {
+        super(logger, client, dbName)
     }
 
     public async getTextChannelMap(guildId: string, channelId: string): Promise<TextChannelMap> {

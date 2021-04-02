@@ -4,5 +4,6 @@ export enum BotCommand {
     Write = "write",
     Ignore = "ignore",
     Skip = "skip",
-    Preserve = "preserve"
+    Preserve = "preserve",
+    Commands = "commands"
 }

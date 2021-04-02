@@ -1,19 +1,25 @@
-import { DMChannel, Message, NewsChannel, TextChannel } from "discord.js"
+import { DMChannel, 
+    Message, 
+    NewsChannel, 
+    TextChannel 
+} from "discord.js"
 import { MongoConnector } from "../../db/MongoConnector"
+import { Constants, Messages } from "../../descriptor"
 import { BotCommand } from "../../enums"
+import { Logger } from "../../Logger"
 import { BaseHandler } from "./BaseHandler"
 
 export class SkipUsersRoles extends BaseHandler {
     private mongoConnector: MongoConnector
 
-    constructor(mongoConnector: MongoConnector, prefix: string) {
-        super(prefix + BotCommand.Skip)
+    constructor(logger: Logger, mongoConnector: MongoConnector, prefix: string) {
+        super(logger, prefix + BotCommand.Skip)
         this.mongoConnector = mongoConnector
     }
 
     protected process(message: Message) {
         let args = this.splitArguments(this.trimCommand(message))
-        let skip = args[0] === "1"
+        let skip = args[0] === Constants.Enable
         let users = message.mentions.users.keyArray()
         let roles = message.mentions.roles.keyArray()
         let guildId = message.guild?.id as string
@@ -35,8 +41,8 @@ export class SkipUsersRoles extends BaseHandler {
                 if (skip) add(guildId, ids[i], mongoConnector)
                 else remove(guildId, ids[i], mongoConnector)
             } catch (e) {
-                console.log(`[ERROR] ${this.constructor.name}.process() - ` + e)
-                channel.send(`Error occured during processing of one of the mentioned users/roles`)
+                this.logger.logError(this.constructor.name, this.processMentionArray.name, e)
+                channel.send(Messages.SkipError)
             }
         }
     }

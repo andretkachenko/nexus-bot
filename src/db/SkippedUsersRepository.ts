@@ -1,10 +1,11 @@
 import { SkippedUser } from "../entities"
 import { MongoClient } from "mongodb"
 import { Repository } from "./Repository"
+import { Logger } from "../Logger"
 
 export class SkippedUsersRepository extends Repository<SkippedUser> {
-    constructor(client: MongoClient, dbName: string) {
-        super(client, dbName)
+    constructor(logger: Logger, client: MongoClient, dbName: string) {
+        super(logger, client, dbName)
     }
 
     public async any(guildId: string, userId: string): Promise<boolean> {
