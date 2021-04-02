@@ -13,18 +13,19 @@ import {
     Write
 } from "./userCommands"
 import { Config } from "../config"
+import { Logger } from "../Logger"
 
 export class UserCommandHandlers {
     private readonly handler: IHandler
 
-    constructor(client: Client, mongoConnector: MongoConnector, config: Config) {
-        this.handler = new Help(config)
+    constructor(client: Client, logger: Logger, mongoConnector: MongoConnector, config: Config) {
+        this.handler = new Help(logger, config)
         this.handler
-            .setNext(new Ping(config.prefix))
-            .setNext(new Write(config.prefix))
-            .setNext(new Preserve(mongoConnector, config.prefix))
-            .setNext(new IgnoreChannel(client, mongoConnector, config.prefix))
-            .setNext(new SkipUsersRoles(mongoConnector, config.prefix))
+            .setNext(new Ping(logger, config.prefix))
+            .setNext(new Write(logger, config.prefix))
+            .setNext(new Preserve(logger, mongoConnector, config.prefix))
+            .setNext(new IgnoreChannel(logger, client, mongoConnector, config.prefix))
+            .setNext(new SkipUsersRoles(logger, mongoConnector, config.prefix))
     }
 
     public handle(message: Message) {

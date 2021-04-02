@@ -15,6 +15,10 @@ import {
     ClientEvent,
     ProcessEvent
 } from "./enums"
+import { 
+    Messages,
+    Constants 
+} from "./descriptor"
 
 export class EventRegistry {
     private client: Client
@@ -28,12 +32,11 @@ export class EventRegistry {
     constructor(client: Client, config: Config) {
         this.client = client
         this.config = config
-
-        let mongoConnector = new MongoConnector(config)
-
         this.logger = new Logger()
+
+        let mongoConnector = new MongoConnector(config, this.logger)        
         this.channelHandlers = new ChannelHandlers(mongoConnector, this.logger, client)
-        this.userCommandHandlers = new UserCommandHandlers(client, mongoConnector, config)
+        this.userCommandHandlers = new UserCommandHandlers(client, this.logger, mongoConnector, config)
         this.serverHandlers = new ServerHandlers(mongoConnector)
     }
 
@@ -48,8 +51,7 @@ export class EventRegistry {
         this.handleGuildDelete()
 
         // => Bot error and warn handlers
-        this.client.on(ClientEvent.Error, this.logger.logError)
-        this.client.on(ClientEvent.Warn, this.logger.logWarn)
+        this.handleClientErrorsAndWarnings()
 
         // => Process handlers
         this.handleProcessEvents()
@@ -61,8 +63,8 @@ export class EventRegistry {
 
     private handleReady() {
         !
-            this.client.once(ClientEvent.Ready, () => {
-                this.logger.introduce(this.client, this.config)
+            this.client.once(ClientEvent.Ready, () => { 
+                this.introduce(this.client, this.config)
             })
     }
 
@@ -96,23 +98,43 @@ export class EventRegistry {
 
     private handleProcessEvents() {
         process.on(ProcessEvent.Exit, () => {
-            const msg = `[ERROR] Process exit.`
+            const msg = Messages.ProcessExit
             this.logger.logEvent(msg)
-            console.log(msg)
             this.client.destroy()
         })
 
-        process.on(ProcessEvent.UncaughtException, (err: Error) => {
-            const errorMsg = (err ? err.stack || err : '').toString().replace(new RegExp(`${__dirname}\/`, 'g'), './')
-            const msg = "[ERROR] " + errorMsg
-            this.logger.logError(msg)
-            console.log(msg)
-        })
+        process.on(ProcessEvent.UncaughtException, (error: Error) => this.handleError(error))
 
         process.on(ProcessEvent.UnhandledRejection, (reason: {} | null | undefined) => {
-            const msg = `[ERROR] Uncaught Promise rejection: ${reason}`
-            this.logger.logError(msg)
-            console.log(msg)
+            this.logger.logError(this.constructor.name, this.handleProcessEvents.name, Messages.UnhandledRejection + ": " + reason)
         })
     }
+
+    private handleClientErrorsAndWarnings() {
+        this.client.on(ClientEvent.Error, (error: Error) => this.handleError(error))
+
+        this.client.on(ClientEvent.Warn, (warning) => {
+            this.logger.logWarn(Messages.DiscordWarn + ": " + warning)
+        })
+    }
+
+    private handleError(err: Error) {
+        const errorMsg = (err ? err.stack || err : Constants.EmptyString).toString().replace(new RegExp(`${__dirname}\/`, 'g'), './')
+        this.logger.logError(this.constructor.name, this.handleError.name, errorMsg)
+    }
+
+	public introduce(client: Client, config: Config) {
+		this.logger.logEvent(Messages.BotConnected)
+		this.logger.logEvent(Messages.LoggedAs + (client.user ? client.user.tag : Constants.Undefined))
+		try
+		{
+			if(client.user) client.user.setActivity({ 
+                "name": Messages.StatusString(config.prefix, client.guilds.cache.size), 
+                "type": Constants.Listening 
+            })
+		}
+		catch(error) {
+			this.logger.logError(this.constructor.name, this.introduce.name, error)
+		}
+	}
 }

@@ -3,7 +3,9 @@ import {
     MongoClient,
     UpdateQuery
 } from "mongodb"
+import { Constants } from "../descriptor"
 import { IGuildRelated } from "../entities"
+import { Logger } from "../Logger"
 
 type TSchema = any
 
@@ -11,11 +13,13 @@ export class Repository<TEntity extends IGuildRelated> {
     private client: MongoClient
     private dbName: string
     protected collectionName!: string
+    private logger: Logger
 
-    constructor(client: MongoClient, dbName: string) {
+    constructor(logger: Logger, client: MongoClient, dbName: string) {
+        this.logger = logger
         this.client = client
         this.dbName = dbName
-        this.collectionName = this.constructor.name.replace('Repository', '')
+        this.collectionName = this.constructor.name.replace(Constants.Repository, Constants.EmptyString)
     }
 
     protected async getFirst(filter: FilterQuery<TSchema>): Promise<TEntity> {
@@ -43,7 +47,7 @@ export class Repository<TEntity extends IGuildRelated> {
         let collection = db.collection(this.collectionName)
         return collection.insertOne(entity)
             .then((result) => {
-                if (result.result.ok !== 1) console.log(`[ERROR] ${this.constructor.name}.insert()`)
+                if (result.result.ok !== 1) this.logger.logError(this.constructor.name, this.insert.name, Constants.EmptyString)
                 else {
                     success = true
                 }
@@ -57,7 +61,7 @@ export class Repository<TEntity extends IGuildRelated> {
         let collection = db.collection(this.collectionName)
         return collection.updateOne(filter, update)
             .then((result) => {
-                if (result.result.ok !== 1) console.log(`[ERROR] ${this.constructor.name}.update()`)
+                if (result.result.ok !== 1) this.logger.logError(this.constructor.name, this.update.name, Constants.EmptyString)
                 else {
                     success = true
                 }
@@ -71,7 +75,7 @@ export class Repository<TEntity extends IGuildRelated> {
         let collection = db.collection(this.collectionName)
         return collection.deleteOne(filter)
             .then((result) => {
-                if (result.result.ok !== 1) console.log(`[ERROR] ${this.constructor.name}.deleteOne(${filter})`)
+                if (result.result.ok !== 1) this.logger.logError(this.constructor.name, this.deleteOne.name, Constants.EmptyString)
                 else {
                     success = true
                 }
@@ -85,7 +89,7 @@ export class Repository<TEntity extends IGuildRelated> {
         let collection = db.collection(this.collectionName)
         return collection.deleteMany({ guildId: guildId })
             .then((deleteResult) => {
-                if (deleteResult.result.ok !== 1) console.log(`[ERROR] ${this.constructor.name}.deleteForGuild(${guildId})`)
+                if (deleteResult.result.ok !== 1) this.logger.logError(this.constructor.name, this.deleteForGuild.name, Constants.EmptyString)
                 else {
                     result = true
                 }

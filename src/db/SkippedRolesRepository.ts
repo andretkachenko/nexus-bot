@@ -1,10 +1,11 @@
 import { SkippedRole } from "../entities"
 import { MongoClient } from "mongodb"
 import { Repository } from "./Repository"
+import { Logger } from "../Logger"
 
 export class SkippedRolesRepository extends Repository<SkippedRole> {
-    constructor(client: MongoClient, dbName: string) {
-        super(client, dbName)
+    constructor(logger: Logger, client: MongoClient, dbName: string) {
+        super(logger, client, dbName)
     }
 
     public async getAll(guildId: string): Promise<SkippedRole[]> {

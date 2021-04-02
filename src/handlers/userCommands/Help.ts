@@ -1,22 +1,24 @@
 import { Message, MessageEmbed } from "discord.js"
 import { Config } from "../../config"
+import { Constants } from "../../descriptor"
 import { BotCommand } from "../../enums"
+import { Logger } from "../../Logger"
 import { BaseHandler } from "./BaseHandler"
 
 export class Help extends BaseHandler {
     private img: string
     private prefix: string
 
-    constructor(config: Config) {
-        super(config.prefix + BotCommand.Help)
+    constructor(logger: Logger, config: Config) {
+        super(logger, config.prefix + BotCommand.Help)
         this.img = config.img
         this.prefix = config.prefix
     }
 
     protected process(message: Message) {
         let embed = new MessageEmbed()
-            .setColor("#0099ff")
-            .setAuthor('Nexus Bot - link voice and text channels', this.img, 'https://github.com/andretkachenko/nexus-bot')
+            .setColor(Constants.EmbedInfoColor)
+            .setAuthor(Constants.EmbedTitle, this.img, Constants.RepoUrl)
             .addField("**How to use**",
             `You don't need to set up anything - once you join a voice channel (excluding inactive channel), a new category with the linked text channel will be created.
             Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.
@@ -29,12 +31,12 @@ export class Help extends BaseHandler {
             **${this.prefix}skip [0/1] @{user/role}** - skip/change visibility settings for specific user/role. Supports multiple mentions. Example: \`${this.prefix}skip 1 @User1 @Role1 @User2\`. Requires user to have admin rights.
             **${this.prefix}preserve [0/1] {channelId}** - set linked text channel to save messages after the last user left the voice channel. \`channelId\` - id of the voice channel. Example: \`${this.prefix}preserve 1 717824008636334130\`. Requires user to have admin rights.
             `)
-            .addField("**Want to use it on your server?**", "Follow this link: https://github.com/andretkachenko/nexus-bot#want-to-use-at-your-server")
-            .addField("**Any issues or missing feature?**", "You can suggest it via https://github.com/andretkachenko/nexus-bot/issues")
+            .addField("**Want to use it on your server?**", "Follow this link: " + Constants.RepoUrl+Constants.InviteGuideUri)
+            .addField("**Any issues or missing feature?**", "You can suggest it via " + Constants.RepoUrl+Constants.IssuesUri)
         message.channel.send(embed)
     }
 
-    protected hasPermissions(message: Message): boolean {
+    protected hasPermissions(_message: Message): boolean {
         return true
     }
 }

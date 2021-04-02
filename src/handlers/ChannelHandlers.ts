@@ -19,6 +19,7 @@ import {
 	Permission,
 	ChannelType
 } from "../enums"
+import { Constants } from "../descriptor"
 
 export class ChannelHandlers {
 	private client: Client
@@ -88,12 +89,9 @@ export class ChannelHandlers {
 		}
 
 		if (category && category.children.size < 50) options.parent = parentId
-		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + '-text', options)
+		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + Constants.TextSuffix, options)
 			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
-			.catch(async reason => {
-				console.log(`[ERROR] ${this.constructor.name}.createTextChannel() - ${reason}; serverOwner: ${(await this.client.users.fetch(newVoiceState.guild.ownerID)).tag}; permissions: ${guild?.me?.roles.highest.position}:${guild?.me?.permissions.toJSON().toString()}+${category?.permissionsFor(guild?.me?.id as string)?.toJSON().toString()} vs ${newVoiceState.member?.roles.highest.position}:${newVoiceState.member?.permissions.toJSON().toString()}+${category?.permissionsFor(newVoiceState.member?.id as string)?.toJSON().toString()}`)
-
-			})
+			.catch(async reason => this.logger.logError(this.constructor.name, this.createTextChannel.name, reason))
 
 	}
 
@@ -108,9 +106,7 @@ export class ChannelHandlers {
 			.then(skip => {
 				if (skip) return
 				textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
-					.catch(reason => {
-						console.log(`[ERROR] ${this.constructor.name}.showHideTextChannel() - ${reason}`)
-					})
+					.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason))
 			})
 	}
 
@@ -124,7 +120,7 @@ export class ChannelHandlers {
 			await this.fetchAndDelete(textChannel)
 		}
 		catch (error) {
-			this.handleBulkDeleteError(error)
+			this.logger.logError(this.constructor.name, this.deleteNotPinnedMessages.name, error)
 		}
 	}
 
@@ -133,7 +129,7 @@ export class ChannelHandlers {
 		let categoryExists = guild.channels.cache.find(c => c.id == textCategoryId)
 		if (!categoryExists) {
 			this.mongoConnector.textCategoryRepository.deleteForGuild(guild.id)
-			textCategoryId = ''
+			textCategoryId = Constants.EmptyString
 		}
 		if (this.isNullOrEmpty(textCategoryId)) {
 			textCategoryId = await this.createCategory(guild)
@@ -142,13 +138,13 @@ export class ChannelHandlers {
 	}
 
 	private async createCategory(guild: Guild): Promise<string> {
-		if (!this.sufficientPermissions(Permission.MANAGE_CHANNELS, guild.me?.permissions)) return ''
+		if (!this.sufficientPermissions(Permission.MANAGE_CHANNELS, guild.me?.permissions)) return Constants.EmptyString
 
-		let categoryId = ''
+		let categoryId = Constants.EmptyString
 
-		await guild.channels.create("Nexus channels", { type: ChannelType.category })
+		await guild.channels.create(Constants.CategoryName, { type: ChannelType.category })
 			.then(async (category) => categoryId = await this.registerCategory(category))
-			.catch(reason => { console.log(`[ERROR] ${this.constructor.name}.createCategory() - ${reason}`) })
+			.catch(reason => { this.logger.logError(this.constructor.name, this.createCategory.name, reason) })
 
 		return categoryId
 	}
@@ -161,7 +157,7 @@ export class ChannelHandlers {
 		}
 		return this.mongoConnector.textCategoryRepository.insert(textCategoryMap)
 			.then(success => {
-				return success ? category.id : ''
+				return success ? category.id : Constants.EmptyString
 			})
 	}
 
@@ -221,11 +217,5 @@ export class ChannelHandlers {
 		}
 
 		return true
-	}
-
-	private handleBulkDeleteError(reason: string) {
-		if (reason !== "DiscordAPIError: You can only bulk delete messages that are under 14 days old.") {
-			console.log(`[ERROR] ${this.constructor.name}.deleteNotPinnedMessages() - ${reason}`)
-		}
 	}
 }

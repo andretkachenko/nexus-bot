@@ -1,16 +1,19 @@
-import * as debug from 'debug'
-import { Client } from 'discord.js'
-import { Config } from './config'
+import { Constants } from "./descriptor"
 
 export class Logger {
-    public logSystem = debug('bot:system')
-    public logEvent = debug('bot:event')
-    public logError = debug('bot:error')
-    public logWarn = debug('bot:warn')
+	public logSystem(message: string) {
+		console.log(`${Constants.SystemMarker} ${message}`)
+	}
 
-	public introduce(client: Client, config: Config) {
-		this.logEvent(`nexus-bot Connected.`)
-		this.logEvent(`Logged in as ${client.user ? client.user.tag : "undefined"}`)
-		if(client.user) client.user.setActivity({ "name": `${config.prefix}help on ${client.guilds.cache.size} servers`, "type": "LISTENING" })
+	public logEvent(message: string) {
+		console.log(message)
+	}
+
+	public logError(className: string, methodName: string, message: string, parameters: string = Constants.EmptyString) {
+		console.log(`${Constants.ErrorMarker} ${className}.${methodName}(${parameters}) - ${message}`)
+	}
+
+	public logWarn(message: string) {
+		console.log(`${Constants.WarnMarker} ${message}`)
 	}
 }
