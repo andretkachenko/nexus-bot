@@ -1,9 +1,9 @@
 export enum BotCommand {
-    Help = "help",
-    Ping = "ping",
-    Write = "write",
-    Ignore = "ignore",
-    Skip = "skip",
-    Preserve = "preserve",
-    Commands = "commands"
+	help = 'help',
+	ping = 'ping',
+	write = 'write',
+	ignore = 'ignore',
+	skip = 'skip',
+	preserve = 'preserve',
+	commands = 'commands'
 }

@@ -1,6 +1,6 @@
 import { Client } from 'discord.js'
 import { Logger } from './Logger'
-import { EventRegistry } from "./EventRegistry"
+import { EventRegistry } from './EventRegistry'
 import { Config } from './config'
 import { Messages } from './descriptor'
 
@@ -18,10 +18,11 @@ export class Bot {
 	}
 
 	public start(): void {
-		this.logger.logSystem(Messages.StartingBot)
-		
+		this.logger.logSystem(Messages.startingBot)
+
 		// register all event handlers
 		this.eventRegistry.registerEvents()
 		this.client.login(this.config.token)
+			.catch(reason => this.logger.logError(this.constructor.name, this.start.name, reason))
 	}
 }

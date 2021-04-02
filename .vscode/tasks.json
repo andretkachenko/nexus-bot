@@ -4,9 +4,29 @@
 		{
 			"type": "npm",
 			"script": "lint",
-			"problemMatcher": [ "$eslint-stylish" ],
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
 			"label": "npm: lint",
 			"detail": "eslint -c .eslintrc.js --ext .ts src"
+		},
+		{
+			"type": "npm",
+			"script": "build-ts",
+			"label": "npm: compile typescript",
+			"detail": "eslint -c .eslintrc.js --ext .ts src",
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
+	],
+	"compounds": [
+	  {
+		"name": "Node",
+		"configurations": ["Node.js"],
+		"preLaunchTask": "${defaultBuildTask}"
+	  }
 	]
 }

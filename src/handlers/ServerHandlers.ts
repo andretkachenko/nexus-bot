@@ -1,14 +1,20 @@
-import { Guild } from "discord.js"
-import { MongoConnector } from "../db/MongoConnector"
+import { Guild } from 'discord.js'
+import { MongoConnector } from '../db/MongoConnector'
+import { Logger } from '../Logger'
 
 export class ServerHandlers {
-    private mongoConnector: MongoConnector
+	private logger: Logger
+	private mongoConnector: MongoConnector
 
-    constructor(mongoConnector: MongoConnector) {
-        this.mongoConnector = mongoConnector
-    }
+	constructor(logger: Logger, mongoConnector: MongoConnector) {
+		this.logger = logger
+		this.mongoConnector = mongoConnector
+	}
 
-    public async handleBotKickedFromServer(guild: Guild) {
-        this.mongoConnector.repositories.forEach(repo => repo.deleteForGuild(guild.id))
-    }
+	public handleBotKickedFromServer(guild: Guild): void {
+		this.mongoConnector.repositories.forEach(repo => {
+			repo.deleteForGuild(guild.id)
+				.catch(reason => this.logger.logError(this.constructor.name, this.handleBotKickedFromServer.name, reason, repo.constructor.name))
+		})
+	}
 }
