@@ -1,5 +1,5 @@
 export enum ProcessEvent {
-	Exit = 'exit',
-	UncaughtException = 'uncaughtException',
-	UnhandledRejection = 'unhandledRejection',
+	exit = 'exit',
+	uncaughtException = 'uncaughtException',
+	unhandledRejection = 'unhandledRejection',
 }

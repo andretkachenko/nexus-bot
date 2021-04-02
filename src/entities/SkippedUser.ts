@@ -1,6 +1,6 @@
-import { IGuildRelated } from "."
+import { IGuildRelated } from '.'
 
 export interface SkippedUser extends IGuildRelated {
-    guildId: string
-    userId: string
+	guildId: string
+	userId: string
 }

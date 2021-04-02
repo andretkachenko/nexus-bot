@@ -1,6 +1,6 @@
-import { IGuildRelated } from "."
+import { IGuildRelated } from '.'
 
 export interface IgnoredChannel extends IGuildRelated {
-    guildId: string
-    channelId: string
+	guildId: string
+	channelId: string
 }
