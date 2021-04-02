@@ -120,11 +120,12 @@ export class ChannelHandlers {
 		let textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
 		if (textChannelMap.preserve) return
 
-		let last: boolean
-		do {
-			last = await this.fetchAndDelete(textChannel)
+		try {
+			await this.fetchAndDelete(textChannel)
 		}
-		while (!last)
+		catch (error) {
+			this.handleBulkDeleteError(error)
+		}
 	}
 
 	private async resolveTextCategory(guild: Guild): Promise<string> {
@@ -210,21 +211,16 @@ export class ChannelHandlers {
 	}
 
 	private async fetchAndDelete(textChannel: TextChannel): Promise<boolean> {
-		let last = false
-
-		try {
-			let fetched = await textChannel.messages.fetch({ limit: 100 })
-			let notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
-			last = notPinned.size > 0
-			if (last) {
-				await textChannel.bulkDelete(notPinned).catch(reason => this.handleBulkDeleteError(reason))
-			}
-		}
-		catch (error) {
-			this.handleBulkDeleteError(error as string)
+		let anyLeft = true
+		let fetched = await textChannel.messages.fetch({ limit: 100 })
+		let notPinned = fetched.filter(fetchedMsg => !fetchedMsg.pinned)
+		anyLeft = notPinned.size > 0
+		if (anyLeft) {
+			await textChannel.bulkDelete(notPinned)
+			return this.fetchAndDelete(textChannel)
 		}
 
-		return last
+		return true
 	}
 
 	private handleBulkDeleteError(reason: string) {
