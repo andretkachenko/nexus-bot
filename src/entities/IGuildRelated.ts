@@ -1,3 +1,3 @@
 export interface IGuildRelated {
-    guildId: string
+	guildId: string
 }

@@ -1,34 +1,44 @@
-import { Message } from "discord.js"
-import { MongoConnector } from "../../db/MongoConnector"
-import { TextChannelMap } from "../../entities"
+import { Message } from 'discord.js'
+import { MongoConnector } from '../../db/MongoConnector'
+import { Constants } from '../../descriptor'
+import { TextChannelMap } from '../../entities'
 import {
-    BotCommand,
-    Permission
-} from "../../enums"
-import { BaseHandler } from "./BaseHandler"
+	BotCommand,
+	Permission
+} from '../../enums'
+import { Logger } from '../../Logger'
+import { BaseHandler } from './BaseHandler'
 
 export class Preserve extends BaseHandler {
-    private mongoConnector: MongoConnector
+	private mongoConnector: MongoConnector
 
-    constructor(mongoConnector: MongoConnector, prefix: string) {
-        super(prefix + BotCommand.Preserve)
-        this.mongoConnector = mongoConnector
-    }
+	constructor(logger: Logger, mongoConnector: MongoConnector, prefix: string) {
+		super(logger, prefix + BotCommand.preserve)
+		this.mongoConnector = mongoConnector
+	}
 
-    protected process(message: Message) {
-        let args = this.splitArguments(this.trimCommand(message))
-        let guildId = message.guild?.id as string
-        let textChannelMap: TextChannelMap = {
-            guildId: guildId,
-            voiceChannelId: args[1],
-            textChannelId: '', 
-            preserve: args[0] == '1'
-        }
-        this.mongoConnector.textChannelRepository.setPreserveOption(textChannelMap)
-    }
+	protected process(message: Message): void {
+		const args = this.splitArguments(this.trimCommand(message))
+		const guildId = message.guild?.id as string
+		const preserve = args[0] === Constants.enable
+		for (let i = 1; i < args.length; i++) {
+			this.handlePreserveCall(guildId, preserve, args[i])
+		}
+	}
 
-    protected hasPermissions(message: Message): boolean {
-        return super.hasPermissions(message) ||
-            (message.member !== null && message.member.hasPermission(Permission.MANAGE_CHANNELS))
-    }
+	protected handlePreserveCall(guildId: string, preserve: boolean, voiceChannelId: string): void {
+		const textChannelMap: TextChannelMap = {
+			guildId,
+			voiceChannelId,
+			textChannelId: Constants.emptyString,
+			preserve
+		}
+		this.mongoConnector.textChannelRepository.setPreserveOption(textChannelMap)
+			.catch(reason => this.logger.logError(this.constructor.name, this.handlePreserveCall.name, reason))
+	}
+
+	protected hasPermissions(message: Message): boolean {
+		return super.hasPermissions(message) ||
+            (message.member !== null && message.member.hasPermission(Permission.manageChannels))
+	}
 }

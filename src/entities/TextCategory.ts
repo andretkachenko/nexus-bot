@@ -1,6 +1,6 @@
-import { IGuildRelated } from "."
+import { IGuildRelated } from '.'
 
 export interface TextCategory extends IGuildRelated {
-    guildId: string
-    textCategoryId: string
+	guildId: string
+	textCategoryId: string
 }
