@@ -3,18 +3,5 @@
 		{
 			"path": "."
 		}
-	],
-	"settings": {
-		"eslint.options": {
-		
-		},
-		"eslint.format.enable": true
-	},
-	"extensions": {
-		"recommendations": [
-			"dbaeumer.vscode-eslint",
-			"eg2.vscode-npm-script",
-			"eamodio.gitlens"
-		  ]
-	}
+	]
 }
