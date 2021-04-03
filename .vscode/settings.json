@@ -1,4 +1,6 @@
 {
+    "eslint.options": {},
+    "eslint.format.enable": true,
     "files.exclude": {
         "*.code-workspace": true,
         "node_modules": true,

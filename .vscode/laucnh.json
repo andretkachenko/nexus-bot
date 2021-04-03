@@ -1,7 +1,0 @@
-{
-    "configurations": [
-        {
-            "preLaunchTask": "npm: compile typescript"
-        }
-    ]   
-}
