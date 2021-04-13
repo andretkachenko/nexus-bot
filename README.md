@@ -26,6 +26,7 @@ List of available commands:
 ## Known issues
 - Due to the fact that Discord bots are not allowed to change permissions for admins, server admins will still see all text channels (IMHO, not even an issue, but still worth mentioning).  
 - Messages in the channel can be cached in the app, so the user can still see it even when it's cleared on the server. These messages will disappear after Discord app reboot. For now, I didn't see any solution to fix it - if you know any workaround, please post it in issues.
+- Linked text channel creates with `undefined-text` name - this will remain as such until DiscordJS team adds proper stage channels support.
 
 ### If you found a bug
 If you have any issue with the bot functionality, feel free to post an issue in this repo - for now, I am intended to maintain this app as long as I don't feel it is stable enough.
