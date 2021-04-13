@@ -8,6 +8,7 @@ import {
 	Permissions,
 	CategoryChannel,
 	PermissionResolvable,
+	VoiceChannel,
 } from 'discord.js'
 import { MongoConnector } from '../db/MongoConnector'
 import {
@@ -42,7 +43,7 @@ export class ChannelHandlers {
 			this.showHideTextChannel(textChannel, newVoiceState.member, true)
 		}
 		else {
-			await this.mongoConnector.textChannelRepository.delete(newVoiceState.guild.id, channelId)
+			if(textChannelMap) await this.mongoConnector.textChannelRepository.delete(newVoiceState.guild.id, channelId)
 			this.createTextChannel(newVoiceState)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelJoin.name, reason))
 		}
@@ -62,12 +63,12 @@ export class ChannelHandlers {
 	}
 
 	private async createTextChannel(newVoiceState: VoiceState) {
-		const guild = newVoiceState.channel?.guild
-		const isIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id as string, newVoiceState.channel?.id as string)
-		if (!newVoiceState.channel || !guild || isIgnored || !guild.me?.permissions) return
+		const guild = newVoiceState.guild
+		const isIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.id)
+		if (!newVoiceState.channelID || !guild || isIgnored || !guild.me?.permissions) return
 
 		const parentId = await this.resolveTextCategory(guild)
-		const category = newVoiceState.channel?.guild.channels.cache.find(c => c.id === parentId) as CategoryChannel
+		const category = guild.channels.cache.find(c => c.id === parentId) as CategoryChannel
 
 		if (!this.sufficientPermissions([Permission.manageChannels, Permission.manageRoles],
 			guild?.me?.permissions, category?.permissionsFor(guild.me?.id ))) return
@@ -91,8 +92,9 @@ export class ChannelHandlers {
 		}
 
 		if (category && category.children.size < 50) options.parent = parentId
-		newVoiceState.channel.guild.channels.create(newVoiceState.channel.name + Constants.textSuffix, options)
-			.then(ch => this.registerChannel(newVoiceState.channel?.id as string, ch as TextChannel))
+		const voiceChannelName = newVoiceState.channel?.name ?? Constants.undefinedId // workaround before discord.js implements stage channels
+		guild.channels.create(voiceChannelName + Constants.textSuffix, options)
+			.then(ch => this.registerChannel(newVoiceState.channelID, ch))
 			.catch(reason => this.logger.logError(this.constructor.name, this.createTextChannel.name, reason))
 
 	}
@@ -165,7 +167,9 @@ export class ChannelHandlers {
 			})
 	}
 
-	private registerChannel(voiceChannelId: string, channel: TextChannel): void {
+	private registerChannel(voiceChannelId: string | undefined | null, channel: TextChannel | CategoryChannel | VoiceChannel): void {
+		if(!voiceChannelId || !this.isTextChannel(channel) || !channel.id) return
+
 		const textChannelMap: TextChannelMap = {
 			guildId: channel.guild.id,
 			voiceChannelId,
@@ -174,6 +178,10 @@ export class ChannelHandlers {
 		this.mongoConnector.textChannelRepository.insert(textChannelMap)
 			.catch(reason => this.logger.logError(this.constructor.name, this.registerChannel.name, reason))
 
+	}
+
+	private isTextChannel(channel: TextChannel | CategoryChannel | VoiceChannel): channel is TextChannel {
+		return (channel as TextChannel) !== undefined
 	}
 
 	private isNullOrEmpty(target: string): boolean {
