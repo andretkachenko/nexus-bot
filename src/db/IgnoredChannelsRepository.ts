@@ -8,7 +8,7 @@ export class IgnoredChannelsRepository extends Repository<IgnoredChannel> {
 		super(logger, client, dbName)
 	}
 
-	public async exists(guildId: string, channelId: string): Promise<boolean> {
+	public async exists(guildId: string | undefined, channelId: string | undefined): Promise<boolean> {
 		return super.getFirst({ guildId, channelId })
 			.then(channel => {
 				return channel !== undefined && channel !== null
