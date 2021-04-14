@@ -48,6 +48,7 @@ export class EventRegistry {
 		this.handleMessage()
 		this.handeMessageUpdate()
 		this.handeVoiceStateUpdate()
+		this.handleChannelDelete()
 		this.handleGuildDelete()
 
 		// => Bot error and warn handlers
@@ -94,6 +95,12 @@ export class EventRegistry {
 	private handleGuildDelete() {
 		this.client.on(ClientEvent.guildDelete, guild => {
 			this.serverHandlers.handleBotKickedFromServer(guild)
+		})
+	}
+
+	private handleChannelDelete() {
+		this.client.on(ClientEvent.channelDelete, channel => {
+			this.channelHandlers.handleVoiceChannelDelete(channel)
 		})
 	}
 

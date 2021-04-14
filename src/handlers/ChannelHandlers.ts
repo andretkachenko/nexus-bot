@@ -9,6 +9,8 @@ import {
 	CategoryChannel,
 	PermissionResolvable,
 	VoiceChannel,
+	PartialDMChannel,
+	Channel,
 } from 'discord.js'
 import { MongoConnector } from '../db/MongoConnector'
 import {
@@ -60,6 +62,20 @@ export class ChannelHandlers {
 			this.deleteNotPinnedMessages(textChannel, oldVoiceState.channel.id)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelLeave.name, reason))
 		}
+	}
+
+	public handleVoiceChannelDelete(channel: Channel | PartialDMChannel): void {
+		if(!this.isVoiceChannel(channel)) return
+		this.mongoConnector.textChannelRepository.getTextChannelMap(channel.guild.id, channel.id)
+			.then(textChannelMap => this.deleteLinkedTextChannel(channel, textChannelMap))
+			.catch(reason => this.logger.logError(this.constructor.name, this.handleVoiceChannelDelete.name, reason))
+	}
+
+	private deleteLinkedTextChannel(channel: VoiceChannel, textChannelMap: TextChannelMap): void {
+		if(!textChannelMap) return
+		channel.guild.channels.cache.delete(textChannelMap.textChannelId)
+		this.mongoConnector.textChannelRepository.delete(textChannelMap.guildId, textChannelMap.voiceChannelId)
+			.catch(reason => this.logger.logError(this.constructor.name, this.handleVoiceChannelDelete.name, reason))
 	}
 
 	private async createTextChannel(newVoiceState: VoiceState) {
@@ -180,10 +196,6 @@ export class ChannelHandlers {
 
 	}
 
-	private isTextChannel(channel: TextChannel | CategoryChannel | VoiceChannel): channel is TextChannel {
-		return (channel as TextChannel) !== undefined
-	}
-
 	private isNullOrEmpty(target: string): boolean {
 		return !target || 0 === target.length
 	}
@@ -230,5 +242,13 @@ export class ChannelHandlers {
 		}
 
 		return true
+	}
+
+	private isTextChannel(channel: TextChannel | CategoryChannel | VoiceChannel): channel is TextChannel {
+		return (channel as TextChannel) !== undefined
+	}
+
+	private isVoiceChannel(channel: Channel | PartialDMChannel): channel is VoiceChannel {
+		return (channel as VoiceChannel) !== undefined
 	}
 }
