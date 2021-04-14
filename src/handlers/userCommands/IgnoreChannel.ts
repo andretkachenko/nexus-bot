@@ -37,7 +37,7 @@ export class IgnoreChannel extends BaseHandler {
 	private handleChannelId(ignore: boolean, message: Message, channelId: string, guildId: string) {
 		try {
 			const isValid = this.channelIdValidator.validate(message.channel, channelId, guildId)
-			if (!isValid) throw new Error(Messages.invalidChannelId)
+			if (!isValid) throw new Error(Messages.invalidVoiceChannelId)
 
 			if (ignore) this.addIgnore(guildId, channelId)
 			else this.deleteIgnore(guildId, channelId)

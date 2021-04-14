@@ -23,6 +23,7 @@ import {
 	ChannelType
 } from '../enums'
 import { Constants } from '../descriptor'
+import { TypeGuarder } from '../services'
 
 export class ChannelHandlers {
 	private client: Client
@@ -65,7 +66,7 @@ export class ChannelHandlers {
 	}
 
 	public handleVoiceChannelDelete(channel: Channel | PartialDMChannel): void {
-		if(!this.isVoiceChannel(channel)) return
+		if(!TypeGuarder.isVoiceChannel(channel)) return
 		this.mongoConnector.textChannelRepository.get(channel.guild.id, channel.id)
 			.then(textChannelMap => this.deleteLinkedTextChannel(channel, textChannelMap))
 			.catch(reason => this.logger.logError(this.constructor.name, this.handleVoiceChannelDelete.name, reason))
@@ -187,7 +188,7 @@ export class ChannelHandlers {
 	}
 
 	private registerChannel(voiceChannelId: string | undefined | null, channel: TextChannel | CategoryChannel | VoiceChannel): void {
-		if(!voiceChannelId || !this.isTextChannel(channel) || !channel.id) return
+		if(!voiceChannelId || !TypeGuarder.isTextChannel(channel) || !channel.id) return
 
 		const textChannelMap: TextChannelMap = {
 			guildId: channel.guild.id,
@@ -245,13 +246,5 @@ export class ChannelHandlers {
 		}
 
 		return true
-	}
-
-	private isTextChannel(channel: TextChannel | CategoryChannel | VoiceChannel): channel is TextChannel {
-		return (channel as TextChannel).type === ChannelType.text
-	}
-
-	private isVoiceChannel(channel: Channel | PartialDMChannel): channel is VoiceChannel {
-		return (channel as VoiceChannel).type === ChannelType.voice
 	}
 }

@@ -6,6 +6,7 @@ import { BotCommand,
 	Permission
 } from '../../enums'
 import { Logger } from '../../Logger'
+import { TypeGuarder } from '../../services'
 import { ChannelIdValidator } from '../../services/ChannelIdValidator'
 import { BaseHandler } from './BaseHandler'
 
@@ -30,8 +31,11 @@ export class MapChannels extends BaseHandler {
 
 	private async linkChannels(message: Message, guildId: string, override: boolean, voiceChannelId: string, textChannelId: string) {
 		try {
-			const isValid = this.channelIdValidator.validate(message.channel, voiceChannelId, guildId)
-			if (!isValid) throw new Error(Messages.invalidChannelId)
+			const validVoiceId = this.channelIdValidator.validate(message.channel, voiceChannelId, guildId)
+			if (!validVoiceId) throw new Error(Messages.invalidVoiceChannelId)
+
+			const textChannel = message.guild?.channels.resolve(textChannelId)
+			if(!textChannel || !TypeGuarder.isTextChannel(textChannel)) throw new Error(Messages.invalidTextChannelId)
 
 			// gather existing mapings before they are mutated
 			const voiceMap = await this.mongoConnector.textChannelRepository.get(guildId, voiceChannelId)
