@@ -1,6 +1,8 @@
 import { Message } from 'discord.js'
 import { Constants } from '../../descriptor'
-import { BotCommand } from '../../enums'
+import { BotCommand,
+	Permission
+} from '../../enums'
 import { Logger } from '../../Logger'
 import { BaseHandler } from './BaseHandler'
 
@@ -13,5 +15,9 @@ export class Write extends BaseHandler {
 		const msg = this.trimCommand(message)
 		if(msg !== Constants.emptyString) message.channel.send(msg, message.attachments.array())
 			.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
+	}
+
+	protected hasPermissions(message: Message): boolean {
+		return message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true})
 	}
 }

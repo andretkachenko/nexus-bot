@@ -7,6 +7,7 @@ import { IHandler } from './userCommands/IHandler'
 import {
 	Help,
 	IgnoreChannel,
+	MapChannels,
 	Ping,
 	Preserve,
 	SkipUsersRoles,
@@ -26,6 +27,7 @@ export class UserCommandHandlers {
 			.setNext(new Preserve(logger, mongoConnector, config.prefix))
 			.setNext(new IgnoreChannel(logger, client, mongoConnector, config.prefix))
 			.setNext(new SkipUsersRoles(logger, mongoConnector, config.prefix))
+			.setNext(new MapChannels(logger, client, mongoConnector, config.prefix))
 	}
 
 	public handle(message: Message): void {

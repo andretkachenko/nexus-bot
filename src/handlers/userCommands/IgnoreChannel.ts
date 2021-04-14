@@ -1,28 +1,28 @@
 import {
 	Message,
-	TextChannel,
-	NewsChannel,
-	DMChannel,
 	Client
 } from 'discord.js'
 import {
-	ChannelType,
-	BotCommand
+	BotCommand,
+	Permission
 } from '../../enums'
 import { MongoConnector } from '../../db/MongoConnector'
 import { IgnoredChannel } from '../../entities'
 import { BaseHandler } from './BaseHandler'
 import { Logger } from '../../Logger'
 import { Constants, Messages } from '../../descriptor'
+import { ChannelIdValidator } from '../../services/ChannelIdValidator'
 
 export class IgnoreChannel extends BaseHandler {
 	private client: Client
 	private mongoConnector: MongoConnector
+	private channelIdValidator: ChannelIdValidator
 
 	constructor(logger: Logger, client: Client, mongoConnector: MongoConnector, prefix: string) {
 		super(logger, prefix + BotCommand.ignore)
 		this.mongoConnector = mongoConnector
 		this.client = client
+		this.channelIdValidator = new ChannelIdValidator(this.logger, this.client)
 	}
 
 	protected process(message: Message): void {
@@ -36,8 +36,8 @@ export class IgnoreChannel extends BaseHandler {
 
 	private handleChannelId(ignore: boolean, message: Message, channelId: string, guildId: string) {
 		try {
-			const isValid = this.validateChannelId(message.channel, channelId, guildId)
-			if (!isValid) throw new Error(Messages.invalidChannelId)
+			const isValid = this.channelIdValidator.validate(message.channel, channelId, guildId)
+			if (!isValid) throw new Error(Messages.invalidVoiceChannelId)
 
 			if (ignore) this.addIgnore(guildId, channelId)
 			else this.deleteIgnore(guildId, channelId)
@@ -63,35 +63,8 @@ export class IgnoreChannel extends BaseHandler {
 			.catch(reason => this.logger.logError(this.constructor.name, this.addIgnore.name, reason))
 	}
 
-	private validateChannelId(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string | undefined): boolean {
-		let isValid = true
-		let message = Constants.emptyString
-		if (textChannel.type === ChannelType.dm) {
-			message = Messages.dmNotSupported
-			isValid = false
-		}
-		else if (guildId === undefined) {
-			message = Messages.commandProcessError + Messages.missingGuild
-			isValid = false
-		}
-		if (isValid) {
-			const guild = this.client.guilds.resolve((guildId as string).trim())
-			if (!guild) {
-				message = Messages.commandProcessError + Messages.missingGuild
-				isValid = false
-			} else {
-				const channel = guild.channels.resolve(channelId)
-				if (channel?.type !== ChannelType.voice) {
-					message = Messages.commandProcessError + Messages.notVoiceChannelId
-					isValid = false
-				}
-			}
-		}
-
-		if (message !== Constants.emptyString) {
-			textChannel.send(message)
-				.catch(reason => this.logger.logError(this.constructor.name, this.validateChannelId.name, reason))
-		}
-		return isValid
+	protected hasPermissions(message: Message): boolean {
+		return super.hasPermissions(message) ||
+            (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
 	}
 }
