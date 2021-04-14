@@ -28,7 +28,7 @@ export abstract class BaseHandler implements IHandler {
 	}
 
 	protected hasPermissions(message: Message): boolean {
-		return message.member !== null && message.member.hasPermission(Permission.administrator)
+		return message.member !== null && message.member.hasPermission(Permission.manageRoles, { checkAdmin: true, checkOwner: true})
 	}
 
 	protected splitArguments(message: string): string[] {

@@ -31,6 +31,7 @@ export class Help extends BaseHandler {
             **${this.prefix}skip [0/1] @{user/role}** - skip/change visibility settings for specific user/role. Supports multiple mentions. Example: \`${this.prefix}skip 1 @User1 @Role1 @User2\`. Requires user to have admin rights.
             **${this.prefix}preserve [0/1] {channelId}** - set linked text channel to save messages after the last user left the voice channel. \`channelId\` - id of the voice channel. Example: \`${this.prefix}preserve 1 717824008636334130\`. Requires user to have admin rights.
             `)
+			.addField('**Danger zone! Use with caution!**', `**${this.prefix}map [0/1] {voiceChannelId} {textChannelId}** - map voice and text channels together. 1 means override existing mapings.`)
 			.addField('**Want to use it on your server?**', 'Follow this link: ' + Constants.repoUrl+Constants.inviteGuideUri)
 			.addField('**Any issues or missing feature?**', 'You can suggest it via ' + Constants.repoUrl+Constants.issuesUri)
 		message.channel.send(embed)

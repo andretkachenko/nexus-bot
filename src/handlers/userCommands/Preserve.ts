@@ -30,15 +30,14 @@ export class Preserve extends BaseHandler {
 		const textChannelMap: TextChannelMap = {
 			guildId,
 			voiceChannelId,
-			textChannelId: Constants.emptyString,
-			preserve
+			textChannelId: Constants.emptyString
 		}
-		this.mongoConnector.textChannelRepository.setPreserveOption(textChannelMap)
+		this.mongoConnector.textChannelRepository.setPreserveOption(textChannelMap, preserve)
 			.catch(reason => this.logger.logError(this.constructor.name, this.handlePreserveCall.name, reason))
 	}
 
 	protected hasPermissions(message: Message): boolean {
 		return super.hasPermissions(message) ||
-            (message.member !== null && message.member.hasPermission(Permission.manageChannels))
+            (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
 	}
 }
