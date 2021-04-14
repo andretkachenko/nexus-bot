@@ -10,8 +10,8 @@ export class Logger {
 		console.log(message)
 	}
 
-	public logError(className: string, methodName: string, message: string, parameters: string = Constants.emptyString): void {
-		console.log(`${Constants.errorMarker} ${className}.${methodName}(${parameters}) - ${message}`)
+	public logError(className: string, methodName: string, message: string, ...parameters: string[]): void {
+		console.log(`${Constants.errorMarker} ${className}.${methodName}(${parameters.length > 0 ? parameters.join(', ') : Constants.emptyString}) - ${message}`)
 	}
 
 	public logWarn(message: string): void {

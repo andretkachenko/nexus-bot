@@ -38,7 +38,7 @@ export class ChannelHandlers {
 	public async handleChannelJoin(newVoiceState: VoiceState): Promise<void> {
 		const channelId = newVoiceState.channelID as string
 		if (channelId === newVoiceState.guild.afkChannelID) return
-		const textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(newVoiceState.guild.id, channelId)
+		const textChannelMap = await this.mongoConnector.textChannelRepository.get(newVoiceState.guild.id, channelId)
 		const textChannel = this.resolve(newVoiceState, textChannelMap?.textChannelId)
 
 		if (textChannel) {
@@ -52,7 +52,7 @@ export class ChannelHandlers {
 	}
 
 	public async handleChannelLeave(oldVoiceState: VoiceState): Promise<void> {
-		const textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(oldVoiceState.guild.id, oldVoiceState.channelID as string)
+		const textChannelMap = await this.mongoConnector.textChannelRepository.get(oldVoiceState.guild.id, oldVoiceState.channelID as string)
 
 		const textChannel = this.resolve(oldVoiceState, textChannelMap?.textChannelId)
 		if (!textChannel) return
@@ -66,16 +66,19 @@ export class ChannelHandlers {
 
 	public handleVoiceChannelDelete(channel: Channel | PartialDMChannel): void {
 		if(!this.isVoiceChannel(channel)) return
-		this.mongoConnector.textChannelRepository.getTextChannelMap(channel.guild.id, channel.id)
+		this.mongoConnector.textChannelRepository.get(channel.guild.id, channel.id)
 			.then(textChannelMap => this.deleteLinkedTextChannel(channel, textChannelMap))
 			.catch(reason => this.logger.logError(this.constructor.name, this.handleVoiceChannelDelete.name, reason))
 	}
 
 	private deleteLinkedTextChannel(channel: VoiceChannel, textChannelMap: TextChannelMap): void {
 		if(!textChannelMap) return
-		channel.guild.channels.cache.delete(textChannelMap.textChannelId)
+		const textChannel = channel.guild.channels.cache.find(ch => ch.id === textChannelMap.textChannelId)
+		if(!textChannel) return
+		textChannel.delete()
+			.catch(reason => this.logger.logError(this.constructor.name, this.deleteLinkedTextChannel.name, reason))
 		this.mongoConnector.textChannelRepository.delete(textChannelMap.guildId, textChannelMap.voiceChannelId)
-			.catch(reason => this.logger.logError(this.constructor.name, this.handleVoiceChannelDelete.name, reason))
+			.catch(reason => this.logger.logError(this.constructor.name, this.deleteLinkedTextChannel.name, reason))
 	}
 
 	private async createTextChannel(newVoiceState: VoiceState) {
@@ -135,7 +138,7 @@ export class ChannelHandlers {
 	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannelId: string) {
 		if (!this.sufficientPermissionsForChannel(Permission.manageMessages, textChannel)) return
 
-		const textChannelMap = await this.mongoConnector.textChannelRepository.getTextChannelMap(textChannel.guild.id, voiceChannelId)
+		const textChannelMap = await this.mongoConnector.textChannelRepository.get(textChannel.guild.id, voiceChannelId)
 		if (textChannelMap.preserve) return
 
 		try {
@@ -245,10 +248,10 @@ export class ChannelHandlers {
 	}
 
 	private isTextChannel(channel: TextChannel | CategoryChannel | VoiceChannel): channel is TextChannel {
-		return (channel as TextChannel) !== undefined
+		return (channel as TextChannel).type === ChannelType.text
 	}
 
 	private isVoiceChannel(channel: Channel | PartialDMChannel): channel is VoiceChannel {
-		return (channel as VoiceChannel) !== undefined
+		return (channel as VoiceChannel).type === ChannelType.voice
 	}
 }
