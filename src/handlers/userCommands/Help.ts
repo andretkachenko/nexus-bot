@@ -25,7 +25,7 @@ export class Help extends BaseHandler {
 		{
 			const args = this.splitArguments(this.trimCommand(message))
 			if(args[0]) docType = args[0]
-			const docHandler = this.cmdChain.getDocHandler(docType)
+			const docHandler = this.cmdChain.getDocHandler(docType) ?? this
 			this.trySendHelp(message.channel, docHandler)
 		}
 		catch (e) {

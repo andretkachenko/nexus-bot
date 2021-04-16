@@ -43,7 +43,7 @@ export class UserCommandHandlers {
 			new Whoops(logger, config)
 		)
 		this.docs = {}
-		handlers.forEach(handler => this.docs[handler.cmd] = handler)
+		handlers.forEach(handler => this.docs[handler.cmdWord.toLocaleLowerCase()] = handler)
 	}
 
 	public handle(message: Message): void {
@@ -52,7 +52,7 @@ export class UserCommandHandlers {
 	}
 
 	public getDocHandler(type: string): IHandler {
-		return this.docs[type]
+		return this.docs[type.toLocaleLowerCase()]
 	}
 
 	private chain(handlers: IHandler[]): IHandler {

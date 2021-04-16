@@ -9,15 +9,17 @@ import { IHandler } from './.'
 export abstract class BaseHandler implements IHandler {
 	private nextHandler!: IHandler
 	protected logger: Logger
-	public readonly cmd: string
+	public readonly cmdWord: string
 	protected readonly prefix: string
 	protected readonly img: string
+	protected readonly cmd: string
 
 	constructor(logger: Logger, config: Config, cmd : string) {
 		this.logger = logger
-		this.cmd = cmd
+		this.cmdWord = cmd
 		this.prefix = config.prefix
 		this.img = config.img
+		this.cmd = this.prefix + this.cmdWord
 	}
 
 	protected abstract process(message: Message): void
@@ -29,7 +31,8 @@ export abstract class BaseHandler implements IHandler {
 	}
 
 	public handle(message: Message): void {
-		if (message.content.includes(this.prefix + this.cmd) && this.hasPermissions(message)) {
+		const content = message.content.toLocaleLowerCase()
+		if (content.startsWith(this.cmd.toLocaleLowerCase()) && this.hasPermissions(message)) {
 			return this.process(message)
 		}
 		if (this.nextHandler) return this.nextHandler.handle(message)
@@ -44,6 +47,6 @@ export abstract class BaseHandler implements IHandler {
 	}
 
 	protected trimCommand(message: Message): string {
-		return message.content.substring(this.prefix.length + this.cmd.length + 1)
+		return message.content.substring(this.cmd.length + 1)
 	}
 }
