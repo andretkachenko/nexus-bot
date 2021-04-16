@@ -41,7 +41,7 @@ export class Whoops extends BaseHandler {
         `)
 			.addField('Let\'s try again', `
             Try different command or repeat the previous one. 
-            If the bot is still not working as expected/not working at all/offline - consider raising a ticket (see 'Any issues...' section below)
+            If the bot is still not working as expected/not working at all/offline - consider raising a ticket (see \`Any issues...\` section below)
         `)
 			.addField('Can I reset bot\'s settings?', `
             In case you think that you messed up with any setting for the Nexus channels - kick the bot and re-invite it again.

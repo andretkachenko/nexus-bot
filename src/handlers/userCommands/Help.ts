@@ -53,7 +53,7 @@ export class Help extends BaseHandler {
 		Each time user joins/leaves voice channel, he will get/lose rights to see the linked text channel.
 		Feel free to rename/move categories and text channels as you wish - it will not affect bot.
 		When the last user leaves the voice channel, messages in the linked text channel will be deleted (excluding pinned messages).
-		Type **${this.prefix}help commands** to get the list of all commands.`)
+		Type \`${this.prefix}help commands\` to get the list of all commands.`)
 	}
 
 	private createEmbed(): MessageEmbed {
@@ -64,7 +64,7 @@ export class Help extends BaseHandler {
 
 	private addFooter(embed: MessageEmbed): void {
 		embed
-			.addField('**Want to use it on your server?**', 'Follow this link: ' + Constants.repoUrl+Constants.inviteGuideUri)
-			.addField('**Any issues or missing feature?**', 'You can raise a ticket at ' + Constants.repoUrl+Constants.issuesUri)
+			.addField('Want to use it on your server?', 'Follow this link: ' + Constants.repoUrl+Constants.inviteGuideUri)
+			.addField('Any issues or missing feature?', 'You can raise a ticket at ' + Constants.repoUrl+Constants.issuesUri)
 	}
 }

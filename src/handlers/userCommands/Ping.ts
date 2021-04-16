@@ -25,7 +25,7 @@ export class Ping extends BaseHandler {
 		embed
 			.addField(`${this.prefix}ping`, `
             This command is create to check if the bot is alive.
-            Writes '${Messages.pingResponse}' in the chat if the bot is working.
+            Writes \`'${Messages.pingResponse}'\` in the chat if the bot is working.
 		`)
 	}
 }

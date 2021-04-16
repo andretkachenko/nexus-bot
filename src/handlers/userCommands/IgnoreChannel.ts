@@ -75,14 +75,14 @@ export class IgnoreChannel extends BaseHandler {
 			.addField(`${this.prefix}ignore [0/1] {channelId}`, `
         Start/stop ignoring voice channel when checking for linked text channel.
         Used when there's no need for linked text channel for the specific Voice Channel.
-        1 means start ignoring, 0 - stop ignoring and handle the Voice Channel as usual.
+        \`1\` means start ignoring, \`0\` - stop ignoring and handle the Voice Channel as usual.
         Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID.
 
         If the channelId is invalid, the bot will post a warning in the chat.
 
         Examples: 
-        \`${this.prefix}ignore 1 717824008636334130\` - request to start ignoring the Voice Channel with the ID **717824008636334130**
-        \`${this.prefix}ignore 0 717824008636334130\` - request to remove the Voice Channel with the ID **717824008636334130** from Ignore List and handle it as usual 
+        \`${this.prefix}ignore 1 717824008636334130\` - request to start ignoring the Voice Channel with the ID \`717824008636334130\`
+        \`${this.prefix}ignore 0 717824008636334130\` - request to remove the Voice Channel with the ID \`717824008636334130\` from Ignore List and handle it as usual 
         
         Requires user to have admin/owner rights or permissions to manage channels and roles.
         `)
