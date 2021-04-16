@@ -77,11 +77,11 @@ export class SkipUsersRoles extends BaseHandler {
 			.addField(`${this.prefix}skip [0/1] @{user/role}`, `
 			Add/remove user/role to the Skip List.
 			The bot will not change visibility settings for the users/roles, which are in Skip List.
-			Used when there's no need for linked text channel for the specific Voice Channel.
+			Used when there's no need for a linked text channel for the specific Voice Channel.
 			\`1\` to add the Skip List, \`0\` to remove.
 			Supports arguments chaining - you're allowed to use more than 1 user/role.
 			
-			If an error happends when processing a user/role, the bot will post a warning in the chat.
+			If an error happens when processing a user/role, the bot will post a warning in the chat.
 
 			Examples: 
 			\`${this.prefix}skip 1 @Wumpus @Moderator @Lumpus\` - request to add Users\`Wumpus\`, \`Lumpus\` and Role  \`Moderator\` to the Skip List 
