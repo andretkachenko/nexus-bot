@@ -1,6 +1,12 @@
-import { Client, Message } from 'discord.js'
+import { Client,
+	Message,
+	MessageEmbed
+} from 'discord.js'
+import { Config } from '../../config'
 import { MongoConnector } from '../../db'
-import { Constants, Messages } from '../../descriptor'
+import { Constants,
+	Messages
+} from '../../descriptor'
 import { TextChannelMap } from '../../entities'
 import { BotCommand,
 	Permission
@@ -14,8 +20,8 @@ export class MapChannels extends BaseHandler {
 	private channelIdValidator: ChannelIdValidator
 	private mongoConnector: MongoConnector
 
-	constructor(logger: Logger, client: Client, mongoConnector: MongoConnector, prefix: string) {
-		super(logger, prefix + BotCommand.map)
+	constructor(logger: Logger, client: Client, mongoConnector: MongoConnector, config: Config) {
+		super(logger, config, BotCommand.map)
 
 		this.channelIdValidator = new ChannelIdValidator(logger, client)
 		this.mongoConnector = mongoConnector
@@ -100,5 +106,24 @@ export class MapChannels extends BaseHandler {
 	protected hasPermissions(message: Message): boolean {
 		return super.hasPermissions(message) ||
             (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
+	}
+
+	public fillEmbed(embed: MessageEmbed): void {
+		embed
+			.addField(`${this.prefix}map [0/1] {voiceChannelId} {textChannelId}`, `
+            *Danger zone! High risk to shoot your own leg. Use at your own discretion*
+            Map the Voice Channel and the Text Channel together.
+            1 means to override existing mappings, 0 - throw error in case mappings already exist.
+            1 is a 'force' option, which will override every clashing mapping
+            
+            If not forced, the bot will post a warning in case:
+                - **voiceChannelId** or **textChannelId** are invalid (no matching channel found);
+                - The Voice Channel already has a Text Channel mapped to it;
+                - The Text Channel has already been mapped to a Voice Channel;
+
+            If forced, the bot will override existing mapping, but will also post warnings for each mapping that had to be deleted/edited.
+
+            Requires user to have admin/owner rights or permissions to manage channels and roles.
+		`)
 	}
 }

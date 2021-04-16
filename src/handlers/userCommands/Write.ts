@@ -1,4 +1,7 @@
-import { Message } from 'discord.js'
+import { Message,
+	MessageEmbed
+} from 'discord.js'
+import { Config } from '../../config'
 import { Constants } from '../../descriptor'
 import { BotCommand,
 	Permission
@@ -7,8 +10,8 @@ import { Logger } from '../../Logger'
 import { BaseHandler } from './BaseHandler'
 
 export class Write extends BaseHandler {
-	constructor(logger: Logger, prefix: string) {
-		super(logger, prefix + BotCommand.write)
+	constructor(logger: Logger, config: Config) {
+		super(logger, config, BotCommand.write)
 	}
 
 	protected process(message: Message): void {
@@ -19,5 +22,14 @@ export class Write extends BaseHandler {
 
 	protected hasPermissions(message: Message): boolean {
 		return message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true})
+	}
+
+	public fillEmbed(embed: MessageEmbed): void {
+		embed
+			.addField(`${this.prefix}write`, `
+			Repeat the message that was written with the command.
+			May be used to give descriptions/systems message to the Nexus text channels.
+			Requires user to have admin/owner rights or permissions to manage channels and roles.
+		`)
 	}
 }

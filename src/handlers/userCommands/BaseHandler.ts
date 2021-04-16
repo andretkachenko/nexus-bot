@@ -1,19 +1,27 @@
-import { Message } from 'discord.js'
+import { Message,
+	MessageEmbed
+} from 'discord.js'
+import { Config } from '../../config'
 import { Permission } from '../../enums'
 import { Logger } from '../../Logger'
-import { IHandler } from './IHandler'
+import { IHandler } from './.'
 
 export abstract class BaseHandler implements IHandler {
-	protected logger: Logger
 	private nextHandler!: IHandler
-	protected readonly cmd: string
+	protected logger: Logger
+	public readonly cmd: string
+	protected readonly prefix: string
+	protected readonly img: string
 
-	constructor(logger: Logger, cmd: string) {
+	constructor(logger: Logger, config: Config, cmd : string) {
 		this.logger = logger
 		this.cmd = cmd
+		this.prefix = config.prefix
+		this.img = config.img
 	}
 
 	protected abstract process(message: Message): void
+	public abstract fillEmbed(embed: MessageEmbed): void
 
 	public setNext(handler: IHandler): IHandler {
 		this.nextHandler = handler
@@ -21,7 +29,7 @@ export abstract class BaseHandler implements IHandler {
 	}
 
 	public handle(message: Message): void {
-		if (message.content.includes(this.cmd) && this.hasPermissions(message)) {
+		if (message.content.includes(this.prefix + this.cmd) && this.hasPermissions(message)) {
 			return this.process(message)
 		}
 		if (this.nextHandler) return this.nextHandler.handle(message)
@@ -36,6 +44,6 @@ export abstract class BaseHandler implements IHandler {
 	}
 
 	protected trimCommand(message: Message): string {
-		return message.content.substring(this.cmd.length + 1)
+		return message.content.substring(this.prefix.length + this.cmd.length + 1)
 	}
 }
