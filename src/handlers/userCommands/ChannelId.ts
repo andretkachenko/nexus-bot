@@ -5,11 +5,11 @@ import { Config } from '../../config'
 import { Messages } from '../../descriptor'
 import { BotCommand } from '../../enums'
 import { Logger } from '../../Logger'
-import { BaseHandler } from './BaseHandler'
+import { BaseHandler } from './.'
 
-export class Ping extends BaseHandler {
+export class ChannelId extends BaseHandler {
 	constructor(logger: Logger, config: Config) {
-		super(logger, config, BotCommand.ping)
+		super(logger, config, BotCommand.channelId)
 	}
 
 	protected process(message: Message): void {
@@ -23,9 +23,14 @@ export class Ping extends BaseHandler {
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.prefix}ping`, `
-            This command is create to check if the bot is alive.
-            Writes '${Messages.pingResponse}' in the chat if the bot is working.
-		`)
+			.addField('How can I find User ID/Channel ID/Guild ID?', `
+            To be able to see IDs in Discord you need to:
+            1. Go to the Discord settings
+            2. Go to the Advanced tab
+            3. Enable "Developer Mode"
+
+            After that, you should see new option in the right-click menu - "Copy ID".
+            Click on it and then paste the ID when needed.
+        `)
 	}
 }

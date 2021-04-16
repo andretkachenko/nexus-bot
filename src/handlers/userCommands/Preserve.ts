@@ -1,4 +1,7 @@
-import { Message } from 'discord.js'
+import { Message,
+	MessageEmbed
+} from 'discord.js'
+import { Config } from '../../config'
 import { MongoConnector } from '../../db/MongoConnector'
 import { Constants } from '../../descriptor'
 import { TextChannelMap } from '../../entities'
@@ -12,8 +15,8 @@ import { BaseHandler } from './BaseHandler'
 export class Preserve extends BaseHandler {
 	private mongoConnector: MongoConnector
 
-	constructor(logger: Logger, mongoConnector: MongoConnector, prefix: string) {
-		super(logger, prefix + BotCommand.preserve)
+	constructor(logger: Logger, mongoConnector: MongoConnector, config: Config) {
+		super(logger, config, BotCommand.preserve)
 		this.mongoConnector = mongoConnector
 	}
 
@@ -26,7 +29,7 @@ export class Preserve extends BaseHandler {
 		}
 	}
 
-	protected handlePreserveCall(guildId: string, preserve: boolean, voiceChannelId: string): void {
+	private handlePreserveCall(guildId: string, preserve: boolean, voiceChannelId: string): void {
 		const textChannelMap: TextChannelMap = {
 			guildId,
 			voiceChannelId,
@@ -39,5 +42,20 @@ export class Preserve extends BaseHandler {
 	protected hasPermissions(message: Message): boolean {
 		return super.hasPermissions(message) ||
             (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
+	}
+
+	public fillEmbed(embed: MessageEmbed): void {
+		embed
+			.addField(`${this.prefix}preserve [0/1] {channelId}`, `
+			Enable/disable clearance of the Text Channel after the last User has left associated Voice Channel.
+            1 means that messages should not be deleted once the Voice Channel is empty, 0 - delete all unpinned messages after the last User has left the Voice Channel (0 is the default option for the each Text Channel the bot creates).
+            The pinned messages will remain in all Nexus-handled Text Channels with both options.
+
+            Examples:
+            \`${this.prefix}preserve 1 717824008636334130\` - request to keep message in the Text Channel with the ID **717824008636334130**
+            \`${this.prefix}preserve 0 717824008636334130\` - request to resume message deletion in the Text Channel with the ID **717824008636334130**
+            
+            Requires user to have admin/owner rights or permissions to manage channels and roles.
+		`)
 	}
 }

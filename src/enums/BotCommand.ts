@@ -6,5 +6,7 @@ export enum BotCommand {
 	skip = 'skip',
 	preserve = 'preserve',
 	map = 'map',
-	commands = 'commands'
+	commands = 'commands',
+	channelId = 'channelId',
+	whoops = 'whoops'
 }
