@@ -13,10 +13,10 @@ Each time user joins/leaves voice channel, he will get/lose rights to see the li
 Feel free to rename/move categories and text channels as you wish - it will not affect bot.
 When the last user leaves the voice channel, messages in the linked text channel will be deleted (excluding pinned messages).
 
-For existing commands either check [wiki](https://github.com/andretkachenko/nexus-bot/wiki/Existing-commands) or use `sudo help commands` on your Discor server or in bot's DM
+For existing commands either check [wiki](https://github.com/andretkachenko/nexus-bot/wiki/Existing-commands) or use `sudo help commands` on your Discord server or in bot's DM
 
 ### If you found a bug
-If you have any issue with the bot functionality, feel free to post an issue in this repo ([check know issues first](https://github.com/andretkachenko/nexus-bot/wiki/Known-issues)) - for now, I am intended to maintain this app as long as I don't feel it is stable enough.
+If you have any issue with the bot functionality, feel free to post an issue in this repo ([check known issues first](https://github.com/andretkachenko/nexus-bot/wiki/Known-issues)) - for now, I am intended to maintain this app as long as I don't feel it is stable enough.
 
 ### Need any adjustments?
 If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
