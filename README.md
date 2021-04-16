@@ -15,9 +15,9 @@ When the last user leaves the voice channel, messages in the linked text channel
 
 For existing commands either check [wiki](https://github.com/andretkachenko/nexus-bot/wiki/Existing-commands) or use `sudo help commands` on your Discord server or in bot's DM
 
-### If you found a bug
+## If you found a bug
 If you have any issue with the bot functionality, feel free to post an issue in this repo ([check known issues first](https://github.com/andretkachenko/nexus-bot/wiki/Known-issues)) - for now, I am intended to maintain this app as long as I don't feel it is stable enough.
 
-### Need any adjustments?
+## Need any adjustments?
 If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
 Please bear in mind: I intend to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
