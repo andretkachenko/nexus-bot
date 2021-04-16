@@ -29,7 +29,7 @@ export class ChannelId extends BaseHandler {
             2. Go to the Advanced tab
             3. Enable "Developer Mode"
 
-            After that, you should see new option in the right-click menu - "Copy ID".
+            After that, you should see new option in the right-click menu - \`Copy ID\`.
             Click on it and then paste the ID when needed.
         `)
 	}

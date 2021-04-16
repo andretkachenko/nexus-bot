@@ -78,14 +78,14 @@ export class SkipUsersRoles extends BaseHandler {
 			Add/remove user/role to the Skip List.
 			The bot will not change visibility settings for the users/roles, which are in Skip List.
 			Used when there's no need for linked text channel for the specific Voice Channel.
-			1 to add the Skip List, 0 to remove.
+			\`1\` to add the Skip List, \`0\` to remove.
 			Supports arguments chaining - you're allowed to use more than 1 user/role.
 			
 			If an error happends when processing a user/role, the bot will post a warning in the chat.
 
 			Examples: 
-			\`${this.prefix}skip 1 @Wumpus @Moderator @Lumpus\` - request to add Users**Wumpus**, **Lumpus** and Role  **Moderator** to the Skip List 
-			\`${this.prefix}skip 0 @Wumpus @Moderator @Lumpus\` - request to remove Users **Wumpus**, **Lumpus** and Role **Moderator**  from the Skip List
+			\`${this.prefix}skip 1 @Wumpus @Moderator @Lumpus\` - request to add Users\`Wumpus\`, \`Lumpus\` and Role  \`Moderator\` to the Skip List 
+			\`${this.prefix}skip 0 @Wumpus @Moderator @Lumpus\` - request to remove Users \`Wumpus\`, \`Lumpus\` and Role \`Moderator\`  from the Skip List
 
 			Requires user to have admin/owner rights or permissions to manage channels and roles.
 		`)

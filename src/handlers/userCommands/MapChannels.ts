@@ -113,11 +113,11 @@ export class MapChannels extends BaseHandler {
 			.addField(`${this.prefix}map [0/1] {voiceChannelId} {textChannelId}`, `
             *Danger zone! High risk to shoot your own leg. Use at your own discretion*
             Map the Voice Channel and the Text Channel together.
-            1 means to override existing mappings, 0 - throw error in case mappings already exist.
-            1 is a 'force' option, which will override every clashing mapping
+            \`1\` means to override existing mappings, \`0\` - throw error in case mappings already exist.
+            \`1\` is a 'force' option, which will override every clashing mapping
             
             If not forced, the bot will post a warning in case:
-                - **voiceChannelId** or **textChannelId** are invalid (no matching channel found);
+                - \`voiceChannelId\` or \`textChannelId\` are invalid (no matching channel found);
                 - The Voice Channel already has a Text Channel mapped to it;
                 - The Text Channel has already been mapped to a Voice Channel;
 

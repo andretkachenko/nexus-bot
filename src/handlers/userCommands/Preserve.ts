@@ -48,12 +48,12 @@ export class Preserve extends BaseHandler {
 		embed
 			.addField(`${this.prefix}preserve [0/1] {channelId}`, `
 			Enable/disable clearance of the Text Channel after the last User has left associated Voice Channel.
-            1 means that messages should not be deleted once the Voice Channel is empty, 0 - delete all unpinned messages after the last User has left the Voice Channel (0 is the default option for the each Text Channel the bot creates).
+            \`1\` means that messages should not be deleted once the Voice Channel is empty, \`0\` - delete all unpinned messages after the last User has left the Voice Channel (0 is the default option for the each Text Channel the bot creates).
             The pinned messages will remain in all Nexus-handled Text Channels with both options.
 
             Examples:
-            \`${this.prefix}preserve 1 717824008636334130\` - request to keep message in the Text Channel with the ID **717824008636334130**
-            \`${this.prefix}preserve 0 717824008636334130\` - request to resume message deletion in the Text Channel with the ID **717824008636334130**
+            \`${this.prefix}preserve 1 717824008636334130\` - request to keep message in the Text Channel with the ID \`717824008636334130\`
+            \`${this.prefix}preserve 0 717824008636334130\` - request to resume message deletion in the Text Channel with the ID \`717824008636334130\`
             
             Requires user to have admin/owner rights or permissions to manage channels and roles.
 		`)
