@@ -29,8 +29,12 @@ export class Whoops extends BaseHandler {
             - Manage Roles
             - Manage Channels
             - Read Messages
+            - Send Messages
             - Manage Messages
+            - Embed Links
+            - Attach Files
             - Read Message History
+            - Mention @everyone, @here and All Roles
         `)
 			.addField('Might be a fluke?', `
             There's a chance that something went wrong during one exact event. 
