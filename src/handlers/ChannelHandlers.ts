@@ -124,7 +124,7 @@ export class ChannelHandlers {
 	}
 
 	private showHideTextChannel(textChannel: TextChannel, user: GuildMember | null, value: boolean) {
-		if (!this.sufficientPermissionsForChannel(Permission.manageRoles, textChannel) || !user || !textChannel) return
+		if (!this.sufficientPermissionsForChannel([Permission.manageRoles, Permission.manageChannels, Permission.viewChannel], textChannel) || !user || !textChannel) return
 
 		this.skip(user)
 			.then(skip => {
@@ -137,7 +137,7 @@ export class ChannelHandlers {
 	}
 
 	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannelId: string) {
-		if (!this.sufficientPermissionsForChannel(Permission.manageMessages, textChannel)) return
+		if (!this.sufficientPermissionsForChannel([Permission.manageMessages, Permission.manageChannels, Permission.viewChannel], textChannel)) return
 
 		const textChannelMap = await this.mongoConnector.textChannelRepository.get(textChannel.guild.id, voiceChannelId)
 		if (textChannelMap.preserve) return
