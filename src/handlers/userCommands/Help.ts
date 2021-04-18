@@ -6,8 +6,9 @@ import { DMChannel, Message,
 import { IHandler } from '.'
 import { Config } from '../../config'
 import { Constants } from '../../descriptor'
-import { BotCommand } from '../../enums'
+import { BotCommand, ChannelType } from '../../enums'
 import { Logger } from '../../Logger'
+import { TypeGuarder } from '../../services'
 import { UserCommandHandlers } from '../UserCommandHandlers'
 import { BaseHandler } from './BaseHandler'
 
@@ -39,7 +40,10 @@ export class Help extends BaseHandler {
 		handler.fillEmbed(embed)
 		this.addFooter(embed)
 		channel.send(embed)
-			.catch(reason => this.logger.logError(this.constructor.name, this.trySendHelp.name, reason))
+			.catch(reason => {
+				const guildId = TypeGuarder.isGuildChannel(channel) ? channel.guild.id : ChannelType.dm
+				this.logger.logError(this.constructor.name, this.trySendHelp.name, reason, guildId)
+			})
 	}
 
 	protected hasPermissions(_message: Message): boolean {
