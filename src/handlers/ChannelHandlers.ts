@@ -131,9 +131,9 @@ export class ChannelHandlers {
 				if (skip) return
 				// eslint-disable-next-line @typescript-eslint/naming-convention
 				textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
-					.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason))
+					.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
 			})
-			.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason))
+			.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
 	}
 
 	private async deleteNotPinnedMessages(textChannel: TextChannel, voiceChannelId: string) {
@@ -146,7 +146,7 @@ export class ChannelHandlers {
 			await this.fetchAndDelete(textChannel)
 		}
 		catch (error) {
-			this.logger.logError(this.constructor.name, this.deleteNotPinnedMessages.name, error)
+			this.logger.logError(this.constructor.name, this.deleteNotPinnedMessages.name, error, textChannel.guild.id)
 		}
 	}
 
