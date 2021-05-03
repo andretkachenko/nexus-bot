@@ -4,7 +4,7 @@ import { DMChannel, Message,
 	TextChannel
 } from 'discord.js'
 import { IHandler } from '.'
-import { Config } from '../../config'
+import { Config } from '../../Config'
 import { Constants } from '../../descriptor'
 import { BotCommand, ChannelType } from '../../enums'
 import { Logger } from '../../Logger'
@@ -24,15 +24,21 @@ export class Help extends BaseHandler {
 		let docType: string = BotCommand.help
 		try
 		{
-			const args = this.splitArguments(this.trimCommand(message))
-			if(args[0]) docType = args[0]
-			const docHandler = this.cmdChain.getDocHandler(docType) ?? this
-			this.trySendHelp(message.channel, docHandler)
+			docType = this.getRequestedDoc(message, docType)
 		}
 		catch (e) {
 			this.logger.logError(this.constructor.name, this.process.name, e, docType)
 			this.trySendHelp(message.channel, this)
 		}
+	}
+
+	private getRequestedDoc(message: Message, docType: string) {
+		const args = this.splitArguments(this.trimCommand(message))
+		if (args[0])
+			docType = args[0]
+		const docHandler = this.cmdChain.getDocHandler(docType) ?? this
+		this.trySendHelp(message.channel, docHandler)
+		return docType
 	}
 
 	private trySendHelp(channel: TextChannel | DMChannel | NewsChannel, handler: IHandler): void {

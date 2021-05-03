@@ -1,7 +1,10 @@
 import {
+	DeleteWriteOpResultObject,
 	FilterQuery,
+	InsertOneWriteOpResult,
 	MongoClient,
-	UpdateQuery
+	UpdateQuery,
+	UpdateWriteOpResult
 } from 'mongodb'
 import { Constants } from '../descriptor'
 import { IGuildRelated } from '../entities'
@@ -42,58 +45,38 @@ export class Repository<TEntity extends IGuildRelated> {
 	}
 
 	public async insert(entity: TEntity): Promise<boolean> {
-		let success = false
 		const db = this.client.db(this.dbName)
 		const collection = db.collection(this.collectionName)
 		return collection.insertOne(entity)
-			.then((result) => {
-				if (result.result.ok !== 1) this.logger.logError(this.constructor.name, this.insert.name, Constants.emptyString)
-				else {
-					success = true
-				}
-				return success
-			})
+			.then((result) => this.handleOperationResult(result, this.insert.name))
 	}
 
 	protected async update(filter: FilterQuery<TSchema>, update: UpdateQuery<TSchema>): Promise<boolean> {
-		let success = false
 		const db = this.client.db(this.dbName)
 		const collection = db.collection(this.collectionName)
 		return collection.updateOne(filter, update)
-			.then((result) => {
-				if (result.result.ok !== 1) this.logger.logError(this.constructor.name, this.update.name, Constants.emptyString)
-				else {
-					success = true
-				}
-				return success
-			})
+			.then((result) => this.handleOperationResult(result, this.update.name))
 	}
 
 	protected async deleteOne(filter: FilterQuery<TSchema>): Promise<boolean> {
-		let success = false
 		const db = this.client.db(this.dbName)
 		const collection = db.collection(this.collectionName)
 		return collection.deleteOne(filter)
-			.then((result) => {
-				if (result.result.ok !== 1) this.logger.logError(this.constructor.name, this.deleteOne.name, Constants.emptyString)
-				else {
-					success = true
-				}
-				return success
-			})
+			.then((result) => this.handleOperationResult(result, this.deleteOne.name))
 	}
 
 	public async deleteForGuild(guildId: string): Promise<boolean> {
-		let result = false
 		const db = this.client.db(this.dbName)
 		const collection = db.collection(this.collectionName)
 		return collection.deleteMany({ guildId })
-			.then((deleteResult) => {
-				if (deleteResult.result.ok !== 1) this.logger.logError(this.constructor.name, this.deleteForGuild.name, Constants.emptyString)
-				else {
-					result = true
-				}
-				return result
-			})
+			.then((result) => this.handleOperationResult(result, this.deleteForGuild.name))
+	}
+
+	private handleOperationResult(operationResult: DeleteWriteOpResultObject | UpdateWriteOpResult | InsertOneWriteOpResult<any>, operationName: string): boolean {
+		if (operationResult.result.ok !== 1) {
+			this.logger.logError(this.constructor.name, operationName, Constants.emptyString)
+			return false
+		}
+		return true
 	}
 }

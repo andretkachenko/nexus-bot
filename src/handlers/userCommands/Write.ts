@@ -1,7 +1,7 @@
 import { Message,
 	MessageEmbed
 } from 'discord.js'
-import { Config } from '../../config'
+import { Config } from '../../Config'
 import { Constants } from '../../descriptor'
 import { BotCommand,
 	Permission
@@ -26,7 +26,7 @@ export class Write extends BaseHandler {
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.prefix}write`, `
+			.addField(`${this.cmd}`, `
 			Repeat the message that was written with the command.
 			May be used to give descriptions/systems message to the Nexus text channels.
 			Requires user to have admin/owner rights or permissions to manage channels and roles.

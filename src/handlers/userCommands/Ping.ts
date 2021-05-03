@@ -1,7 +1,7 @@
 import { Message,
 	MessageEmbed
 } from 'discord.js'
-import { Config } from '../../config'
+import { Config } from '../../Config'
 import { Messages } from '../../descriptor'
 import { BotCommand } from '../../enums'
 import { Logger } from '../../Logger'
@@ -23,7 +23,7 @@ export class Ping extends BaseHandler {
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.prefix}ping`, `
+			.addField(`${this.cmd}`, `
             This command is create to check if the bot is alive.
             Writes \`'${Messages.pingResponse}'\` in the chat if the bot is working.
 		`)

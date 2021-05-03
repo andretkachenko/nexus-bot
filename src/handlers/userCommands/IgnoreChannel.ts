@@ -13,7 +13,7 @@ import { BaseHandler } from './BaseHandler'
 import { Logger } from '../../Logger'
 import { Constants, Messages } from '../../descriptor'
 import { ChannelIdValidator } from '../../services/ChannelIdValidator'
-import { Config } from '../../config'
+import { Config } from '../../Config'
 
 export class IgnoreChannel extends BaseHandler {
 	private client: Client
@@ -38,17 +38,20 @@ export class IgnoreChannel extends BaseHandler {
 
 	private handleChannelId(ignore: boolean, message: Message, channelId: string, guildId: string) {
 		try {
-			const isValid = this.channelIdValidator.validate(message.channel, channelId, guildId)
-			if (!isValid) throw new Error(Messages.invalidVoiceChannelId)
-
-			if (ignore) this.addIgnore(guildId, channelId)
-			else this.deleteIgnore(guildId, channelId)
+			this.handleIgnore(message, channelId, guildId, ignore)
 		}
 		catch (e) {
-			this.logger.logError(this.constructor.name, this.handleChannelId.name, e, channelId)
-			message.channel.send(Messages.errorProcessingChannelId + channelId)
+			const msg = e instanceof Error ? e.message : Messages.errorProcessingChannelId + channelId
+			this.logger.logError(this.constructor.name, this.handleChannelId.name, msg, channelId)
+			message.channel.send(msg)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelId.name, reason))
 		}
+	}
+
+	private handleIgnore(message: Message, channelId: string, guildId: string, ignore: boolean) {
+		this.channelIdValidator.validate(message.channel, channelId, guildId)
+
+		return ignore ? this.addIgnore(guildId, channelId) : this.deleteIgnore(guildId, channelId)
 	}
 
 	private deleteIgnore(guildId: string, channelId: string) {
@@ -72,7 +75,7 @@ export class IgnoreChannel extends BaseHandler {
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.prefix}ignore [0/1] {channelId}`, `
+			.addField(`${this.cmd} [0/1] {channelId}`, `
         Start/stop ignoring voice channel when checking for linked text channel.
         Used when there's no need for linked text channel for the specific Voice Channel.
         \`1\` means start ignoring, \`0\` - stop ignoring and handle the Voice Channel as usual.
@@ -81,8 +84,8 @@ export class IgnoreChannel extends BaseHandler {
         If the channelId is invalid, the bot will post a warning in the chat.
 
         Examples: 
-        \`${this.prefix}ignore 1 717824008636334130\` - request to start ignoring the Voice Channel with the ID \`717824008636334130\`
-        \`${this.prefix}ignore 0 717824008636334130\` - request to remove the Voice Channel with the ID \`717824008636334130\` from Ignore List and handle it as usual 
+        \`${this.cmd} 1 717824008636334130\` - request to start ignoring the Voice Channel with the ID \`717824008636334130\`
+        \`${this.cmd} 0 717824008636334130\` - request to remove the Voice Channel with the ID \`717824008636334130\` from Ignore List and handle it as usual 
         
         Requires user to have admin/owner rights or permissions to manage channels and roles.
         `)

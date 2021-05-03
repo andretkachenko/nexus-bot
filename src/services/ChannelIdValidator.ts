@@ -1,14 +1,11 @@
 import { Client,
 	DMChannel,
+	Guild,
 	NewsChannel,
 	TextChannel
 } from 'discord.js'
-import { Constants,
-	Messages
-} from '../descriptor'
-import {
-	ChannelType
-} from '../enums'
+import { Messages } from '../descriptor'
+import { ChannelType } from '../enums'
 import { Logger } from '../Logger'
 
 export class ChannelIdValidator {
@@ -21,34 +18,27 @@ export class ChannelIdValidator {
 	}
 
 	public validate(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string | undefined): boolean {
-		let isValid = true
-		let message = Constants.emptyString
-		if (textChannel.type === ChannelType.dm) {
-			message = Messages.dmNotSupported
-			isValid = false
-		}
-		else if (guildId === undefined) {
-			message = Messages.commandProcessError + Messages.missingGuild
-			isValid = false
-		}
-		if (isValid) {
-			const guild = this.client.guilds.resolve((guildId as string).trim())
-			if (!guild) {
-				message = Messages.commandProcessError + Messages.missingGuild
-				isValid = false
-			} else {
-				const channel = guild.channels.resolve(channelId)
-				if (channel?.type !== ChannelType.voice) {
-					message = Messages.commandProcessError + Messages.notVoiceChannelId
-					isValid = false
-				}
-			}
-		}
+		this.checkDm(textChannel)
+		const guild = this.tryGetGuild(guildId)
+		this.checkVoice(guild, channelId)
 
-		if (message !== Constants.emptyString) {
-			textChannel.send(message)
-				.catch(reason => this.logger.logError(this.constructor.name, this.validate.name, reason))
-		}
-		return isValid
+		return true
+	}
+
+	private checkDm(textChannel: TextChannel | NewsChannel | DMChannel): void {
+		if (textChannel.type === ChannelType.dm) throw new Error(Messages.dmNotSupported)
+	}
+
+	private tryGetGuild(guildId: string | undefined): Guild {
+		if(guildId === undefined) throw new Error(Messages.commandProcessError + Messages.missingGuild)
+		const guild = this.client.guilds.resolve((guildId).trim())
+
+		if (!guild) throw new Error(Messages.commandProcessError + Messages.missingGuild)
+		return guild
+	}
+
+	private checkVoice(guild: Guild, channelId: string): void {
+		const channel = guild.channels.resolve(channelId)
+		if (channel?.type !== ChannelType.voice) throw new Error(Messages.commandProcessError + Messages.notVoiceChannelId)
 	}
 }

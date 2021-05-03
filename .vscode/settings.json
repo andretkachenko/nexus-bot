@@ -1,8 +1,12 @@
 {
     "eslint.options": {},
+    "eslint.lintTask.enable": true,
     "eslint.format.enable": true,
     "files.exclude": {
         "*.code-workspace": true,
         "node_modules": true,
-    }
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
 }

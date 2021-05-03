@@ -1,10 +1,11 @@
 import {
 	Client,
 	Message,
-	PartialMessage
+	PartialMessage,
+	VoiceState
 } from 'discord.js'
 import { Logger } from './Logger'
-import { Config } from './config'
+import { Config } from './Config'
 import { MongoConnector } from './db/MongoConnector'
 import {
 	ChannelHandlers,
@@ -83,13 +84,19 @@ export class EventRegistry {
 
 	private handeVoiceStateUpdate() {
 		this.client.on(ClientEvent.voiceStateUpdate, (oldVoiceState, newVoiceState) => {
-			if (newVoiceState.channelID !== oldVoiceState.channelID) {
-				if (newVoiceState.channelID) this.channelHandlers.handleChannelJoin(newVoiceState)
-					.catch(reason => this.logger.logError(this.constructor.name, this.handeVoiceStateUpdate.name, reason))
-				if (oldVoiceState.channelID) this.channelHandlers.handleChannelLeave(oldVoiceState)
-					.catch(reason => this.logger.logError(this.constructor.name, this.handeVoiceStateUpdate.name, reason))
-			}
+			this.handleVoiceStateUpdate(newVoiceState, oldVoiceState)
 		})
+	}
+
+	private handleVoiceStateUpdate(newVoiceState: VoiceState, oldVoiceState: VoiceState) {
+		if (newVoiceState.channelID === oldVoiceState.channelID) return
+
+		if (newVoiceState.channelID)
+			this.channelHandlers.handleChannelJoin(newVoiceState)
+				.catch(reason => this.logger.logError(this.constructor.name, this.handeVoiceStateUpdate.name, reason))
+		if (oldVoiceState.channelID)
+			this.channelHandlers.handleChannelLeave(oldVoiceState)
+				.catch(reason => this.logger.logError(this.constructor.name, this.handeVoiceStateUpdate.name, reason))
 	}
 
 	private handleGuildDelete() {
@@ -131,19 +138,24 @@ export class EventRegistry {
 		this.logger.logError(this.constructor.name, this.handleError.name, errorMsg)
 	}
 
-	public introduce(client: Client, config: Config): void {
+	private introduce(client: Client, config: Config): void {
 		this.logger.logEvent(Messages.botConnected)
 		this.logger.logEvent(Messages.loggedAs + (client.user ? client.user.tag : Constants.undefinedId))
 		try
 		{
-			if(client.user) client.user.setActivity({
-				'name': Messages.statusString(config.prefix, client.guilds.cache.size),
-				'type': Constants.listening
-			})
-				.catch(reason => this.logger.logError(this.constructor.name, this.introduce.name, reason))
+			this.setBotActivity(client, config)
 		}
 		catch(error) {
 			this.logger.logError(this.constructor.name, this.introduce.name, error)
 		}
+	}
+
+	private setBotActivity(client: Client, config: Config) {
+		if (client.user)
+			client.user.setActivity({
+				'name': Messages.statusString(config.prefix, client.guilds.cache.size),
+				'type': Constants.listening
+			})
+				.catch(reason => this.logger.logError(this.constructor.name, this.introduce.name, reason))
 	}
 }

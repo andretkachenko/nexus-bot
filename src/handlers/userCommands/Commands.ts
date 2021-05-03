@@ -1,7 +1,7 @@
 import { Message,
 	MessageEmbed
 } from 'discord.js'
-import { Config } from '../../config'
+import { Config } from '../../Config'
 import { Messages } from '../../descriptor'
 import { BotCommand } from '../../enums'
 import { Logger } from '../../Logger'
@@ -25,16 +25,16 @@ export class Commands extends BaseHandler {
 		embed
 			.addField('List of available commands', `
 		\`{}\` - 'replace with id', \`[]\` - choose one option, \`@{}\` - mention user/role
-		\`${this.prefix}write\` - repeat message that was written by the user. Can be used to send a system message to the channel.
-		\`${this.prefix}ignore [0/1] {channelId}\` - ignore/handle voice channel with the specified id when checking for linked text channel.
-		\`${this.prefix}skip [0/1] @{user/role}\` - skip/change visibility settings for specific user/role. Supports multiple mentions.
-		\`${this.prefix}preserve [0/1] {channelId}\` - set linked text channel to save messages after the last user left the voice channel.
-		\`${this.prefix}map [0/1] {voiceChannelId} {textChannelId}\` - map voice and text channels together.
+		\`${this.prefix+BotCommand.write}\` - repeat message that was written by the user. Can be used to send a system message to the channel.
+		\`${this.prefix+BotCommand.ignore} [0/1] {channelId}\` - ignore/handle voice channel with the specified id when checking for linked text channel.
+		\`${this.prefix+BotCommand.skip} [0/1] @{user/role}\` - skip/change visibility settings for specific user/role. Supports multiple mentions.
+		\`${this.prefix+BotCommand.preserve} [0/1] {channelId}\` - set linked text channel to save messages after the last user left the voice channel.
+		\`${this.prefix+BotCommand.map} [0/1] {voiceChannelId} {textChannelId}\` - map voice and text channels together.
 		`)
 			.addField('Informational commands', `
-        To get detailed explanation of any command, write help with the name of a command. For example: \`${this.prefix}help write\`
-        \`${this.prefix}help channelId\` - explanation how to find channelId/guildId
-        \`${this.prefix}help whoops\` - notes in case of bot's malfunctioning
+        To get detailed explanation of any command, write help with the name of a command. For example: \`${this.cmd + ' ' + BotCommand.write}\`
+        \`${this.cmd + ' ' + BotCommand.channelId}\` - explanation how to find channelId/guildId
+        \`${this.cmd + ' ' + BotCommand.whoops}\` - notes in case of bot's malfunctioning
         `)
 	}
 }

@@ -30,7 +30,8 @@ Happy linting! 💖
         "eslint-plugin-import",
         "eslint-plugin-jsdoc",
         "eslint-plugin-prefer-arrow",
-        "@typescript-eslint"
+        "@typescript-eslint",  
+        "eslint-plugin-no-else"
     ],
     "rules": {
         "@typescript-eslint/no-unused-vars": [ 
@@ -193,6 +194,11 @@ Happy linting! 💖
             }
         ],
         "use-isnan": "error",
-        "valid-typeof": "off"
+        "valid-typeof": "off",
+        "max-depth": [
+            "error",
+            1
+        ],
+        "no-else/no-else": 2
     }
 }

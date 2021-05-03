@@ -42,14 +42,11 @@ export class ChannelHandlers {
 		const textChannelMap = await this.mongoConnector.textChannelRepository.get(newVoiceState.guild.id, channelId)
 		const textChannel = this.resolve(newVoiceState, textChannelMap?.textChannelId)
 
-		if (textChannel) {
-			this.showHideTextChannel(textChannel, newVoiceState.member, true)
-		}
-		else {
-			if(textChannelMap) await this.mongoConnector.textChannelRepository.delete(newVoiceState.guild.id, channelId)
-			this.createTextChannel(newVoiceState)
-				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelJoin.name, reason))
-		}
+		if (textChannel) return this.showHideTextChannel(textChannel, newVoiceState.member, true)
+
+		if(textChannelMap) await this.mongoConnector.textChannelRepository.delete(newVoiceState.guild.id, channelId)
+		this.createTextChannel(newVoiceState)
+			.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelJoin.name, reason))
 	}
 
 	public async handleChannelLeave(oldVoiceState: VoiceState): Promise<void> {
@@ -229,10 +226,7 @@ export class ChannelHandlers {
 	}
 
 	private sufficientPermissions(required: PermissionResolvable, ...permissions: (Readonly<Permissions> | undefined | null)[]): boolean {
-		for (const permissionSet of permissions) {
-			if (permissionSet && !permissionSet.has([Permission.viewChannel, required])) return false
-		}
-		return true
+		return permissions.every(permissionSet => !permissionSet || permissionSet.has([Permission.viewChannel, required]))
 	}
 
 	private async fetchAndDelete(textChannel: TextChannel): Promise<boolean> {
