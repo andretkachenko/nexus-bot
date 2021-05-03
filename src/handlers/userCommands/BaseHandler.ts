@@ -1,7 +1,7 @@
 import { Message,
 	MessageEmbed
 } from 'discord.js'
-import { Config } from '../../config'
+import { Config } from '../../Config'
 import { Permission } from '../../enums'
 import { Logger } from '../../Logger'
 import { IHandler } from './.'

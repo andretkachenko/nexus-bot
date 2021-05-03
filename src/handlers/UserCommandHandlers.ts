@@ -17,7 +17,7 @@ import {
 	Whoops,
 	Write
 } from './userCommands'
-import { Config } from '../config'
+import { Config } from '../Config'
 import { Logger } from '../Logger'
 
 export class UserCommandHandlers {
@@ -58,10 +58,15 @@ export class UserCommandHandlers {
 	private chain(handlers: IHandler[]): IHandler {
 		let current: IHandler | undefined
 		for(const handler of handlers) {
-			if(current) current.setNext(handler)
-			current = handler
+			current = this.chainHandlers(current, handler)
 		}
 
 		return handlers[0]
+	}
+
+	private chainHandlers(current: IHandler | undefined, handler: IHandler) {
+		if (current) current.setNext(handler)
+		current = handler
+		return current
 	}
 }

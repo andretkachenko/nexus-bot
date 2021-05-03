@@ -1,7 +1,7 @@
 import { Client } from 'discord.js'
 import { Logger } from './Logger'
 import { EventRegistry } from './EventRegistry'
-import { Config } from './config'
+import { Config } from './Config'
 import { Messages } from './descriptor'
 
 export class Bot {

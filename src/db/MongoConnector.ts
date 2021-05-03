@@ -1,4 +1,4 @@
-import { Config } from '../config'
+import { Config } from '../Config'
 import { MongoClient } from 'mongodb'
 import { Repository } from './Repository'
 import { IGuildRelated } from '../entities'
