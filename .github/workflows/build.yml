@@ -33,7 +33,10 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - run: pwd
+      - name: troubleshoot
+        run: pwd
+        run: dir
+        run: cd ..
       - name: build
         run: tsc
  
