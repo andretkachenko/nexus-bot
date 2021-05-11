@@ -33,12 +33,8 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - run: pwd
-      - run: dir
-      - run: cd /home/runner/work/nexus-bot/nexus-bot
-      - run: dir
       - name: build
-        run: tsc
+        run: npm run build-ts /home/runner/work/nexus-bot/nexus-bot
  
   lint:
     name: Linter check
@@ -46,4 +42,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: lint
-        run: npm run lint
+        run: npm run lint /home/runner/work/nexus-bot/nexus-bot
