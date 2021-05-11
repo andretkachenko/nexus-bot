@@ -2,9 +2,13 @@ name: Build
  
 on:
   push:
-    branches: [ master ]
+    branches: 
+      - master
+      - develop
   pull_request:
-    branches: [ master ]
+    branches: 
+      - master
+      - develop
  
 jobs:
   build: 
@@ -18,5 +22,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm run build-ts   
+
+      - name: npm install
+      - run: npm install
+
       - name: build
+      - run: npm run build-ts   
+
+      - name: lint
+      - run: npm run lint
