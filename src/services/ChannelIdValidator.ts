@@ -17,9 +17,12 @@ export class ChannelIdValidator {
 		this.client = client
 	}
 
-	public validate(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string | undefined): boolean {
+	public validate(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string | undefined, allowCategoryId?: boolean): boolean {
 		this.checkDm(textChannel)
 		const guild = this.tryGetGuild(guildId)
+		let validCategory = false
+		if(allowCategoryId) validCategory = this.checkCategory(channelId, guild)
+		if(validCategory) return true
 		this.checkVoice(guild, channelId)
 
 		return true
@@ -35,6 +38,11 @@ export class ChannelIdValidator {
 
 		if (!guild) throw new Error(Messages.commandProcessError + Messages.missingGuild)
 		return guild
+	}
+
+	private checkCategory(channelId: string, guild: Guild): boolean {
+		const channel = guild.channels.resolve(channelId)
+		return channel?.type === ChannelType.category
 	}
 
 	private checkVoice(guild: Guild, channelId: string): void {

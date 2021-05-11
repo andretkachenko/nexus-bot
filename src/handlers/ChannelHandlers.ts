@@ -81,7 +81,7 @@ export class ChannelHandlers {
 
 	private async createTextChannel(newVoiceState: VoiceState) {
 		const guild = newVoiceState.guild
-		const isIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.id)
+		const isIgnored = await this.checkIfIgnored(guild, newVoiceState)
 		if (!newVoiceState.channelID || !guild || isIgnored || !guild.me?.permissions) return
 
 		const parentId = await this.resolveTextCategory(guild)
@@ -240,5 +240,11 @@ export class ChannelHandlers {
 		}
 
 		return true
+	}
+
+	private async checkIfIgnored(guild: Guild, newVoiceState: VoiceState) {
+		const channelIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.id)
+		const categoryIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.parentID as string)
+		return channelIgnored || categoryIgnored
 	}
 }
