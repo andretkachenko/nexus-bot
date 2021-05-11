@@ -35,9 +35,9 @@ jobs:
     steps:
       - name: troubleshoot
         run: |
-        pwd
-        dir
-        cd ..
+          pwd
+          dir
+          cd ..
       - name: build
         run: tsc
  
