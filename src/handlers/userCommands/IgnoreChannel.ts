@@ -78,10 +78,10 @@ export class IgnoreChannel extends BaseHandler {
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
 			.addField(`${this.cmd} [0/1] {channelId}`, `
-        Start/stop ignoring voice channel when checking for linked text channel.
-        Used when there's no need for linked text channel for the specific Voice Channel.
+        Start/stop ignoring voice channel / category with voice channels when checking for linked text channel.
+        Used when there's no need for linked text channel for the specific Voice Channel / Voice Channels inside specific Category.
         \`1\` means start ignoring, \`0\` - stop ignoring and handle the Voice Channel as usual.
-        Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID.
+        Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID / Category ID.
 
         If the channelId is invalid, the bot will post a warning in the chat.
 
