@@ -35,7 +35,8 @@ jobs:
     steps:
       - run: pwd
       - run: dir
-      - run: cd ..
+      - run: cd /home/runner/work/nexus-bot/nexus-bot
+      - run: dir
       - name: build
         run: tsc
  
