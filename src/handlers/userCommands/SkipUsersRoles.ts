@@ -37,37 +37,46 @@ export class SkipUsersRoles extends BaseHandler {
 		guildId: string,
 		skip: boolean,
 		ids: string[],
-		add: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => void),
-		remove: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => void)
+		add: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>),
+		remove: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>)
 	) {
 		for (const id of ids) {
 			this.tryProcess(skip ? add : remove, mongoConnector, guildId, id, channel)
 		}
 	}
 
-	addUser = (connector: MongoConnector, logger: Logger, guildId: string, userId: string): void => {
+	addUser = async (connector: MongoConnector, logger: Logger, guildId: string, userId: string): Promise<void> => {
+		const alreadyExist = await connector.skippedUsers.exists(guildId, userId)
+		if(alreadyExist) return
 		connector.skippedUsers.insert({ guildId, userId })
 			.catch(reason => logger.logError(this.constructor.name, this.addUser.name, reason))
 	}
 
-	deleteUser = (connector: MongoConnector, logger: Logger, guildId: string, userId: string): void => {
+	deleteUser = async (connector: MongoConnector, logger: Logger, guildId: string, userId: string): Promise<void> => {
+		const exists = await connector.skippedUsers.exists(guildId, userId)
+		if(!exists) return
 		connector.skippedUsers.delete({ guildId, userId })
 			.catch(reason => logger.logError(this.constructor.name, this.deleteUser.name, reason))
 	}
 
-	addRole = (connector: MongoConnector, logger: Logger, guildId: string, roleId: string): void => {
+	addRole = async (connector: MongoConnector, logger: Logger, guildId: string, roleId: string): Promise<void> => {
+		const alreadyExist = await connector.skippedRoles.exists(guildId, roleId)
+		if(alreadyExist) return
 		connector.skippedRoles.insert({ guildId, roleId })
 			.catch(reason => logger.logError(this.constructor.name, this.addRole.name, reason))
 	}
 
-	deleteRole = (connector: MongoConnector, logger: Logger, guildId: string, roleId: string): void => {
+	deleteRole = async (connector: MongoConnector, logger: Logger, guildId: string, roleId: string): Promise<void> => {
+		const exists = await connector.skippedRoles.exists(guildId, roleId)
+		if(!exists) return
 		connector.skippedRoles.delete({ guildId, roleId })
 			.catch(reason => logger.logError(this.constructor.name, this.deleteRole.name, reason))
 	}
 
-	private tryProcess(process: (connector: MongoConnector, logger: Logger, guildId: string, userId: string) => void, mongoConnector: MongoConnector, guildId: string, id: string, channel: TextChannel | DMChannel | NewsChannel) {
+	private tryProcess(process: (connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>, mongoConnector: MongoConnector, guildId: string, id: string, channel: TextChannel | DMChannel | NewsChannel) {
 		try {
 			process(mongoConnector, this.logger, guildId, id)
+				.catch(reason => this.logger.logError(this.constructor.name, this.deleteRole.name, reason))
 		} catch (e) {
 			this.logger.logError(this.constructor.name, this.processMentionArray.name, e)
 			channel.send(Messages.skipError)

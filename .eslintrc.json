@@ -17,6 +17,7 @@ Happy linting! 💖
         "es6": true,
         "node": true
     },
+    "ignorePatterns": "*.js",
     "extends": [
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
