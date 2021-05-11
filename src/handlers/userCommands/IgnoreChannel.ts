@@ -14,6 +14,7 @@ import { Logger } from '../../Logger'
 import { Constants, Messages } from '../../descriptor'
 import { ChannelIdValidator } from '../../services/ChannelIdValidator'
 import { Config } from '../../Config'
+import { TypeGuarder } from '../../services'
 
 export class IgnoreChannel extends BaseHandler {
 	private client: Client
@@ -49,9 +50,9 @@ export class IgnoreChannel extends BaseHandler {
 	}
 
 	private handleIgnore(message: Message, channelId: string, guildId: string, ignore: boolean) {
-		this.channelIdValidator.validate(message.channel, channelId, guildId)
+		this.channelIdValidator.validate(message.channel, channelId, guildId, true)
 
-		return ignore ? this.addIgnore(guildId, channelId) : this.deleteIgnore(guildId, channelId)
+		return ignore ? this.addIgnore(guildId, channelId, TypeGuarder.isCategory(message.guild?.channels.resolve(channelId))) : this.deleteIgnore(guildId, channelId)
 	}
 
 	private deleteIgnore(guildId: string, channelId: string) {
@@ -59,10 +60,11 @@ export class IgnoreChannel extends BaseHandler {
 			.catch(reason => this.logger.logError(this.constructor.name, this.deleteIgnore.name, reason))
 	}
 
-	private addIgnore(guildId: string, channelId: string) {
+	private addIgnore(guildId: string, channelId: string, isCategory: boolean) {
 		const ignoredChannel: IgnoredChannel = {
 			guildId,
-			channelId
+			channelId,
+			isCategory
 		}
 		this.mongoConnector.ignoredChannels.insert(ignoredChannel)
 			.catch(reason => this.logger.logError(this.constructor.name, this.addIgnore.name, reason))
@@ -76,10 +78,10 @@ export class IgnoreChannel extends BaseHandler {
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
 			.addField(`${this.cmd} [0/1] {channelId}`, `
-        Start/stop ignoring voice channel when checking for linked text channel.
-        Used when there's no need for linked text channel for the specific Voice Channel.
+        Start/stop ignoring voice channel / category with voice channels when checking for linked text channel.
+        Used when there's no need for linked text channel for the specific Voice Channel / Voice Channels inside specific Category.
         \`1\` means start ignoring, \`0\` - stop ignoring and handle the Voice Channel as usual.
-        Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID.
+        Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID / Category ID.
 
         If the channelId is invalid, the bot will post a warning in the chat.
 
