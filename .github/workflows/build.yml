@@ -32,6 +32,7 @@ jobs:
     name: Build project
     needs: setup
     runs-on: ubuntu-latest
+    working-directory: nexus-bot
     steps:
       - name: build
         run: npm run build-ts
