@@ -13,7 +13,6 @@ on:
 jobs:
   setup:
     name: Setup NodeJS
-    needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
