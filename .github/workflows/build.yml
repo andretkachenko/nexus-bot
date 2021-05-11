@@ -11,7 +11,9 @@ on:
       - develop
  
 jobs:
-  build: 
+  setup:
+    name: Setup NodeJS
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,8 +29,18 @@ jobs:
       - name: npm install
         run: npm install
 
+  build: 
+    name: Build project
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
       - name: build
-        run: npm run build-ts   
-
+        run: npm run build-ts
+ 
+  lint:
+    name: Linter check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: lint
         run: npm run lint
