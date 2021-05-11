@@ -11,8 +11,8 @@ on:
       - develop
  
 jobs:
-  setup:
-    name: Setup NodeJS
+  build:
+    name: Build And Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,19 +27,6 @@ jobs:
 
       - name: npm install
         run: npm install
-
-  build: 
-    name: Build project
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: build
-        run: npm run build-ts /home/runner/work/nexus-bot/nexus-bot
- 
-  lint:
-    name: Linter check
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
+        
       - name: lint
-        run: npm run lint /home/runner/work/nexus-bot/nexus-bot
+        run: npm run lint
