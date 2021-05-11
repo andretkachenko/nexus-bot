@@ -24,4 +24,8 @@ export class TypeGuarder {
 		return (channel as NewsChannel).type === ChannelType.news || this.isTextChannel(channel)
 	}
 
+	public static isCategory(channel: GuildChannel | null | undefined ): channel is CategoryChannel {
+		return channel?.type === ChannelType.category
+	}
+
 }
