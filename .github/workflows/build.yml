@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: build
-        run: npm run build-ts
+        run: tsc
         working-directory: nexus-bot
  
   lint:
