@@ -35,7 +35,6 @@ jobs:
     steps:
       - name: build
         run: tsc
-        working-directory: nexus-bot
  
   lint:
     name: Linter check
