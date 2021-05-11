@@ -32,7 +32,7 @@ export class Commands extends BaseHandler {
 		\`${this.prefix+BotCommand.map} [0/1] {voiceChannelId} {textChannelId}\` - map voice and text channels together.
 		`)
 			.addField('Informational commands', `
-        To get detailed explanation of any command, write help with the name of a command. For example: \`${this.cmd + ' ' + BotCommand.write}\`
+        To get detailed explanation of any command, write help with the name of a command. For example: \`${this.prefix+BotCommand.help + ' ' + BotCommand.write}\`
         \`${this.cmd + ' ' + BotCommand.channelId}\` - explanation how to find channelId/guildId
         \`${this.cmd + ' ' + BotCommand.whoops}\` - notes in case of bot's malfunctioning
         `)

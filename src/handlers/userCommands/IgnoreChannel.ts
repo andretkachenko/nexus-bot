@@ -40,6 +40,7 @@ export class IgnoreChannel extends BaseHandler {
 	private handleChannelId(ignore: boolean, message: Message, channelId: string, guildId: string) {
 		try {
 			this.handleIgnore(message, channelId, guildId, ignore)
+				.catch(reason => this.logger.logError(this.constructor.name, this.handleIgnore.name, reason))
 		}
 		catch (e) {
 			const msg = e instanceof Error ? e.message : Messages.errorProcessingChannelId + channelId
@@ -49,23 +50,29 @@ export class IgnoreChannel extends BaseHandler {
 		}
 	}
 
-	private handleIgnore(message: Message, channelId: string, guildId: string, ignore: boolean) {
+	private async handleIgnore(message: Message, channelId: string, guildId: string, ignore: boolean): Promise<void> {
 		this.channelIdValidator.validate(message.channel, channelId, guildId, true)
 
-		return ignore ? this.addIgnore(guildId, channelId, TypeGuarder.isCategory(message.guild?.channels.resolve(channelId))) : this.deleteIgnore(guildId, channelId)
+		return ignore
+			? this.addIgnore(guildId, channelId, TypeGuarder.isCategory(message.guild?.channels.resolve(channelId)))
+			: this.deleteIgnore(guildId, channelId)
 	}
 
-	private deleteIgnore(guildId: string, channelId: string) {
+	private async deleteIgnore(guildId: string, channelId: string): Promise<void> {
+		const exists = await this.mongoConnector.ignoredChannels.exists(guildId, channelId)
+		if(!exists) return
 		this.mongoConnector.ignoredChannels.delete(guildId, channelId)
 			.catch(reason => this.logger.logError(this.constructor.name, this.deleteIgnore.name, reason))
 	}
 
-	private addIgnore(guildId: string, channelId: string, isCategory: boolean) {
+	private async addIgnore(guildId: string, channelId: string, isCategory: boolean): Promise<void> {
 		const ignoredChannel: IgnoredChannel = {
 			guildId,
 			channelId,
 			isCategory
 		}
+		const alreadyExist = await this.mongoConnector.ignoredChannels.exists(guildId, channelId)
+		if(alreadyExist) return
 		this.mongoConnector.ignoredChannels.insert(ignoredChannel)
 			.catch(reason => this.logger.logError(this.constructor.name, this.addIgnore.name, reason))
 	}

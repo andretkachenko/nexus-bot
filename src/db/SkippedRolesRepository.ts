@@ -12,8 +12,8 @@ export class SkippedRolesRepository extends Repository<SkippedRole> {
 		return super.getMany({ guildId })
 	}
 
-	public async exists(guildId: string, userId: string): Promise<boolean> {
-		return super.getFirst({ guildId, roleId: userId })
+	public async exists(guildId: string, roleId: string): Promise<boolean> {
+		return super.getFirst({ guildId, roleId })
 			.then(entity => {
 				return entity !== undefined && entity !== null
 			})
