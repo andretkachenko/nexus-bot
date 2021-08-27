@@ -1,10 +1,10 @@
 export enum ChannelType {
-	text = 'text',
-	dm = 'dm',
-	voice = 'voice',
+	guildText = 'GUILD_TEXT',
+	dm = 'DM',
+	guildVoice = 'GUILD_VOICE',
 	group = 'group',
-	category = 'category',
-	news = 'news',
+	guildCategory = 'GUILD_CATEGORY',
+	guildNews = 'GUILD_NEWS',
 	store = 'store',
 	unknown = 'unknown',
 }

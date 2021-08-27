@@ -1,7 +1,6 @@
-import { DMChannel, Message,
+import { Message,
 	MessageEmbed,
-	NewsChannel,
-	TextChannel
+	TextBasedChannels
 } from 'discord.js'
 import { IHandler } from '.'
 import { Config } from '../../Config'
@@ -27,7 +26,7 @@ export class Help extends BaseHandler {
 			docType = this.getRequestedDoc(message, docType)
 		}
 		catch (e) {
-			this.logger.logError(this.constructor.name, this.process.name, e, docType)
+			this.logger.logError(this.constructor.name, this.process.name, e as string, docType)
 			this.trySendHelp(message.channel, this)
 		}
 	}
@@ -41,11 +40,11 @@ export class Help extends BaseHandler {
 		return docType
 	}
 
-	private trySendHelp(channel: TextChannel | DMChannel | NewsChannel, handler: IHandler): void {
+	private trySendHelp(channel: TextBasedChannels, handler: IHandler): void {
 		const embed = this.createEmbed()
 		handler.fillEmbed(embed)
 		this.addFooter(embed)
-		channel.send(embed)
+		channel.send({ embeds: [ embed ] })
 			.catch(reason => {
 				const guildId = TypeGuarder.isGuildChannel(channel) ? channel.guild.id : ChannelType.dm
 				this.logger.logError(this.constructor.name, this.trySendHelp.name, reason, guildId)

@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv'
 
 export class Config {
+	applicationId: string
 	token: string
 	environment: string
 	prefix: string
@@ -12,6 +13,7 @@ export class Config {
 
 	constructor() {
 		dotenv.config()
+		this.applicationId = process.env.APPLICATION_ID as string
 		this.token = process.env.TOKEN as string
 		this.environment = process.env.NODE_ENV as string
 		this.prefix = process.env.PREFIX as string

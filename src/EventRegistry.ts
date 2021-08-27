@@ -1,5 +1,6 @@
 import {
 	Client,
+	Interaction,
 	Message,
 	PartialMessage,
 	VoiceState
@@ -46,6 +47,7 @@ export class EventRegistry {
 		this.handleReady()
 
 		// => Main worker handlers
+		this.handleInteraction()
 		this.handleMessage()
 		this.handeMessageUpdate()
 		this.handeVoiceStateUpdate()
@@ -69,8 +71,17 @@ export class EventRegistry {
 		})
 	}
 
+	private handleInteraction() {
+		this.client.on(ClientEvent.interactionCreate, (interaction: Interaction) => {
+			if(!interaction.isCommand() || this.client.application?.commands.resolve(interaction.commandName)) return
+
+			interaction.reply('Pong')
+				.catch(reason => this.logger.logError(this.constructor.name, this.handleInteraction.name, reason))
+		})
+	}
+
 	private handleMessage() {
-		this.client.on(ClientEvent.message, (message: Message) => {
+		this.client.on(ClientEvent.messageCreate, (message: Message) => {
 			this.userCommandHandlers.handle(message)
 		})
 	}
@@ -89,12 +100,12 @@ export class EventRegistry {
 	}
 
 	private handleVoiceStateUpdate(newVoiceState: VoiceState, oldVoiceState: VoiceState) {
-		if (newVoiceState.channelID === oldVoiceState.channelID) return
+		if (newVoiceState.channelId === oldVoiceState.channelId) return
 
-		if (newVoiceState.channelID)
+		if (newVoiceState.channelId)
 			this.channelHandlers.handleChannelJoin(newVoiceState)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handeVoiceStateUpdate.name, reason))
-		if (oldVoiceState.channelID)
+		if (oldVoiceState.channelId)
 			this.channelHandlers.handleChannelLeave(oldVoiceState)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handeVoiceStateUpdate.name, reason))
 	}
@@ -128,7 +139,7 @@ export class EventRegistry {
 	private handleClientErrorsAndWarnings() {
 		this.client.on(ClientEvent.error, (error: Error) => this.handleError(error))
 
-		this.client.on(ClientEvent.warn, (warning) => {
+		this.client.on(ClientEvent.warn, (warning: string) => {
 			this.logger.logWarn(Messages.discordWarn + ': ' + warning)
 		})
 	}
@@ -146,7 +157,7 @@ export class EventRegistry {
 			this.setBotActivity(client, config)
 		}
 		catch(error) {
-			this.logger.logError(this.constructor.name, this.introduce.name, error)
+			this.logger.logError(this.constructor.name, this.introduce.name, error as string)
 		}
 	}
 
@@ -156,6 +167,5 @@ export class EventRegistry {
 				'name': Messages.statusString(config.prefix, client.guilds.cache.size),
 				'type': Constants.listening
 			})
-				.catch(reason => this.logger.logError(this.constructor.name, this.introduce.name, reason))
 	}
 }

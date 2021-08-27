@@ -1,21 +1,29 @@
 {
 	"compilerOptions": {
-		"target": "es2017",
+		"lib": ["es2021"],
 		"module": "commonjs",
+		"target": "es2021",
+
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,		
+		"forceConsistentCasingInFileNames": true,
 		"outDir": "build",
 		"rootDir": "src",
 		"moduleResolution": "node",
 		"declaration": false,
-		"strict": true,
 		"sourceMap": true,
 		"noImplicitAny": true,
 		"alwaysStrict": true,
+		"types": [],
 		"typeRoots": [
             "./node_modules/@types"
         ]
 	},
 	"exclude": [
 		"./node_modules/*",
+		"node_modules/*",
+		"node_modules"
 	],
 	"include": [
 		"./src/**/*.ts"

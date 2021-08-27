@@ -1,8 +1,6 @@
 import { Client,
-	DMChannel,
 	Guild,
-	NewsChannel,
-	TextChannel
+	TextBasedChannels,
 } from 'discord.js'
 import { Messages } from '../descriptor'
 import { ChannelType } from '../enums'
@@ -17,7 +15,7 @@ export class ChannelIdValidator {
 		this.client = client
 	}
 
-	public validate(textChannel: TextChannel | NewsChannel | DMChannel, channelId: string, guildId: string | undefined, allowCategoryId?: boolean): boolean {
+	public validate(textChannel: TextBasedChannels, channelId: string, guildId: string | undefined, allowCategoryId?: boolean): boolean {
 		this.checkDm(textChannel)
 		const guild = this.tryGetGuild(guildId)
 		let validCategory = false
@@ -28,7 +26,7 @@ export class ChannelIdValidator {
 		return true
 	}
 
-	private checkDm(textChannel: TextChannel | NewsChannel | DMChannel): void {
+	private checkDm(textChannel: TextBasedChannels): void {
 		if (textChannel.type === ChannelType.dm) throw new Error(Messages.dmNotSupported)
 	}
 
@@ -42,11 +40,11 @@ export class ChannelIdValidator {
 
 	private checkCategory(channelId: string, guild: Guild): boolean {
 		const channel = guild.channels.resolve(channelId)
-		return channel?.type === ChannelType.category
+		return channel?.type === ChannelType.guildCategory
 	}
 
 	private checkVoice(guild: Guild, channelId: string): void {
 		const channel = guild.channels.resolve(channelId)
-		if (channel?.type !== ChannelType.voice) throw new Error(Messages.commandProcessError + Messages.notVoiceChannelId)
+		if (channel?.type !== ChannelType.guildVoice) throw new Error(Messages.commandProcessError + Messages.notVoiceChannelId)
 	}
 }

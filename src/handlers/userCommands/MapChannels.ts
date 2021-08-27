@@ -113,7 +113,7 @@ export class MapChannels extends BaseHandler {
 
 	protected hasPermissions(message: Message): boolean {
 		return super.hasPermissions(message) ||
-            (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
+            (message.member !== null && message.member.permissions.has(Permission.manageChannels, true))
 	}
 
 	public fillEmbed(embed: MessageEmbed): void {

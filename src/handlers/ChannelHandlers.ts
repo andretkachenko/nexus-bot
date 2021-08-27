@@ -3,7 +3,7 @@ import {
 	TextChannel,
 	GuildMember,
 	Guild,
-	GuildCreateChannelOptions,
+	GuildChannelCreateOptions,
 	Client,
 	Permissions,
 	CategoryChannel,
@@ -24,6 +24,8 @@ import {
 } from '../enums'
 import { Constants } from '../descriptor'
 import { TypeGuarder } from '../services'
+import { Channels as AnyChannel, SafePermissionOverwriteOptions } from '../types'
+
 
 export class ChannelHandlers {
 	private client: Client
@@ -37,8 +39,8 @@ export class ChannelHandlers {
 	}
 
 	public async handleChannelJoin(newVoiceState: VoiceState): Promise<void> {
-		const channelId = newVoiceState.channelID as string
-		if (channelId === newVoiceState.guild.afkChannelID) return
+		const channelId = newVoiceState.channelId as string
+		if (channelId === newVoiceState.guild.afkChannelId) return
 		const textChannelMap = await this.mongoConnector.textChannelRepository.get(newVoiceState.guild.id, channelId)
 		const textChannel = this.resolve(newVoiceState, textChannelMap?.textChannelId)
 
@@ -50,7 +52,7 @@ export class ChannelHandlers {
 	}
 
 	public async handleChannelLeave(oldVoiceState: VoiceState): Promise<void> {
-		const textChannelMap = await this.mongoConnector.textChannelRepository.get(oldVoiceState.guild.id, oldVoiceState.channelID as string)
+		const textChannelMap = await this.mongoConnector.textChannelRepository.get(oldVoiceState.guild.id, oldVoiceState.channelId as string)
 
 		const textChannel = this.resolve(oldVoiceState, textChannelMap?.textChannelId)
 		if (!textChannel) return
@@ -82,7 +84,7 @@ export class ChannelHandlers {
 	private async createTextChannel(newVoiceState: VoiceState) {
 		const guild = newVoiceState.guild
 		const isIgnored = await this.checkIfIgnored(guild, newVoiceState)
-		if (!newVoiceState.channelID || !guild || isIgnored || !guild.me?.permissions) return
+		if (!newVoiceState.channelId || !guild || isIgnored || !guild.me?.permissions) return
 
 		const parentId = await this.resolveTextCategory(guild)
 		const category = guild.channels.cache.find(c => c.id === parentId) as CategoryChannel
@@ -90,8 +92,8 @@ export class ChannelHandlers {
 		if (!this.sufficientPermissions([Permission.manageChannels, Permission.manageRoles],
 			guild?.me?.permissions, category?.permissionsFor(guild.me?.id ))) return
 
-		const options: GuildCreateChannelOptions = {
-			type: ChannelType.text,
+		const options: GuildChannelCreateOptions = {
+			type: ChannelType.guildText,
 			permissionOverwrites: [
 				{
 					id: guild.id,
@@ -111,7 +113,7 @@ export class ChannelHandlers {
 		if (category && category.children.size < 50) options.parent = parentId
 		const voiceChannelName = newVoiceState.channel?.name ?? Constants.undefinedId // workaround before discord.js implements stage channels
 		guild.channels.create(voiceChannelName + Constants.textSuffix, options)
-			.then(ch => this.registerChannel(newVoiceState.channelID, ch))
+			.then(ch => this.registerChannel(newVoiceState.channelId, ch))
 			.catch(reason => this.logger.logError(this.constructor.name, this.createTextChannel.name, reason))
 
 	}
@@ -127,7 +129,8 @@ export class ChannelHandlers {
 			.then(skip => {
 				if (skip) return
 				// eslint-disable-next-line @typescript-eslint/naming-convention
-				textChannel.updateOverwrite(user, { VIEW_CHANNEL: value })
+				const option : SafePermissionOverwriteOptions = { VIEW_CHANNEL : value }
+				textChannel.permissionOverwrites.edit(user, option)
 					.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
 			})
 			.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
@@ -143,7 +146,7 @@ export class ChannelHandlers {
 			await this.fetchAndDelete(textChannel)
 		}
 		catch (error) {
-			this.logger.logError(this.constructor.name, this.deleteNotPinnedMessages.name, error, textChannel.guild.id)
+			this.logger.logError(this.constructor.name, this.deleteNotPinnedMessages.name, error as string, textChannel.guild.id)
 		}
 	}
 
@@ -166,7 +169,7 @@ export class ChannelHandlers {
 
 		let categoryId = Constants.emptyString
 
-		await guild.channels.create(Constants.categoryName, { type: ChannelType.category })
+		await guild.channels.create(Constants.categoryName, { type: ChannelType.guildCategory })
 			.then(async (category) => categoryId = await this.registerCategory(category))
 			.catch(reason => { this.logger.logError(this.constructor.name, this.createCategory.name, reason) })
 
@@ -184,7 +187,7 @@ export class ChannelHandlers {
 			})
 	}
 
-	private registerChannel(voiceChannelId: string | undefined | null, channel: TextChannel | CategoryChannel | VoiceChannel): void {
+	private registerChannel(voiceChannelId: string | undefined | null, channel: AnyChannel): void {
 		if(!voiceChannelId || !TypeGuarder.isTextChannel(channel) || !channel.id) return
 
 		const textChannelMap: TextChannelMap = {
@@ -202,7 +205,7 @@ export class ChannelHandlers {
 	}
 
 	private async skip(user: GuildMember): Promise<boolean> {
-		return user.hasPermission(Permission.administrator)
+		return user.permissions.has(Permission.administrator)
 			|| user.user.bot
 			|| await this.userSkipped(user)
 			|| await this.userInSkippedRole(user)
@@ -244,7 +247,7 @@ export class ChannelHandlers {
 
 	private async checkIfIgnored(guild: Guild, newVoiceState: VoiceState) {
 		const channelIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.id)
-		const categoryIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.parentID as string)
+		const categoryIgnored = await this.mongoConnector.ignoredChannels.exists(guild?.id, newVoiceState.channel?.parentId as string)
 		return channelIgnored || categoryIgnored
 	}
 }

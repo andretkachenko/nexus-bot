@@ -16,12 +16,14 @@ export class Write extends BaseHandler {
 
 	protected process(message: Message): void {
 		const msg = this.trimCommand(message)
-		if(msg !== Constants.emptyString) message.channel.send(msg, message.attachments.array())
-			.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
+		if(msg !== Constants.emptyString) {
+			message.channel.send({ content: msg, files: message.attachments.map(x => x)})
+				.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
+		}
 	}
 
 	protected hasPermissions(message: Message): boolean {
-		return message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true})
+		return message.member !== null && message.member.permissions.has(Permission.manageChannels, true)
 	}
 
 	public fillEmbed(embed: MessageEmbed): void {

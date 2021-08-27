@@ -1,8 +1,6 @@
-import { DMChannel,
-	Message,
+import { Message,
 	MessageEmbed,
-	NewsChannel,
-	TextChannel
+	TextBasedChannels,
 } from 'discord.js'
 import { Config } from '../../Config'
 import { MongoConnector } from '../../db/MongoConnector'
@@ -24,8 +22,8 @@ export class SkipUsersRoles extends BaseHandler {
 	protected process(message: Message): void {
 		const args = this.splitArguments(this.trimCommand(message))
 		const skip = args[0] === Constants.enable
-		const users = message.mentions.users.keyArray()
-		const roles = message.mentions.roles.keyArray()
+		const users = message.mentions.users.map((_value, key) => key)
+		const roles = message.mentions.roles.map((_value, key) => key)
 		const guildId = message.guild?.id as string
 		this.processMentionArray(this.mongoConnector, message.channel, guildId, skip, users, this.addUser, this.deleteUser)
 		this.processMentionArray(this.mongoConnector, message.channel, guildId, skip, roles, this.addRole, this.deleteRole)
@@ -33,7 +31,7 @@ export class SkipUsersRoles extends BaseHandler {
 
 	private processMentionArray(
 		mongoConnector: MongoConnector,
-		channel: TextChannel | DMChannel | NewsChannel,
+		channel: TextBasedChannels,
 		guildId: string,
 		skip: boolean,
 		ids: string[],
@@ -73,12 +71,12 @@ export class SkipUsersRoles extends BaseHandler {
 			.catch(reason => logger.logError(this.constructor.name, this.deleteRole.name, reason))
 	}
 
-	private tryProcess(process: (connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>, mongoConnector: MongoConnector, guildId: string, id: string, channel: TextChannel | DMChannel | NewsChannel) {
+	private tryProcess(process: (connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>, mongoConnector: MongoConnector, guildId: string, id: string, channel: TextBasedChannels) {
 		try {
 			process(mongoConnector, this.logger, guildId, id)
 				.catch(reason => this.logger.logError(this.constructor.name, this.deleteRole.name, reason))
 		} catch (e) {
-			this.logger.logError(this.constructor.name, this.processMentionArray.name, e)
+			this.logger.logError(this.constructor.name, this.processMentionArray.name, e as string)
 			channel.send(Messages.skipError)
 				.catch(reason => this.logger.logError(this.constructor.name, this.processMentionArray.name, reason))
 		}
