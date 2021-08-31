@@ -5,7 +5,7 @@ The purpose of this bot is to create text channel, which is visible only to thos
 Each time the last user leaves the voice channel, all non-pinned messages in linked text channel will be deleted. 
 
 ## Want to use at your server?
-[![Invite bot to your server](https://i.imgur.com/MgQZMpT.jpg)](https://discord.com/oauth2/authorize?client_id=709876107213537351&permissions=268692496&scope=bot)
+[![Invite bot to your server](https://i.imgur.com/MgQZMpT.jpg)](https://discord.com/api/oauth2/authorize?client_id=709876107213537351&permissions=53955783696&scope=bot%20applications.commands)
 
 ## How to use
 You don't need to set up anything - once you join a voice channel (excluding inactive channel), a new category with the linked text channel will be created.  
