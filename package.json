@@ -1,6 +1,6 @@
 {
   "name": "nexus-bot",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "discord bot to map text channel to each voice channel",
   "main": "build/main.js",
   "author": "andretkachenko",
