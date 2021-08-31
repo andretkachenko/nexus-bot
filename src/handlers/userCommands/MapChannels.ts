@@ -1,4 +1,5 @@
 import { Client,
+	CommandInteraction,
 	Message,
 	MessageEmbed
 } from 'discord.js'
@@ -14,47 +15,61 @@ import { TypeGuarder,
 	ChannelIdValidator
 } from '../../services'
 import { BaseHandler } from './BaseHandler'
+import { IHandler } from './IHandler'
 
+@IHandler.register
 export class MapChannels extends BaseHandler {
 	private channelIdValidator: ChannelIdValidator
-	private mongoConnector: MongoConnector
 
-	constructor(logger: Logger, client: Client, mongoConnector: MongoConnector, config: Config) {
-		super(logger, config, BotCommand.map)
+	private readonly forceOption = 'force'
+	private readonly tcOption = 'textchannel'
+	private readonly vcOption = 'voicechannel'
+
+	constructor(client: Client, logger: Logger, config: Config, mongoConnector: MongoConnector) {
+		super(client, logger, config, mongoConnector, BotCommand.map)
 
 		this.channelIdValidator = new ChannelIdValidator(logger, client)
-		this.mongoConnector = mongoConnector
+		this.slash
+			.setDescription('Map the Voice Channel and the Text Channel together.')
+			.addChannelOption(o => o.setName(this.vcOption).setDescription('Voice Channel to map').setRequired(true))
+			.addChannelOption(o => o.setName(this.tcOption).setDescription('Text Channel to map').setRequired(true))
+			.addBooleanOption(o => o.setName(this.forceOption).setDescription('Force?'))
 	}
 
-	protected process(message: Message): void {
-		const args = this.splitArguments(this.trimCommand(message))
-		const guildId = message.guild?.id as string
+	public process(interaction: CommandInteraction): void {
+		const force = interaction.options.getBoolean(this.forceOption) ?? false
+		const voice = interaction.options.getChannel(this.vcOption, true)
+		const text = interaction.options.getChannel(this.tcOption, true)
 
-		this.linkChannels(message, guildId, args[0] === '1', args[1], args[2])
+		if(!TypeGuarder.isGuildChannel(voice) || !TypeGuarder.isGuildChannel(text)) return
+
+		void this.linkChannels(interaction, voice.guild.id, force, voice.id, text.id)
 			.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
+			.then(() => super.process(interaction))
 	}
 
-	private async linkChannels(message: Message, guildId: string, override: boolean, voiceChannelId: string, textChannelId: string) {
+	private async linkChannels(interaction: CommandInteraction, guildId: string, override: boolean, voiceChannelId: string, textChannelId: string) {
 		try {
-			await this.validateAndApply(message, voiceChannelId, guildId, textChannelId, override)
+			await this.validateAndApply(interaction, voiceChannelId, guildId, textChannelId, override)
 		}
 		catch (e) {
-			this.handleLinkingError(e, voiceChannelId, textChannelId, message)
+			this.handleLinkingError(e, voiceChannelId, textChannelId, interaction)
 		}
 	}
 
-	private handleLinkingError(e: any, voiceChannelId: string, textChannelId: string, message: Message) {
+	private handleLinkingError(e: any, voiceChannelId: string, textChannelId: string, interaction: CommandInteraction) {
 		let err = e instanceof Error ? e.message : e as string
 		if (!err) err = Messages.unknownLinkError
 		this.logger.logError(this.constructor.name, this.linkChannels.name, err, voiceChannelId, textChannelId)
-		message.channel.send(err)
+		interaction.reply({ content: err, ephemeral: true })
 			.catch(reason => this.logger.logError(this.constructor.name, this.linkChannels.name, reason))
 	}
 
-	private async validateAndApply(message: Message, voiceChannelId: string, guildId: string, textChannelId: string, override: boolean) {
-		this.channelIdValidator.validate(message.channel, voiceChannelId, guildId)
+	private async validateAndApply(interaction: CommandInteraction, voiceChannelId: string, guildId: string, textChannelId: string, override: boolean) {
 
-		const textChannel = message.guild?.channels.resolve(textChannelId)
+		this.channelIdValidator.validate(voiceChannelId, guildId)
+
+		const textChannel = interaction.guild?.channels.resolve(textChannelId)
 		if (!textChannel || !TypeGuarder.isTextChannel(textChannel))
 			throw new Error(Messages.invalidTextChannelId)
 
@@ -63,41 +78,41 @@ export class MapChannels extends BaseHandler {
 		const textMap = await this.mongoConnector.textChannelRepository.getByTextChannelId(guildId, textChannelId)
 
 		// adjust mapings to fit new one
-		const voiceHandled = this.handleVoiceMap(message, voiceMap, override, textChannelId)
-		const textHandled = this.handleTextMap(message, textMap, override, voiceChannelId)
+		const voiceHandled = this.handleVoiceMap(interaction, voiceMap, override, textChannelId)
+		const textHandled = this.handleTextMap(interaction, textMap, override, voiceChannelId)
 
 		// if none of the maping were adjusted - then new one should be created
 		if (!voiceHandled && !textHandled)
-			this.insertNewMap(message, guildId, voiceChannelId, textChannelId)
+			this.insertNewMap(interaction, guildId, voiceChannelId, textChannelId)
 	}
 
-	private handleVoiceMap(message: Message, textChannelMap: TextChannelMap, override: boolean, textChannelId: string): boolean {
+	private handleVoiceMap(interaction: CommandInteraction, textChannelMap: TextChannelMap, override: boolean, textChannelId: string): boolean {
 		if(!textChannelMap) return false
 
 		if(!override) throw new Error(Messages.voiceChannelMapped)
 		this.mongoConnector.textChannelRepository.changeTextChannelId(textChannelMap, textChannelId)
 			.catch(reason => { throw new Error(reason) })
-		message.channel.send(Messages.voiceMapEditNotice + textChannelId)
+		interaction.reply({ content: Messages.voiceMapEditNotice(textChannelId), ephemeral: true })
 			.catch(reason => { throw new Error(reason) })
 
 		return true
 	}
 
-	private handleTextMap(message: Message, textChannelMap: TextChannelMap, override: boolean, voiceChannelId: string): boolean {
+	private handleTextMap(interaction: CommandInteraction, textChannelMap: TextChannelMap, override: boolean, voiceChannelId: string): boolean {
 		if(!textChannelMap) return false
 
 		if(!override) throw new Error(Messages.textChannelMapped)
 		this.mongoConnector.textChannelRepository.delete(textChannelMap.guildId, textChannelMap.voiceChannelId)
 			.catch(reason => { throw new Error(reason) })
-		message.channel.send(Messages.textMapDeleteNotice + voiceChannelId)
+		interaction.reply({ content: Messages.textMapDeleteNotice(voiceChannelId), ephemeral: true })
 			.catch(reason => { throw new Error(reason) })
 
-		this.insertNewMap(message, textChannelMap.guildId, voiceChannelId, textChannelMap.textChannelId)
+		this.insertNewMap(interaction, textChannelMap.guildId, voiceChannelId, textChannelMap.textChannelId)
 
 		return true
 	}
 
-	private insertNewMap(message: Message, guildId: string, voiceChannelId: string, textChannelId: string): void {
+	private insertNewMap(interaction: CommandInteraction, guildId: string, voiceChannelId: string, textChannelId: string): void {
 		const textCategoryMap: TextChannelMap = {
 			guildId,
 			voiceChannelId,
@@ -107,25 +122,23 @@ export class MapChannels extends BaseHandler {
 		this.mongoConnector.textChannelRepository.insert(textCategoryMap)
 			.catch(reason => { throw new Error(reason) })
 
-		message.channel.send(Messages.textMapCreateNotice + voiceChannelId)
+		interaction.reply({ content: Messages.textMapCreateNotice(voiceChannelId), ephemeral: true })
 			.catch(reason => { throw new Error(reason) })
 	}
 
 	protected hasPermissions(message: Message): boolean {
 		return super.hasPermissions(message) ||
-            (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
+            (message.member !== null && message.member.permissions.has(Permission.manageChannels, true))
 	}
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.cmd} [0/1] {voiceChannelId} {textChannelId}`, `
+			.addField(`${this.cmd}`, `
             *Danger zone! High risk to shoot your own leg. Use at your own discretion*
             Map the Voice Channel and the Text Channel together.
-            \`1\` means to override existing mappings, \`0\` - throw error in case mappings already exist.
-            \`1\` is a 'force' option, which will override every clashing mapping
             
             If not forced, the bot will post a warning in case:
-                - \`voiceChannelId\` or \`textChannelId\` are invalid (no matching channel found);
+                - \`${this.vcOption}\` or \`${this.tcOption}\` are invalid (no matching channel found);
                 - The Voice Channel already has a Text Channel mapped to it;
                 - The Text Channel has already been mapped to a Voice Channel;
 

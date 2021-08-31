@@ -1,19 +1,29 @@
-import { Message,
+import { Client,
+	CommandInteraction,
+	Message,
 	MessageEmbed
 } from 'discord.js'
 import { Config } from '../../Config'
-import { Messages } from '../../descriptor'
+import { MongoConnector } from '../../db'
 import { BotCommand } from '../../enums'
 import { Logger } from '../../Logger'
-import { BaseHandler } from './.'
+import { BaseHandler,
+	IHandler
+} from './.'
 
+@IHandler.register
 export class Whoops extends BaseHandler {
-	constructor(logger: Logger, config: Config) {
-		super(logger, config, BotCommand.whoops)
+	constructor(client: Client, logger: Logger, config: Config, mongoConnector: MongoConnector) {
+		super(client, logger, config, mongoConnector, BotCommand.whoops)
+
+		this.slash.setDescription('Memo if the bot does not behave as expected')
 	}
 
-	protected process(message: Message): void {
-		message.channel.send(Messages.pingResponse)
+	public process(interaction: CommandInteraction): void {
+		const embed = this.createEmbed()
+		this.fillEmbed(embed)
+		this.addFooter(embed)
+		interaction.reply({ embeds: [embed], ephemeral: true })
 			.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
 	}
 

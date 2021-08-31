@@ -1,7 +1,8 @@
 import {
 	Message,
 	Client,
-	MessageEmbed
+	MessageEmbed,
+	CommandInteraction
 } from 'discord.js'
 import {
 	BotCommand,
@@ -11,50 +12,62 @@ import { MongoConnector } from '../../db/MongoConnector'
 import { IgnoredChannel } from '../../entities'
 import { BaseHandler } from './BaseHandler'
 import { Logger } from '../../Logger'
-import { Constants, Messages } from '../../descriptor'
+import { Messages } from '../../descriptor'
 import { ChannelIdValidator } from '../../services/ChannelIdValidator'
 import { Config } from '../../Config'
 import { TypeGuarder } from '../../services'
+import { IHandler } from './IHandler'
 
+@IHandler.register
 export class IgnoreChannel extends BaseHandler {
-	private client: Client
-	private mongoConnector: MongoConnector
 	private channelIdValidator: ChannelIdValidator
+	private readonly flagOption = 'enable'
+	private readonly idOption = 'voicechannel'
 
-	constructor(logger: Logger, client: Client, mongoConnector: MongoConnector, config: Config) {
-		super(logger, config, BotCommand.ignore)
-		this.mongoConnector = mongoConnector
-		this.client = client
+	constructor(client: Client, logger: Logger, config: Config, mongoConnector: MongoConnector) {
+		super(client, logger, config, mongoConnector, BotCommand.ignore)
+
 		this.channelIdValidator = new ChannelIdValidator(this.logger, this.client)
+
+		this.slash
+			.setDescription('Toggle channel linking')
+			.addBooleanOption(o =>
+				o
+					.setName(this.flagOption)
+					.setDescription('Enable/disable clearance of the Text Channel after the last User has left associated Voice Channel.')
+					.setRequired(true)
+			)
+			.addChannelOption(o => o.setName(this.idOption).setDescription('Voice Channel, for which it should be changed').setRequired(true))
 	}
 
-	protected process(message: Message): void {
-		const args = this.splitArguments(this.trimCommand(message))
-		const ignore = args[0] === Constants.enable
-		const guildId = message.guild?.id as string
-		for (let i = 1; i < args.length; i++) {
-			this.handleChannelId(ignore, message, args[i], guildId)
-		}
+	public process(interaction: CommandInteraction): void {
+		const flag = interaction.options.getBoolean(this.flagOption, true)
+		const channel = interaction.options.getChannel(this.idOption, true)
+
+		if(TypeGuarder.isGuildChannel(channel))
+			this.handleChannelId(flag, interaction, channel.id, channel.guild.id)
+
+		super.process(interaction)
 	}
 
-	private handleChannelId(ignore: boolean, message: Message, channelId: string, guildId: string) {
+	private handleChannelId(ignore: boolean, interaction: CommandInteraction, channelId: string, guildId: string) {
 		try {
-			this.handleIgnore(message, channelId, guildId, ignore)
+			this.handleIgnore(interaction, channelId, guildId, ignore)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleIgnore.name, reason))
 		}
 		catch (e) {
 			const msg = e instanceof Error ? e.message : Messages.errorProcessingChannelId + channelId
 			this.logger.logError(this.constructor.name, this.handleChannelId.name, msg, channelId)
-			message.channel.send(msg)
+			interaction.reply({ content: msg, ephemeral: true })
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelId.name, reason))
 		}
 	}
 
-	private async handleIgnore(message: Message, channelId: string, guildId: string, ignore: boolean): Promise<void> {
-		this.channelIdValidator.validate(message.channel, channelId, guildId, true)
+	private async handleIgnore(interaction: CommandInteraction, channelId: string, guildId: string, ignore: boolean): Promise<void> {
+		this.channelIdValidator.validate(channelId, guildId, true)
 
 		return ignore
-			? this.addIgnore(guildId, channelId, TypeGuarder.isCategory(message.guild?.channels.resolve(channelId)))
+			? this.addIgnore(guildId, channelId, TypeGuarder.isCategory(interaction.guild?.channels.resolve(channelId)))
 			: this.deleteIgnore(guildId, channelId)
 	}
 
@@ -79,22 +92,17 @@ export class IgnoreChannel extends BaseHandler {
 
 	protected hasPermissions(message: Message): boolean {
 		return super.hasPermissions(message) ||
-            (message.member !== null && message.member.hasPermission(Permission.manageChannels, { checkAdmin: true, checkOwner: true}))
+            (message.member !== null && message.member.permissions.has(Permission.manageChannels, true))
 	}
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.cmd} [0/1] {channelId}`, `
+			.addField(`${this.cmd}`, `
         Start/stop ignoring voice channel / category with voice channels when checking for linked text channel.
         Used when there's no need for linked text channel for the specific Voice Channel / Voice Channels inside specific Category.
-        \`1\` means start ignoring, \`0\` - stop ignoring and handle the Voice Channel as usual.
         Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID / Category ID.
 
         If the channelId is invalid, the bot will post a warning in the chat.
-
-        Examples: 
-        \`${this.cmd} 1 717824008636334130\` - request to start ignoring the Voice Channel with the ID \`717824008636334130\`
-        \`${this.cmd} 0 717824008636334130\` - request to remove the Voice Channel with the ID \`717824008636334130\` from Ignore List and handle it as usual 
         
         Requires user to have admin/owner rights or permissions to manage channels and roles.
         `)

@@ -1,9 +1,10 @@
 import * as dotenv from 'dotenv'
 
 export class Config {
+	applicationId: string
 	token: string
 	environment: string
-	prefix: string
+	testServer: string
 	mongoName: string
 	mongoPassword: string
 	mongoCluster: string
@@ -12,9 +13,10 @@ export class Config {
 
 	constructor() {
 		dotenv.config()
+		this.applicationId = process.env.APPLICATION_ID as string
 		this.token = process.env.TOKEN as string
 		this.environment = process.env.NODE_ENV as string
-		this.prefix = process.env.PREFIX as string
+		this.testServer = process.env.TEST_SERVER as string
 		this.mongoName = process.env.MONGO_NAME as string
 		this.mongoPassword = process.env.MONGO_PWD as string
 		this.mongoCluster = process.env.MONGO_CLUSTER as string
