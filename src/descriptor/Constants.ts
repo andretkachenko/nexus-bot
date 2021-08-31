@@ -12,7 +12,7 @@ export class Constants {
 	public static readonly categoryName = 'Nexus channels'
 	public static readonly textSuffix = '-text'
 
-	public static readonly listening = 'LISTENING'
+	public static readonly customActivity = 'CUSTOM'
 	public static readonly undefinedId = 'undefined'
 	public static readonly at = 'at '
 

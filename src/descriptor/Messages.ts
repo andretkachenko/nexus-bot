@@ -13,14 +13,14 @@ export class Messages {
 	public static readonly errorProcessingChannelId = 'Error processing channel '
 	public static readonly voiceChannelMapped = 'Voice Channel already has mapped Text Channel'
 	public static readonly textChannelMapped = 'Text Channel is already mapped to a Voice Channel'
-	public static readonly voiceMapEditNotice = 'The Voice Channel already had a mapped Text Channel. Changed to map with the Text Channel #'
-	public static readonly textMapDeleteNotice = 'The Text Channel was already mapped to a Voice Channel. Deleted mapping with the Voice Channel #'
-	public static readonly textMapCreateNotice = 'Mapped the Text Channel with the Voice Channel #'
+	public static voiceMapEditNotice(id: string): string { return `The Voice Channel already had a mapped Text Channel. Changed to map with the Text Channel <#${id}>` }
+	public static textMapDeleteNotice(id: string): string { return `The Text Channel was already mapped to a Voice Channel. Deleted mapping with the Voice Channel <#${id}>` }
+	public static textMapCreateNotice(id: string): string { return `Mapped the Text Channel with the Voice Channel <#${id}>` }
 	public static readonly dmNotSupported = 'Direct messages are not supported'
 	public static readonly commandProcessError = 'Error processing command - '
 	public static readonly missingGuild = 'unable to identify server'
 	public static readonly notVoiceChannelId = 'specified channel ID does not belong to a voice channel'
 	public static readonly unknownLinkError = `Unknown error. Please raise a ticket at ${Constants.repoUrl+Constants.issuesUri}`
 
-	public static statusString(prefix: string, amt: number): string { return `${prefix}help on ${amt} servers`}
+	public static statusString(amt: number): string { return `supporting slash commands on ${amt} servers`}
 }
