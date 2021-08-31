@@ -1,25 +1,40 @@
-import { Message,
+import { Client,
+	CommandInteraction,
+	Message,
 	MessageEmbed
 } from 'discord.js'
+import { IHandler } from './IHandler'
 import { Config } from '../../Config'
-import { Constants } from '../../descriptor'
 import { BotCommand,
 	Permission
 } from '../../enums'
 import { Logger } from '../../Logger'
 import { BaseHandler } from './BaseHandler'
+import { MongoConnector } from '../../db'
 
+@IHandler.register
 export class Write extends BaseHandler {
-	constructor(logger: Logger, config: Config) {
-		super(logger, config, BotCommand.write)
+	private readonly msgOption = 'message'
+
+	constructor(client: Client, logger: Logger, config: Config, mongoConnector: MongoConnector) {
+		super(client, logger, config, mongoConnector, BotCommand.write)
+
+		this.slash
+			.setDescription('Repeat the message')
+			.addStringOption(option =>
+				option
+					.setName(this.msgOption)
+					.setDescription('message to repeat')
+					.setRequired(true))
 	}
 
-	protected process(message: Message): void {
-		const msg = this.trimCommand(message)
-		if(msg !== Constants.emptyString) {
-			message.channel.send({ content: msg, files: message.attachments.map(x => x)})
-				.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
-		}
+	public process(interaction: CommandInteraction): void {
+		const msg = interaction.options.getString(this.msgOption, true)
+
+		interaction.channel?.send({ content: msg })
+			.catch(reason => this.logger.logError(this.constructor.name, this.process.name, reason))
+
+		super.process(interaction)
 	}
 
 	protected hasPermissions(message: Message): boolean {

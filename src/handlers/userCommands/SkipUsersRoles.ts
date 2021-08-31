@@ -1,46 +1,69 @@
-import { Message,
-	MessageEmbed,
-	TextBasedChannels,
+import { Client,
+	CommandInteraction,
+	GuildMember,
+	MessageEmbed
 } from 'discord.js'
+import { IHandler } from './IHandler'
 import { Config } from '../../Config'
 import { MongoConnector } from '../../db/MongoConnector'
-import { Constants,
-	Messages
-} from '../../descriptor'
+import { Messages } from '../../descriptor'
 import { BotCommand } from '../../enums'
 import { Logger } from '../../Logger'
 import { BaseHandler } from './BaseHandler'
+import { TypeGuarder } from '../../services'
 
+@IHandler.register
 export class SkipUsersRoles extends BaseHandler {
-	private mongoConnector: MongoConnector
 
-	constructor(logger: Logger, mongoConnector: MongoConnector, config: Config) {
-		super(logger, config, BotCommand.skip)
-		this.mongoConnector = mongoConnector
+	private readonly flagOption = 'enable'
+	private readonly idOption = 'userorrole'
+
+	constructor(client: Client, logger: Logger, config: Config, mongoConnector: MongoConnector) {
+		super(client, logger, config, mongoConnector, BotCommand.skip)
+
+		this.slash
+			.setDescription('Add/remove user/role to the Skip List.')
+			.addBooleanOption(option => option.setName(this.flagOption).setDescription('Add/remove user/role to the Skip List.').setRequired(true))
+			.addMentionableOption(option => option.setName(this.idOption).setDescription('role/user').setRequired(true))
 	}
 
-	protected process(message: Message): void {
-		const args = this.splitArguments(this.trimCommand(message))
-		const skip = args[0] === Constants.enable
-		const users = message.mentions.users.map((_value, key) => key)
-		const roles = message.mentions.roles.map((_value, key) => key)
-		const guildId = message.guild?.id as string
-		this.processMentionArray(this.mongoConnector, message.channel, guildId, skip, users, this.addUser, this.deleteUser)
-		this.processMentionArray(this.mongoConnector, message.channel, guildId, skip, roles, this.addRole, this.deleteRole)
-	}
+	public process(interaction: CommandInteraction): void {
 
-	private processMentionArray(
-		mongoConnector: MongoConnector,
-		channel: TextBasedChannels,
-		guildId: string,
-		skip: boolean,
-		ids: string[],
-		add: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>),
-		remove: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>)
-	) {
-		for (const id of ids) {
-			this.tryProcess(skip ? add : remove, mongoConnector, guildId, id, channel)
+		const enable = interaction.options.getBoolean(this.flagOption, true)
+		const mentioned = interaction.options.getMentionable(this.idOption, true)
+		let fn: ((connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>) | undefined
+		let guild = ''
+		let id = ''
+
+		if(TypeGuarder.isGuildMember(mentioned)) {
+			fn = enable ? this.addUser : this.deleteUser
+			guild = mentioned.guild.id
+			id = mentioned.id
 		}
+		if(TypeGuarder.isRole(mentioned)) {
+			fn = enable ? this.addRole : this.deleteRole
+			guild = mentioned.guild.id
+			id = mentioned.id
+		}
+
+		if(!fn) return
+		this.tryProcess(fn, this.mongoConnector, guild, id, interaction)
+
+		super.process(interaction)
+	}
+
+	private handleUser(user: GuildMember, enable: boolean): void {
+		const fn = enable ? this.addUser : this.deleteUser
+
+		fn(this.mongoConnector, this.logger, user.guild.id, user.id)
+			.catch(reason => this.logger.logError(this.constructor.name, this.handleUser.name, reason))
+	}
+
+	private handleRole(user: GuildMember, enable: boolean): void {
+		const fn = enable ? this.addRole : this.deleteRole
+
+		fn(this.mongoConnector, this.logger, user.guild.id, user.id)
+			.catch(reason => this.logger.logError(this.constructor.name, this.handleRole.name, reason))
 	}
 
 	addUser = async (connector: MongoConnector, logger: Logger, guildId: string, userId: string): Promise<void> => {
@@ -71,31 +94,26 @@ export class SkipUsersRoles extends BaseHandler {
 			.catch(reason => logger.logError(this.constructor.name, this.deleteRole.name, reason))
 	}
 
-	private tryProcess(process: (connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>, mongoConnector: MongoConnector, guildId: string, id: string, channel: TextBasedChannels) {
+	private tryProcess(process: (connector: MongoConnector, logger: Logger, guildId: string, userId: string) => Promise<void>, mongoConnector: MongoConnector, guildId: string, id: string, interaction: CommandInteraction) {
 		try {
 			process(mongoConnector, this.logger, guildId, id)
 				.catch(reason => this.logger.logError(this.constructor.name, this.deleteRole.name, reason))
 		} catch (e) {
-			this.logger.logError(this.constructor.name, this.processMentionArray.name, e as string)
-			channel.send(Messages.skipError)
-				.catch(reason => this.logger.logError(this.constructor.name, this.processMentionArray.name, reason))
+			this.logger.logError(this.constructor.name, this.tryProcess.name, e as string)
+			interaction.reply({ content: Messages.skipError, ephemeral: true })
+				.catch(reason => this.logger.logError(this.constructor.name, this.tryProcess.name, reason))
 		}
 	}
 
 	public fillEmbed(embed: MessageEmbed): void {
 		embed
-			.addField(`${this.cmd} [0/1] @{user/role}`, `
+			.addField(`${this.cmd}`, `
 			Add/remove user/role to the Skip List.
 			The bot will not change visibility settings for the users/roles, which are in Skip List.
 			Used when there's no need for a linked text channel for the specific Voice Channel.
-			\`1\` to add the Skip List, \`0\` to remove.
 			Supports arguments chaining - you're allowed to use more than 1 user/role.
 			
 			If an error happens when processing a user/role, the bot will post a warning in the chat.
-
-			Examples: 
-			\`${this.cmd} 1 @Wumpus @Moderator @Lumpus\` - request to add Users\`Wumpus\`, \`Lumpus\` and Role  \`Moderator\` to the Skip List 
-			\`${this.cmd} 0 @Wumpus @Moderator @Lumpus\` - request to remove Users \`Wumpus\`, \`Lumpus\` and Role \`Moderator\`  from the Skip List
 
 			Requires user to have admin/owner rights or permissions to manage channels and roles.
 		`)

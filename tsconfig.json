@@ -11,6 +11,7 @@
 		"outDir": "build",
 		"rootDir": "src",
 		"moduleResolution": "node",
+		"experimentalDecorators": true,
 		"declaration": false,
 		"sourceMap": true,
 		"noImplicitAny": true,
