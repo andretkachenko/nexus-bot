@@ -19,6 +19,7 @@ import {
 	Constants
 } from './descriptor'
 import { IHandler } from './handlers/userCommands'
+import { ActivityTypes } from 'discord.js/typings/enums'
 
 export class EventRegistry {
 	private client: Client
@@ -150,8 +151,8 @@ export class EventRegistry {
 	private setBotActivity(client: Client) {
 		if (client.user)
 			client.user.setActivity({
-				'name': Messages.statusString(client.guilds.cache.size),
-				'type': Constants.customActivity
+				name: Messages.statusString(client.guilds.cache.size),
+				type: ActivityTypes.WATCHING
 			})
 	}
 }
