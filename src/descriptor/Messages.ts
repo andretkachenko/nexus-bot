@@ -22,5 +22,5 @@ export class Messages {
 	public static readonly notVoiceChannelId = 'specified channel ID does not belong to a voice channel'
 	public static readonly unknownLinkError = `Unknown error. Please raise a ticket at ${Constants.repoUrl+Constants.issuesUri}`
 
-	public static statusString(amt: number): string { return `supporting slash commands on ${amt} servers`}
+	public static statusString(amt: number): string { return `${amt} servers`}
 }
