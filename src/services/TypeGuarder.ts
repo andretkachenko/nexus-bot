@@ -1,4 +1,4 @@
-import { APIInteractionDataResolvedChannel } from 'discord-api-types'
+import { APIInteractionDataResolvedChannel } from 'discord.js/node_modules/discord-api-types/payloads/v9/_interactions/applicationCommands'
 import {
 	CategoryChannel,
 	Channel,
@@ -29,7 +29,7 @@ export class TypeGuarder {
 		return (channel as NewsChannel).type === ChannelType.guildNews || this.isTextChannel(channel)
 	}
 
-	public static isGuildChannel(channel: GuildChannel | APIInteractionDataResolvedChannel): channel is GuildChannel {
+	public static isGuildChannel(channel: GuildChannel | ThreadChannel | APIInteractionDataResolvedChannel): channel is GuildChannel {
 		return (channel as GuildChannel).guild !== undefined
 	}
 

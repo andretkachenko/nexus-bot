@@ -24,7 +24,7 @@ import {
 } from '../enums'
 import { Constants } from '../descriptor'
 import { TypeGuarder } from '../services'
-import { Channels as AnyChannel, SafePermissionOverwriteOptions } from '../types'
+import { Channels as AnyChannel } from '../types'
 
 
 export class ChannelHandlers {
@@ -127,10 +127,17 @@ export class ChannelHandlers {
 
 		this.skip(user)
 			.then(skip => {
+				// if user configured to ignore standard visibility configuration - return
 				if (skip) return
+				// if user left the channel - remove his see-channel overwrite rule and return
+				if(!value) {
+					textChannel.permissionOverwrites.delete(user)
+						.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
+					return
+				}
+				// if user joined channel - add see-channel overwrite rule and return
 				// eslint-disable-next-line @typescript-eslint/naming-convention
-				const option : SafePermissionOverwriteOptions = { VIEW_CHANNEL : value }
-				textChannel.permissionOverwrites.edit(user, option)
+				textChannel.permissionOverwrites.create(user, { VIEW_CHANNEL : value })
 					.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
 			})
 			.catch(reason => this.logger.logError(this.constructor.name, this.showHideTextChannel.name, reason, textChannel.guild.id))
