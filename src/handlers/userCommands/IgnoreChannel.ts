@@ -100,7 +100,6 @@ export class IgnoreChannel extends BaseHandler {
 			.addField(`${this.cmd}`, `
         Start/stop ignoring voice channel / category with voice channels when checking for linked text channel.
         Used when there's no need for linked text channel for the specific Voice Channel / Voice Channels inside specific Category.
-        Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID / Category ID.
 
         If the channelId is invalid, the bot will post a warning in the chat.
         

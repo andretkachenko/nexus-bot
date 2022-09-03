@@ -22,5 +22,8 @@ export class Messages {
 	public static readonly notVoiceChannelId = 'specified channel ID does not belong to a voice channel'
 	public static readonly unknownLinkError = `Unknown error. Please raise a ticket at ${Constants.repoUrl+Constants.issuesUri}`
 
+	public static joinMessage(username: string): string { return `${username} joined the channel`}
+	public static leftMessage(username: string): string { return `${username} left the channel`}
+
 	public static statusString(amt: number): string { return `${amt} servers`}
 }

@@ -111,7 +111,6 @@ export class SkipUsersRoles extends BaseHandler {
 			Add/remove user/role to the Skip List.
 			The bot will not change visibility settings for the users/roles, which are in Skip List.
 			Used when there's no need for a linked text channel for the specific Voice Channel.
-			Supports arguments chaining - you're allowed to use more than 1 user/role.
 			
 			If an error happens when processing a user/role, the bot will post a warning in the chat.
 

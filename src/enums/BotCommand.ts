@@ -8,5 +8,6 @@ export enum BotCommand {
 	map = 'map',
 	commands = 'commands',
 	channelId = 'channelid',
-	whoops = 'whoops'
+	whoops = 'whoops',
+	announce = 'announce'
 }
