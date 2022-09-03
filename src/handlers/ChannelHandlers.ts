@@ -49,7 +49,7 @@ export class ChannelHandlers {
 		const category = await this.mongoConnector.textCategoryRepository.get(newVoiceState.guild.id)
 
 		if(category.announce && channel)
-			channel.send(Messages.joinMessage(newVoiceState.member?.displayName ?? ''))
+			channel.send(Messages.joinMessage(newVoiceState.member?.id ?? ''))
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelJoin.name, reason))
 	}
 
@@ -82,7 +82,7 @@ export class ChannelHandlers {
 
 		const category = await this.mongoConnector.textCategoryRepository.get(oldVoiceState.guild.id)
 		if(category.announce)
-			textChannel.send(Messages.leftMessage(oldVoiceState.member?.displayName ?? ''))
+			textChannel.send(Messages.leftMessage(oldVoiceState.member?.id ?? ''))
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelLeave.name, reason))
 	}
 

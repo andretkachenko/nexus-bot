@@ -53,8 +53,8 @@ export class Announce extends BaseHandler {
 			.addField(`${this.cmd}`, `
 			Enable/disable sending join/leave messages.
             If enabled these messages will be sent to the linked Text Channel:
-            - '${Messages.joinMessage('<User>')}' once a user has joined the Voice Channel;
-            - '${Messages.leftMessage('<User>')}' once a user has left the Voice Channel;
+            - '${Messages.joinMessage('user')}' once a user has joined the Voice Channel;
+            - '${Messages.leftMessage('user')}' once a user has left the Voice Channel;
             
             Requires user to have admin/owner rights or permissions to manage channels and roles.
 		`)
