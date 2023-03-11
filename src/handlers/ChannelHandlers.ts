@@ -22,7 +22,10 @@ import {
 	Permission,
 	ChannelType
 } from '../enums'
-import { Constants } from '../descriptor'
+import {
+	Constants,
+	Messages
+} from '../descriptor'
 import { TypeGuarder } from '../services'
 import { Channels as AnyChannel } from '../types'
 
@@ -42,13 +45,26 @@ export class ChannelHandlers {
 		const channelId = newVoiceState.channelId as string
 		if (channelId === newVoiceState.guild.afkChannelId) return
 		const textChannelMap = await this.mongoConnector.textChannelRepository.get(newVoiceState.guild.id, channelId)
+		const channel = await this.getOrCreateTextChannel(newVoiceState, textChannelMap)
+		const category = await this.mongoConnector.textCategoryRepository.get(newVoiceState.guild.id)
+
+		if(category.announce && channel)
+			channel.send(Messages.joinMessage(newVoiceState.member?.id ?? ''))
+				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelJoin.name, reason))
+	}
+
+	private async getOrCreateTextChannel(newVoiceState: VoiceState, textChannelMap: TextChannelMap): Promise<TextChannel | undefined> {
 		const textChannel = this.resolve(newVoiceState, textChannelMap?.textChannelId)
 
-		if (textChannel) return this.showHideTextChannel(textChannel, newVoiceState.member, true)
+		if (textChannel) {
+			this.showHideTextChannel(textChannel, newVoiceState.member, true)
+			return textChannel
+		}
 
-		if(textChannelMap) await this.mongoConnector.textChannelRepository.delete(newVoiceState.guild.id, channelId)
-		this.createTextChannel(newVoiceState)
-			.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelJoin.name, reason))
+		if(textChannelMap) await this.mongoConnector.textChannelRepository.delete(newVoiceState.guild.id, newVoiceState.channelId ?? '')
+		const id = await this.createTextChannel(newVoiceState)
+
+		return this.resolve(newVoiceState, id)
 	}
 
 	public async handleChannelLeave(oldVoiceState: VoiceState): Promise<void> {
@@ -61,7 +77,13 @@ export class ChannelHandlers {
 		if (oldVoiceState.channel && !oldVoiceState.channel?.members.size) {
 			this.deleteNotPinnedMessages(textChannel, oldVoiceState.channel.id)
 				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelLeave.name, reason))
+			return
 		}
+
+		const category = await this.mongoConnector.textCategoryRepository.get(oldVoiceState.guild.id)
+		if(category.announce)
+			textChannel.send(Messages.leftMessage(oldVoiceState.member?.id ?? ''))
+				.catch(reason => this.logger.logError(this.constructor.name, this.handleChannelLeave.name, reason))
 	}
 
 	public handleVoiceChannelDelete(channel: Channel | PartialDMChannel): void {
@@ -81,16 +103,16 @@ export class ChannelHandlers {
 			.catch(reason => this.logger.logError(this.constructor.name, this.deleteLinkedTextChannel.name, reason))
 	}
 
-	private async createTextChannel(newVoiceState: VoiceState) {
+	private async createTextChannel(newVoiceState: VoiceState): Promise<string> {
 		const guild = newVoiceState.guild
 		const isIgnored = await this.checkIfIgnored(guild, newVoiceState)
-		if (!newVoiceState.channelId || !guild || isIgnored || !guild.me?.permissions) return
+		if (!newVoiceState.channelId || !guild || isIgnored || !guild.me?.permissions) return ''
 
 		const parentId = await this.resolveTextCategory(guild)
 		const category = guild.channels.cache.find(c => c.id === parentId) as CategoryChannel
 
 		if (!this.sufficientPermissions([Permission.manageChannels, Permission.manageRoles],
-			guild?.me?.permissions, category?.permissionsFor(guild.me?.id ))) return
+			guild?.me?.permissions, category?.permissionsFor(guild.me?.id ))) return ''
 
 		const options: GuildChannelCreateOptions = {
 			type: ChannelType.guildText,
@@ -112,10 +134,11 @@ export class ChannelHandlers {
 
 		if (category && category.children.size < 50) options.parent = parentId
 		const voiceChannelName = newVoiceState.channel?.name ?? Constants.undefinedId // workaround before discord.js implements stage channels
-		guild.channels.create(voiceChannelName + Constants.textSuffix, options)
-			.then(ch => this.registerChannel(newVoiceState.channelId, ch))
-			.catch(reason => this.logger.logError(this.constructor.name, this.createTextChannel.name, reason))
-
+		return guild.channels.create(voiceChannelName + Constants.textSuffix, options)
+			.then(ch => {
+				this.registerChannel(newVoiceState.channelId, ch)
+				return ch.id
+			})
 	}
 
 	private resolve(voiceState: VoiceState, id: string): TextChannel {

@@ -17,4 +17,18 @@ export class TextCategoriesRepository extends Repository<TextCategory> {
 				return textCategoryId
 			})
 	}
+
+	public async get(guildId: string): Promise<TextCategory> {
+		return super.getFirst({ guildId })
+	}
+
+	public async setAnnounce(guildId: string, announce: boolean | undefined): Promise<boolean> {
+		return super.update({
+			guildId
+		}, {
+			$set: {
+				announce
+			}
+		})
+	}
 }

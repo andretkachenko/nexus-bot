@@ -1,1 +1,1 @@
-worker: nodemon build/main.js
+worker: npm start

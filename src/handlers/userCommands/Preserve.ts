@@ -67,7 +67,6 @@ export class Preserve extends BaseHandler {
 			.addField(`${this.cmd}`, `
 			Enable/disable clearance of the Text Channel after the last User has left associated Voice Channel.
             The pinned messages will remain in all Nexus-handled Text Channels with both options.
-			Supports arguments chaining - you're allowed to use more than 1 Voice Channel ID.
 			Note: You need to use Voice Channel ID, not mapped Text Channel ID.
             
             Requires user to have admin/owner rights or permissions to manage channels and roles.
