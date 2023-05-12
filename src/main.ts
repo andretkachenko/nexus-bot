@@ -22,4 +22,4 @@ router.get('/health', (req, res) => {
 app.use('/', router)
 
 const server = http.createServer(app)
-server.listen(3000)
+server.listen(8080)
