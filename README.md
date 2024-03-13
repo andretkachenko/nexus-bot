@@ -21,3 +21,9 @@ If you have any issue with the bot functionality, feel free to post an issue in 
 ## Need any adjustments?
 If you feel some cool feature is missing, or you want to make some minor tweaks just for your quality of life - feel free to either post an issue in the repo or make a fork and adjust it yourself as you see fit.  
 Please bear in mind: I intend to leave this bot single-purpose, meaning I won't add features which are not related to the idea of creating combined voice-text channels.
+
+## Thank you
+If you like the bot and would like to support me:  
+<a href="https://www.buymeacoffee.com/undrimnir" target="_blank">
+<img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
+</a>
